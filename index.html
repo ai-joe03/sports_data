@@ -240,34 +240,56 @@ const SHORT_NAMES = {
 
 let hiddenKeys = new Set();
 
-// ── Load data ───────────────────────────────────────────────────────
-d3.json("data/epl_setpiece_xg_2024.json").then(raw => {
-  const teams = raw.teams.map(t => ({
-    ...t,
-    short: SHORT_NAMES[t.team] || t.team,
-  }));
+// ── Embedded data (self-contained — no server needed) ───────────────
+const DATA = {"season":"2024/2025","teams":[
+  {"team":"Arsenal","FromCorner":{"xG":11.70,"goals":10,"shots":94,"against_xG":4.20,"against_goals":3,"against_shots":38},"SetPiece":{"xG":3.10,"goals":3,"shots":28,"against_xG":1.80,"against_goals":2,"against_shots":19},"DirectFreekick":{"xG":1.45,"goals":2,"shots":24,"against_xG":0.70,"against_goals":0,"against_shots":12},"Penalty":{"xG":3.80,"goals":5,"shots":5,"against_xG":1.52,"against_goals":2,"against_shots":2},"total_setpiece_xG":20.05,"total_setpiece_goals":20,"total_setpiece_against_xG":8.22},
+  {"team":"Crystal Palace","FromCorner":{"xG":8.40,"goals":9,"shots":72,"against_xG":5.60,"against_goals":6,"against_shots":50},"SetPiece":{"xG":2.80,"goals":3,"shots":22,"against_xG":2.30,"against_goals":2,"against_shots":20},"DirectFreekick":{"xG":1.20,"goals":1,"shots":18,"against_xG":0.90,"against_goals":1,"against_shots":14},"Penalty":{"xG":3.04,"goals":4,"shots":4,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":15.44,"total_setpiece_goals":17,"total_setpiece_against_xG":11.08},
+  {"team":"Nottingham Forest","FromCorner":{"xG":7.80,"goals":8,"shots":68,"against_xG":4.50,"against_goals":4,"against_shots":42},"SetPiece":{"xG":3.40,"goals":4,"shots":30,"against_xG":1.60,"against_goals":1,"against_shots":16},"DirectFreekick":{"xG":1.60,"goals":2,"shots":20,"against_xG":0.80,"against_goals":1,"against_shots":10},"Penalty":{"xG":2.28,"goals":3,"shots":3,"against_xG":1.52,"against_goals":2,"against_shots":2},"total_setpiece_xG":15.08,"total_setpiece_goals":17,"total_setpiece_against_xG":8.42},
+  {"team":"Liverpool","FromCorner":{"xG":8.90,"goals":8,"shots":80,"against_xG":3.80,"against_goals":3,"against_shots":34},"SetPiece":{"xG":2.20,"goals":2,"shots":20,"against_xG":1.40,"against_goals":1,"against_shots":14},"DirectFreekick":{"xG":1.10,"goals":1,"shots":16,"against_xG":0.60,"against_goals":0,"against_shots":8},"Penalty":{"xG":3.04,"goals":4,"shots":4,"against_xG":0.76,"against_goals":1,"against_shots":1},"total_setpiece_xG":15.24,"total_setpiece_goals":15,"total_setpiece_against_xG":6.56},
+  {"team":"Chelsea","FromCorner":{"xG":7.20,"goals":6,"shots":65,"against_xG":4.90,"against_goals":5,"against_shots":44},"SetPiece":{"xG":2.60,"goals":3,"shots":24,"against_xG":2.10,"against_goals":2,"against_shots":18},"DirectFreekick":{"xG":1.30,"goals":1,"shots":20,"against_xG":0.85,"against_goals":1,"against_shots":13},"Penalty":{"xG":3.80,"goals":5,"shots":5,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":14.90,"total_setpiece_goals":15,"total_setpiece_against_xG":10.13},
+  {"team":"Newcastle United","FromCorner":{"xG":7.60,"goals":7,"shots":70,"against_xG":4.10,"against_goals":4,"against_shots":36},"SetPiece":{"xG":2.90,"goals":3,"shots":26,"against_xG":1.90,"against_goals":2,"against_shots":17},"DirectFreekick":{"xG":1.50,"goals":1,"shots":22,"against_xG":0.75,"against_goals":1,"against_shots":11},"Penalty":{"xG":2.28,"goals":3,"shots":3,"against_xG":1.52,"against_goals":2,"against_shots":2},"total_setpiece_xG":14.28,"total_setpiece_goals":14,"total_setpiece_against_xG":8.27},
+  {"team":"Brighton","FromCorner":{"xG":6.80,"goals":6,"shots":60,"against_xG":5.10,"against_goals":5,"against_shots":46},"SetPiece":{"xG":2.50,"goals":2,"shots":22,"against_xG":2.40,"against_goals":3,"against_shots":21},"DirectFreekick":{"xG":1.80,"goals":2,"shots":26,"against_xG":1.00,"against_goals":1,"against_shots":15},"Penalty":{"xG":3.04,"goals":4,"shots":4,"against_xG":1.52,"against_goals":2,"against_shots":2},"total_setpiece_xG":14.14,"total_setpiece_goals":14,"total_setpiece_against_xG":10.02},
+  {"team":"Manchester City","FromCorner":{"xG":7.40,"goals":6,"shots":66,"against_xG":5.20,"against_goals":6,"against_shots":48},"SetPiece":{"xG":2.30,"goals":2,"shots":20,"against_xG":2.50,"against_goals":3,"against_shots":22},"DirectFreekick":{"xG":1.00,"goals":0,"shots":14,"against_xG":0.90,"against_goals":1,"against_shots":12},"Penalty":{"xG":3.04,"goals":4,"shots":4,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":13.74,"total_setpiece_goals":12,"total_setpiece_against_xG":10.88},
+  {"team":"Aston Villa","FromCorner":{"xG":6.90,"goals":7,"shots":62,"against_xG":4.40,"against_goals":4,"against_shots":40},"SetPiece":{"xG":2.40,"goals":2,"shots":21,"against_xG":1.70,"against_goals":2,"against_shots":15},"DirectFreekick":{"xG":1.10,"goals":1,"shots":16,"against_xG":0.80,"against_goals":0,"against_shots":10},"Penalty":{"xG":3.04,"goals":3,"shots":4,"against_xG":1.52,"against_goals":1,"against_shots":2},"total_setpiece_xG":13.44,"total_setpiece_goals":13,"total_setpiece_against_xG":8.42},
+  {"team":"Tottenham","FromCorner":{"xG":6.50,"goals":5,"shots":58,"against_xG":5.30,"against_goals":5,"against_shots":48},"SetPiece":{"xG":2.70,"goals":3,"shots":24,"against_xG":2.20,"against_goals":2,"against_shots":20},"DirectFreekick":{"xG":1.40,"goals":1,"shots":21,"against_xG":0.95,"against_goals":1,"against_shots":14},"Penalty":{"xG":2.28,"goals":3,"shots":3,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":12.88,"total_setpiece_goals":12,"total_setpiece_against_xG":10.73},
+  {"team":"Brentford","FromCorner":{"xG":6.20,"goals":6,"shots":55,"against_xG":4.80,"against_goals":5,"against_shots":43},"SetPiece":{"xG":2.10,"goals":2,"shots":18,"against_xG":2.00,"against_goals":2,"against_shots":18},"DirectFreekick":{"xG":1.30,"goals":1,"shots":19,"against_xG":1.10,"against_goals":1,"against_shots":16},"Penalty":{"xG":3.04,"goals":3,"shots":4,"against_xG":1.52,"against_goals":2,"against_shots":2},"total_setpiece_xG":12.64,"total_setpiece_goals":12,"total_setpiece_against_xG":9.42},
+  {"team":"Manchester United","FromCorner":{"xG":6.10,"goals":5,"shots":54,"against_xG":5.40,"against_goals":6,"against_shots":50},"SetPiece":{"xG":2.30,"goals":2,"shots":20,"against_xG":2.60,"against_goals":3,"against_shots":24},"DirectFreekick":{"xG":1.20,"goals":1,"shots":18,"against_xG":1.00,"against_goals":1,"against_shots":14},"Penalty":{"xG":3.04,"goals":4,"shots":4,"against_xG":1.52,"against_goals":2,"against_shots":2},"total_setpiece_xG":12.64,"total_setpiece_goals":12,"total_setpiece_against_xG":10.52},
+  {"team":"West Ham","FromCorner":{"xG":6.40,"goals":6,"shots":58,"against_xG":5.50,"against_goals":6,"against_shots":50},"SetPiece":{"xG":2.00,"goals":2,"shots":17,"against_xG":2.30,"against_goals":3,"against_shots":21},"DirectFreekick":{"xG":0.90,"goals":0,"shots":12,"against_xG":1.10,"against_goals":1,"against_shots":16},"Penalty":{"xG":2.28,"goals":3,"shots":3,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":11.58,"total_setpiece_goals":11,"total_setpiece_against_xG":11.18},
+  {"team":"Fulham","FromCorner":{"xG":5.80,"goals":5,"shots":52,"against_xG":4.70,"against_goals":4,"against_shots":42},"SetPiece":{"xG":2.20,"goals":2,"shots":19,"against_xG":1.90,"against_goals":2,"against_shots":17},"DirectFreekick":{"xG":1.10,"goals":1,"shots":16,"against_xG":0.85,"against_goals":1,"against_shots":12},"Penalty":{"xG":2.28,"goals":3,"shots":3,"against_xG":1.52,"against_goals":2,"against_shots":2},"total_setpiece_xG":11.38,"total_setpiece_goals":11,"total_setpiece_against_xG":8.97},
+  {"team":"Bournemouth","FromCorner":{"xG":5.60,"goals":5,"shots":50,"against_xG":5.00,"against_goals":5,"against_shots":45},"SetPiece":{"xG":1.90,"goals":2,"shots":16,"against_xG":2.10,"against_goals":2,"against_shots":19},"DirectFreekick":{"xG":1.00,"goals":1,"shots":14,"against_xG":0.90,"against_goals":1,"against_shots":13},"Penalty":{"xG":2.28,"goals":3,"shots":3,"against_xG":1.52,"against_goals":1,"against_shots":2},"total_setpiece_xG":10.78,"total_setpiece_goals":11,"total_setpiece_against_xG":9.52},
+  {"team":"Everton","FromCorner":{"xG":5.40,"goals":4,"shots":48,"against_xG":5.80,"against_goals":6,"against_shots":52},"SetPiece":{"xG":2.00,"goals":2,"shots":17,"against_xG":2.40,"against_goals":3,"against_shots":22},"DirectFreekick":{"xG":0.80,"goals":0,"shots":11,"against_xG":1.20,"against_goals":1,"against_shots":18},"Penalty":{"xG":1.52,"goals":2,"shots":2,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":9.72,"total_setpiece_goals":8,"total_setpiece_against_xG":11.68},
+  {"team":"Wolverhampton Wanderers","FromCorner":{"xG":5.10,"goals":4,"shots":45,"against_xG":5.60,"against_goals":6,"against_shots":50},"SetPiece":{"xG":1.70,"goals":1,"shots":14,"against_xG":2.50,"against_goals":3,"against_shots":22},"DirectFreekick":{"xG":0.90,"goals":1,"shots":13,"against_xG":1.10,"against_goals":1,"against_shots":16},"Penalty":{"xG":1.52,"goals":2,"shots":2,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":9.22,"total_setpiece_goals":8,"total_setpiece_against_xG":11.48},
+  {"team":"Leicester","FromCorner":{"xG":4.90,"goals":4,"shots":43,"against_xG":6.00,"against_goals":7,"against_shots":54},"SetPiece":{"xG":1.80,"goals":1,"shots":15,"against_xG":2.70,"against_goals":3,"against_shots":24},"DirectFreekick":{"xG":0.70,"goals":0,"shots":10,"against_xG":1.30,"against_goals":1,"against_shots":18},"Penalty":{"xG":1.52,"goals":2,"shots":2,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":8.92,"total_setpiece_goals":7,"total_setpiece_against_xG":12.28},
+  {"team":"Ipswich Town","FromCorner":{"xG":4.60,"goals":3,"shots":40,"against_xG":6.20,"against_goals":7,"against_shots":56},"SetPiece":{"xG":1.50,"goals":1,"shots":12,"against_xG":2.80,"against_goals":3,"against_shots":25},"DirectFreekick":{"xG":0.60,"goals":0,"shots":8,"against_xG":1.40,"against_goals":2,"against_shots":20},"Penalty":{"xG":1.52,"goals":2,"shots":2,"against_xG":2.28,"against_goals":3,"against_shots":3},"total_setpiece_xG":8.22,"total_setpiece_goals":6,"total_setpiece_against_xG":12.68},
+  {"team":"Southampton","FromCorner":{"xG":4.30,"goals":3,"shots":38,"against_xG":6.50,"against_goals":7,"against_shots":58},"SetPiece":{"xG":1.40,"goals":1,"shots":11,"against_xG":3.00,"against_goals":4,"against_shots":27},"DirectFreekick":{"xG":0.50,"goals":0,"shots":7,"against_xG":1.50,"against_goals":2,"against_shots":22},"Penalty":{"xG":1.52,"goals":2,"shots":2,"against_xG":3.04,"against_goals":4,"against_shots":4},"total_setpiece_xG":7.72,"total_setpiece_goals":6,"total_setpiece_against_xG":14.04}
+]};
 
-  buildLegend();
+// ── Initialise ──────────────────────────────────────────────────────
+const teams = DATA.teams.map(t => ({
+  ...t,
+  short: SHORT_NAMES[t.team] || t.team,
+}));
+
+buildLegend(teams);
+drawBarChart(teams);
+drawLollipop(teams);
+
+// Sort buttons
+d3.selectAll("#controls button[data-sort]").on("click", function () {
+  d3.selectAll("#controls button[data-sort]").classed("active", false);
+  d3.select(this).classed("active", true);
   drawBarChart(teams);
-  drawLollipop(teams);
+});
 
-  // Sort buttons
-  d3.selectAll("#controls button[data-sort]").on("click", function () {
-    d3.selectAll("#controls button[data-sort]").classed("active", false);
-    d3.select(this).classed("active", true);
-    drawBarChart(teams);
-  });
-
-  // View buttons
-  d3.selectAll("#controls button[data-view]").on("click", function () {
-    d3.selectAll("#controls button[data-view]").classed("active", false);
-    d3.select(this).classed("active", true);
-    drawBarChart(teams);
-  });
+// View buttons
+d3.selectAll("#controls button[data-view]").on("click", function () {
+  d3.selectAll("#controls button[data-view]").classed("active", false);
+  d3.select(this).classed("active", true);
+  drawBarChart(teams);
 });
 
 // ── Legend ───────────────────────────────────────────────────────────
-function buildLegend() {
+function buildLegend(teams) {
   const legend = d3.select("#legend");
   SITUATIONS.forEach(s => {
     const item = legend.append("div")
@@ -276,11 +298,7 @@ function buildLegend() {
         if (hiddenKeys.has(s.key)) hiddenKeys.delete(s.key);
         else hiddenKeys.add(s.key);
         item.classed("dimmed", hiddenKeys.has(s.key));
-        // redraw
-        d3.json("data/epl_setpiece_xg_2024.json").then(raw => {
-          const teams = raw.teams.map(t => ({ ...t, short: SHORT_NAMES[t.team] || t.team }));
-          drawBarChart(teams);
-        });
+        drawBarChart(teams);
       });
     item.append("div").attr("class", "legend-swatch").style("background", s.color);
     item.append("span").text(s.label);
