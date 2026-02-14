@@ -7,12 +7,12 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --border: #30363d;
-      --text: #e6edf3;
-      --text-muted: #8b949e;
-      --accent: #58a6ff;
+      --bg: #f5f5f0;
+      --surface: #ffffff;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --accent: #0969da;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -60,7 +60,7 @@
     .controls button:hover { border-color: var(--accent); color: var(--accent); }
     .controls button.active {
       background: var(--accent);
-      color: var(--bg);
+      color: #fff;
       border-color: var(--accent);
       font-weight: 600;
     }
@@ -120,13 +120,13 @@
     .tooltip {
       position: fixed;
       pointer-events: none;
-      background: #1c2128;
+      background: #ffffff;
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px 16px;
       font-size: 13px;
       line-height: 1.6;
-      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
       z-index: 100;
       opacity: 0;
       transition: opacity 0.15s;
@@ -181,23 +181,15 @@
      Run <code style="background:var(--surface);padding:2px 6px;border-radius:4px;">python scrape_understat.py</code> to refresh with live data.</p>
 </header>
 
-<!-- Controls -->
+<!-- Filter controls -->
 <div class="controls" id="controls">
-  <span class="label">Sort by:</span>
-  <button class="active" data-sort="total">Total xG</button>
-  <button data-sort="corners">Corners</button>
-  <button data-sort="setpiece">Indirect FK</button>
-  <button data-sort="freekick">Direct FK</button>
-  <button data-sort="penalty">Penalties</button>
-  <button data-sort="alpha">A–Z</button>
-  <div class="separator"></div>
-  <span class="label">View:</span>
-  <button class="active" data-view="stacked">Stacked</button>
-  <button data-view="grouped">Grouped</button>
+  <span class="label">Show:</span>
+  <button class="active" data-filter="all">All Set Pieces</button>
+  <button data-filter="FromCorner">Corners</button>
+  <button data-filter="SetPiece">Set Piece</button>
+  <button data-filter="DirectFreekick">Direct FK</button>
+  <button data-filter="Penalty">Penalties</button>
 </div>
-
-<!-- Legend -->
-<div class="legend" id="legend"></div>
 
 <!-- Main stacked bar chart -->
 <div class="chart-container" id="chart1-container">
@@ -229,8 +221,8 @@
 // ── Colour palette ──────────────────────────────────────────────────
 const SITUATIONS = [
   { key: "FromCorner",     label: "Corners",     color: "#f97316" },
-  { key: "SetPiece",       label: "Indirect FK",  color: "#a78bfa" },
-  { key: "DirectFreekick", label: "Direct FK",    color: "#34d399" },
+  { key: "SetPiece",       label: "Set Piece",     color: "#a78bfa" },
+  { key: "DirectFreekick", label: "Direct FK",    color: "#10b981" },
   { key: "Penalty",        label: "Penalties",    color: "#60a5fa" },
 ];
 
@@ -245,7 +237,7 @@ const SHORT_NAMES = {
   "Leicester": "Leicester",
 };
 
-let hiddenKeys = new Set();
+let activeFilter = "all"; // "all" or a situation key
 
 // ── Embedded data (self-contained — no server needed) ───────────────
 const DATA = {"season":"2024/2025","teams":[
@@ -277,78 +269,44 @@ const teams = DATA.teams.map(t => ({
   short: SHORT_NAMES[t.team] || t.team,
 }));
 
-buildLegend(teams);
 drawBarChart(teams);
 drawLollipop(teams);
 drawCornerEfficiency(teams);
 
-// Sort buttons
-d3.selectAll("#controls button[data-sort]").on("click", function () {
-  d3.selectAll("#controls button[data-sort]").classed("active", false);
+// Filter buttons
+d3.selectAll("#controls button[data-filter]").on("click", function () {
+  d3.selectAll("#controls button[data-filter]").classed("active", false);
   d3.select(this).classed("active", true);
+  activeFilter = d3.select(this).attr("data-filter");
   drawBarChart(teams);
 });
-
-// View buttons
-d3.selectAll("#controls button[data-view]").on("click", function () {
-  d3.selectAll("#controls button[data-view]").classed("active", false);
-  d3.select(this).classed("active", true);
-  drawBarChart(teams);
-});
-
-// ── Legend ───────────────────────────────────────────────────────────
-function buildLegend(teams) {
-  const legend = d3.select("#legend");
-  SITUATIONS.forEach(s => {
-    const item = legend.append("div")
-      .attr("class", "legend-item")
-      .on("click", () => {
-        if (hiddenKeys.has(s.key)) hiddenKeys.delete(s.key);
-        else hiddenKeys.add(s.key);
-        item.classed("dimmed", hiddenKeys.has(s.key));
-        drawBarChart(teams);
-      });
-    item.append("div").attr("class", "legend-swatch").style("background", s.color);
-    item.append("span").text(s.label);
-  });
-}
-
-// ── Sort helper ─────────────────────────────────────────────────────
-function sortTeams(teams) {
-  const mode = d3.select("#controls button[data-sort].active").attr("data-sort");
-  const copy = [...teams];
-  const sorters = {
-    total:    (a, b) => b.total_setpiece_xG - a.total_setpiece_xG,
-    corners:  (a, b) => b.FromCorner.xG - a.FromCorner.xG,
-    setpiece: (a, b) => b.SetPiece.xG - a.SetPiece.xG,
-    freekick: (a, b) => b.DirectFreekick.xG - a.DirectFreekick.xG,
-    penalty:  (a, b) => b.Penalty.xG - a.Penalty.xG,
-    alpha:    (a, b) => a.short.localeCompare(b.short),
-  };
-  copy.sort(sorters[mode] || sorters.total);
-  return copy;
-}
 
 // ── Main bar chart ──────────────────────────────────────────────────
 function drawBarChart(teamsRaw) {
-  const teams = sortTeams(teamsRaw);
   const svg = d3.select("#chart1");
   svg.selectAll("*").remove();
 
-  const viewMode = d3.select("#controls button[data-view].active").attr("data-view") || "stacked";
-  const activeSituations = SITUATIONS.filter(s => !hiddenKeys.has(s.key));
+  const isAll = activeFilter === "all";
+  const activeSituations = isAll
+    ? SITUATIONS
+    : SITUATIONS.filter(s => s.key === activeFilter);
+
+  // Sort teams by visible xG
+  const teams = [...teamsRaw].sort((a, b) => {
+    const aVal = activeSituations.reduce((s, sit) => s + a[sit.key].xG, 0);
+    const bVal = activeSituations.reduce((s, sit) => s + b[sit.key].xG, 0);
+    return bVal - aVal;
+  });
 
   const margin = { top: 12, right: 60, bottom: 40, left: 110 };
-  const barHeight = viewMode === "grouped" ? activeSituations.length * 10 + 8 : 28;
+  const barHeight = 28;
   const gap = 6;
   const width = Math.max(800, 1160);
   const height = margin.top + margin.bottom + teams.length * (barHeight + gap);
 
   svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
 
-  const xMax = viewMode === "stacked"
-    ? d3.max(teams, d => activeSituations.reduce((s, sit) => s + d[sit.key].xG, 0))
-    : d3.max(teams, d => d3.max(activeSituations, sit => d[sit.key].xG));
+  const xMax = d3.max(teams, d => activeSituations.reduce((s, sit) => s + d[sit.key].xG, 0));
 
   const x = d3.scaleLinear().domain([0, xMax * 1.12]).range([margin.left, width - margin.right]);
   const y = d3.scaleBand()
@@ -376,69 +334,55 @@ function drawBarChart(teamsRaw) {
     .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toFixed(1)));
 
   // X label
+  const filterLabel = isAll ? "All Set Pieces" : activeSituations[0].label;
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2)
     .attr("y", height - 4)
     .attr("text-anchor", "middle")
     .attr("font-size", 12)
-    .attr("fill", "#8b949e")
-    .text("Expected Goals (xG)");
+    .attr("fill", "#656d76")
+    .text(`Expected Goals (xG) — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
+  const barsG = svg.append("g");
 
-  if (viewMode === "stacked") {
-    // Stacked bars
-    const barsG = svg.append("g");
-    teams.forEach(team => {
-      let offset = 0;
-      activeSituations.forEach(sit => {
-        const val = team[sit.key].xG;
-        barsG.append("rect")
-          .attr("x", x(offset))
-          .attr("y", y(team.short))
-          .attr("width", Math.max(0, x(offset + val) - x(offset)))
-          .attr("height", y.bandwidth())
-          .attr("rx", 3)
-          .attr("fill", sit.color)
-          .attr("opacity", 0.85)
-          .on("mouseover", (event) => showTooltip(event, team, sit))
-          .on("mousemove", moveTooltip)
-          .on("mouseout", hideTooltip);
-        offset += val;
-      });
-
-      // Total label
-      barsG.append("text")
-        .attr("x", x(offset) + 6)
-        .attr("y", y(team.short) + y.bandwidth() / 2)
-        .attr("dy", "0.35em")
-        .attr("font-size", 12)
-        .attr("font-weight", 600)
-        .attr("fill", "#e6edf3")
-        .text(offset.toFixed(1));
+  teams.forEach(team => {
+    let offset = 0;
+    activeSituations.forEach(sit => {
+      const val = team[sit.key].xG;
+      barsG.append("rect")
+        .attr("x", x(offset))
+        .attr("y", y(team.short))
+        .attr("width", Math.max(0, x(offset + val) - x(offset)))
+        .attr("height", y.bandwidth())
+        .attr("rx", 3)
+        .attr("fill", sit.color)
+        .attr("opacity", 0.85)
+        .on("mouseover", (event) => showTooltip(event, team, sit))
+        .on("mousemove", moveTooltip)
+        .on("mouseout", hideTooltip);
+      offset += val;
     });
-  } else {
-    // Grouped bars
-    const subY = d3.scaleBand()
-      .domain(activeSituations.map(s => s.key))
-      .range([0, y.bandwidth()])
-      .padding(0.12);
 
-    const barsG = svg.append("g");
-    teams.forEach(team => {
-      activeSituations.forEach(sit => {
-        barsG.append("rect")
-          .attr("x", x(0))
-          .attr("y", y(team.short) + subY(sit.key))
-          .attr("width", Math.max(0, x(team[sit.key].xG) - x(0)))
-          .attr("height", subY.bandwidth())
-          .attr("rx", 2)
-          .attr("fill", sit.color)
-          .attr("opacity", 0.85)
-          .on("mouseover", (event) => showTooltip(event, team, sit))
-          .on("mousemove", moveTooltip)
-          .on("mouseout", hideTooltip);
-      });
+    // Total label
+    barsG.append("text")
+      .attr("x", x(offset) + 6)
+      .attr("y", y(team.short) + y.bandwidth() / 2)
+      .attr("dy", "0.35em")
+      .attr("font-size", 12)
+      .attr("font-weight", 600)
+      .attr("fill", "#1f2328")
+      .text(offset.toFixed(2));
+  });
+
+  // Mini legend when showing all
+  if (isAll) {
+    const lg = svg.append("g").attr("transform", `translate(${width - margin.right - 240}, ${margin.top + 2})`);
+    let lx = 0;
+    SITUATIONS.forEach(s => {
+      lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", s.color).attr("opacity", 0.85);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(s.label);
+      lx += s.label.length * 7 + 24;
     });
   }
 
@@ -451,11 +395,13 @@ function drawBarChart(teamsRaw) {
         <span class="tt-val">${team[sit.key].xG.toFixed(2)} xG &nbsp;(${team[sit.key].goals}g / ${team[sit.key].shots}sh)</span>
       </div>`;
     });
-    const total = activeSituations.reduce((s, sit) => s + team[sit.key].xG, 0);
-    html += `<div class="tt-row tt-total">
-      <span class="tt-label">Total set piece</span>
-      <span class="tt-val">${total.toFixed(2)} xG</span>
-    </div>`;
+    if (isAll) {
+      const total = activeSituations.reduce((s, sit) => s + team[sit.key].xG, 0);
+      html += `<div class="tt-row tt-total">
+        <span class="tt-label">Total set piece</span>
+        <span class="tt-val">${total.toFixed(2)} xG</span>
+      </div>`;
+    }
     tooltip.html(html).style("opacity", 1);
     moveTooltip(event);
   }
@@ -510,7 +456,7 @@ function drawLollipop(teamsRaw) {
   svg.append("line")
     .attr("x1", x(0)).attr("x2", x(0))
     .attr("y1", margin.top).attr("y2", height - margin.bottom)
-    .attr("stroke", "#e6edf3").attr("stroke-width", 1).attr("stroke-opacity", 0.4);
+    .attr("stroke", "#1f2328").attr("stroke-width", 1).attr("stroke-opacity", 0.2);
 
   // Y axis
   svg.append("g")
@@ -530,7 +476,7 @@ function drawLollipop(teamsRaw) {
     .attr("y", height - 4)
     .attr("text-anchor", "middle")
     .attr("font-size", 12)
-    .attr("fill", "#8b949e")
+    .attr("fill", "#656d76")
     .text("Net Set Piece xG (For − Against)");
 
   const tooltip = d3.select("#tooltip");
@@ -538,7 +484,7 @@ function drawLollipop(teamsRaw) {
   teams.forEach(team => {
     const midY = y(team.short) + y.bandwidth() / 2;
     const positive = team.net >= 0;
-    const col = positive ? "#34d399" : "#f87171";
+    const col = positive ? "#16a34a" : "#dc2626";
 
     // Stem
     svg.append("line")
@@ -549,7 +495,7 @@ function drawLollipop(teamsRaw) {
     // Dot
     svg.append("circle")
       .attr("cx", x(team.net)).attr("cy", midY).attr("r", 6)
-      .attr("fill", col).attr("stroke", "#0d1117").attr("stroke-width", 1.5)
+      .attr("fill", col).attr("stroke", "#ffffff").attr("stroke-width", 1.5)
       .style("cursor", "pointer")
       .on("mouseover", (event) => {
         let html = `<div class="tt-team">${team.team}</div>`;
@@ -619,10 +565,10 @@ function drawCornerEfficiency(teamsRaw) {
   svg.append("line")
     .attr("x1", x(avgXgPerShot)).attr("x2", x(avgXgPerShot))
     .attr("y1", margin.top).attr("y2", height - margin.bottom)
-    .attr("stroke", "#58a6ff").attr("stroke-width", 1.5).attr("stroke-dasharray", "6,4").attr("stroke-opacity", 0.7);
+    .attr("stroke", "#0969da").attr("stroke-width", 1.5).attr("stroke-dasharray", "6,4").attr("stroke-opacity", 0.7);
   svg.append("text")
     .attr("x", x(avgXgPerShot) + 4).attr("y", margin.top + 12)
-    .attr("font-size", 11).attr("fill", "#58a6ff")
+    .attr("font-size", 11).attr("fill", "#0969da")
     .text(`Avg ${avgXgPerShot.toFixed(3)}`);
 
   // Y axis
@@ -643,7 +589,7 @@ function drawCornerEfficiency(teamsRaw) {
     .attr("y", height - 4)
     .attr("text-anchor", "middle")
     .attr("font-size", 12)
-    .attr("fill", "#8b949e")
+    .attr("fill", "#656d76")
     .text("xG per Shot from Corners");
 
   const tooltip = d3.select("#tooltip");
@@ -676,7 +622,7 @@ function drawCornerEfficiency(teamsRaw) {
       .attr("x", x(0)).attr("y", yPos + barH + 2)
       .attr("width", Math.max(0, x(team.xgAgainstPerShot) - x(0)))
       .attr("height", barH)
-      .attr("rx", 3).attr("fill", "#f87171").attr("opacity", 0.6)
+      .attr("rx", 3).attr("fill", "#dc2626").attr("opacity", 0.6)
       .style("cursor", "pointer")
       .on("mouseover", (event) => {
         let html = `<div class="tt-team">${team.team}</div>`;
@@ -697,16 +643,16 @@ function drawCornerEfficiency(teamsRaw) {
       .text(team.xgPerShot.toFixed(3));
     svg.append("text")
       .attr("x", x(team.xgAgainstPerShot) + 5).attr("y", yPos + barH + 2 + barH / 2)
-      .attr("dy", "0.35em").attr("font-size", 10).attr("fill", "#f87171").attr("opacity", 0.8)
+      .attr("dy", "0.35em").attr("font-size", 10).attr("fill", "#dc2626").attr("opacity", 0.8)
       .text(team.xgAgainstPerShot.toFixed(3));
   });
 
   // Mini-legend
   const lg = svg.append("g").attr("transform", `translate(${width - margin.right - 160}, ${margin.top + 2})`);
   lg.append("rect").attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", "#f97316").attr("opacity", 0.85);
-  lg.append("text").attr("x", 14).attr("y", 9).attr("font-size", 11).attr("fill", "#8b949e").text("For (attacking)");
-  lg.append("rect").attr("y", 16).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", "#f87171").attr("opacity", 0.6);
-  lg.append("text").attr("x", 14).attr("y", 25).attr("font-size", 11).attr("fill", "#8b949e").text("Against (defending)");
+  lg.append("text").attr("x", 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text("For (attacking)");
+  lg.append("rect").attr("y", 16).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", "#dc2626").attr("opacity", 0.6);
+  lg.append("text").attr("x", 14).attr("y", 25).attr("font-size", 11).attr("fill", "#656d76").text("Against (defending)");
 }
 
 function moveTooltipGlobal(event) {
