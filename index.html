@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPL Set Piece xG — 2024/25</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    header {
+      max-width: 1200px;
+      margin: 0 auto 32px;
+    }
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    header h1 span { color: var(--accent); }
+    header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Controls */
+    .controls {
+      max-width: 1200px;
+      margin: 0 auto 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .controls button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .controls button:hover { border-color: var(--accent); color: var(--accent); }
+    .controls button.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .controls .label {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-right: 4px;
+    }
+    .controls .separator {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+    }
+
+    /* Legend */
+    .legend {
+      max-width: 1200px;
+      margin: 0 auto 16px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.2s;
+    }
+    .legend-item.dimmed { opacity: 0.3; }
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+
+    /* Chart container */
+    .chart-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 16px 16px;
+      overflow-x: auto;
+    }
+    svg text { fill: var(--text); }
+    .axis path, .axis line { stroke: var(--border); }
+    .axis text { fill: var(--text-muted); font-size: 12px; }
+    .grid line { stroke: var(--border); stroke-opacity: 0.4; stroke-dasharray: 2,3; }
+    .grid path { display: none; }
+
+    /* Tooltip */
+    .tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: #1c2128;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.15s;
+      max-width: 280px;
+    }
+    .tooltip .tt-team { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+    .tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; }
+    .tooltip .tt-label { color: var(--text-muted); }
+    .tooltip .tt-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .tooltip .tt-total { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; }
+
+    /* Diff overlay labels */
+    .diff-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    /* Second chart section */
+    .section-title {
+      max-width: 1200px;
+      margin: 40px auto 16px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .section-subtitle {
+      max-width: 1200px;
+      margin: -10px auto 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    footer {
+      max-width: 1200px;
+      margin: 40px auto 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>EPL Set Piece <span>xG</span> — 2024/25</h1>
+  <p>Expected goals from set pieces per Premier League team, broken down by situation type.
+     Data sourced from <a href="https://understat.com" style="color:var(--accent)">Understat</a>.
+     Run <code style="background:var(--surface);padding:2px 6px;border-radius:4px;">python scrape_understat.py</code> to refresh with live data.</p>
+</header>
+
+<!-- Controls -->
+<div class="controls" id="controls">
+  <span class="label">Sort by:</span>
+  <button class="active" data-sort="total">Total xG</button>
+  <button data-sort="corners">Corners</button>
+  <button data-sort="setpiece">Indirect FK</button>
+  <button data-sort="freekick">Direct FK</button>
+  <button data-sort="penalty">Penalties</button>
+  <button data-sort="alpha">A–Z</button>
+  <div class="separator"></div>
+  <span class="label">View:</span>
+  <button class="active" data-view="stacked">Stacked</button>
+  <button data-view="grouped">Grouped</button>
+</div>
+
+<!-- Legend -->
+<div class="legend" id="legend"></div>
+
+<!-- Main stacked bar chart -->
+<div class="chart-container" id="chart1-container">
+  <svg id="chart1"></svg>
+</div>
+
+<!-- Lollipop: xG For vs Against -->
+<h2 class="section-title">Set Piece xG Balance: For vs Against</h2>
+<p class="section-subtitle">Net set piece xG advantage (positive = better at scoring than conceding from set pieces)</p>
+<div class="chart-container" id="chart2-container">
+  <svg id="chart2"></svg>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<footer>
+  Data represents the 2024/25 Premier League season via <a href="https://understat.com">understat.com</a>.
+  Representative figures — run the scraper for exact live values. Visualised with <a href="https://d3js.org">D3.js v7</a>.
+</footer>
+
+<script>
+// ── Colour palette ──────────────────────────────────────────────────
+const SITUATIONS = [
+  { key: "FromCorner",     label: "Corners",     color: "#f97316" },
+  { key: "SetPiece",       label: "Indirect FK",  color: "#a78bfa" },
+  { key: "DirectFreekick", label: "Direct FK",    color: "#34d399" },
+  { key: "Penalty",        label: "Penalties",    color: "#60a5fa" },
+];
+
+const SHORT_NAMES = {
+  "Wolverhampton Wanderers": "Wolves",
+  "Manchester United": "Man Utd",
+  "Manchester City": "Man City",
+  "Newcastle United": "Newcastle",
+  "Nottingham Forest": "Nott'm Forest",
+  "Crystal Palace": "C. Palace",
+  "Ipswich Town": "Ipswich",
+  "Leicester": "Leicester",
+};
+
+let hiddenKeys = new Set();
+
+// ── Load data ───────────────────────────────────────────────────────
+d3.json("data/epl_setpiece_xg_2024.json").then(raw => {
+  const teams = raw.teams.map(t => ({
+    ...t,
+    short: SHORT_NAMES[t.team] || t.team,
+  }));
+
+  buildLegend();
+  drawBarChart(teams);
+  drawLollipop(teams);
+
+  // Sort buttons
+  d3.selectAll("#controls button[data-sort]").on("click", function () {
+    d3.selectAll("#controls button[data-sort]").classed("active", false);
+    d3.select(this).classed("active", true);
+    drawBarChart(teams);
+  });
+
+  // View buttons
+  d3.selectAll("#controls button[data-view]").on("click", function () {
+    d3.selectAll("#controls button[data-view]").classed("active", false);
+    d3.select(this).classed("active", true);
+    drawBarChart(teams);
+  });
+});
+
+// ── Legend ───────────────────────────────────────────────────────────
+function buildLegend() {
+  const legend = d3.select("#legend");
+  SITUATIONS.forEach(s => {
+    const item = legend.append("div")
+      .attr("class", "legend-item")
+      .on("click", () => {
+        if (hiddenKeys.has(s.key)) hiddenKeys.delete(s.key);
+        else hiddenKeys.add(s.key);
+        item.classed("dimmed", hiddenKeys.has(s.key));
+        // redraw
+        d3.json("data/epl_setpiece_xg_2024.json").then(raw => {
+          const teams = raw.teams.map(t => ({ ...t, short: SHORT_NAMES[t.team] || t.team }));
+          drawBarChart(teams);
+        });
+      });
+    item.append("div").attr("class", "legend-swatch").style("background", s.color);
+    item.append("span").text(s.label);
+  });
+}
+
+// ── Sort helper ─────────────────────────────────────────────────────
+function sortTeams(teams) {
+  const mode = d3.select("#controls button[data-sort].active").attr("data-sort");
+  const copy = [...teams];
+  const sorters = {
+    total:    (a, b) => b.total_setpiece_xG - a.total_setpiece_xG,
+    corners:  (a, b) => b.FromCorner.xG - a.FromCorner.xG,
+    setpiece: (a, b) => b.SetPiece.xG - a.SetPiece.xG,
+    freekick: (a, b) => b.DirectFreekick.xG - a.DirectFreekick.xG,
+    penalty:  (a, b) => b.Penalty.xG - a.Penalty.xG,
+    alpha:    (a, b) => a.short.localeCompare(b.short),
+  };
+  copy.sort(sorters[mode] || sorters.total);
+  return copy;
+}
+
+// ── Main bar chart ──────────────────────────────────────────────────
+function drawBarChart(teamsRaw) {
+  const teams = sortTeams(teamsRaw);
+  const svg = d3.select("#chart1");
+  svg.selectAll("*").remove();
+
+  const viewMode = d3.select("#controls button[data-view].active").attr("data-view") || "stacked";
+  const activeSituations = SITUATIONS.filter(s => !hiddenKeys.has(s.key));
+
+  const margin = { top: 12, right: 60, bottom: 40, left: 110 };
+  const barHeight = viewMode === "grouped" ? activeSituations.length * 10 + 8 : 28;
+  const gap = 6;
+  const width = Math.max(800, 1160);
+  const height = margin.top + margin.bottom + teams.length * (barHeight + gap);
+
+  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
+
+  const xMax = viewMode === "stacked"
+    ? d3.max(teams, d => activeSituations.reduce((s, sit) => s + d[sit.key].xG, 0))
+    : d3.max(teams, d => d3.max(activeSituations, sit => d[sit.key].xG));
+
+  const x = d3.scaleLinear().domain([0, xMax * 1.12]).range([margin.left, width - margin.right]);
+  const y = d3.scaleBand()
+    .domain(teams.map(d => d.short))
+    .range([margin.top, height - margin.bottom])
+    .paddingInner(gap / (barHeight + gap));
+
+  // Grid
+  svg.append("g")
+    .attr("class", "grid")
+    .attr("transform", `translate(0,${margin.top})`)
+    .call(d3.axisTop(x).ticks(8).tickSize(-(height - margin.top - margin.bottom)).tickFormat(""));
+
+  // Y axis
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y).tickSize(0).tickPadding(8))
+    .select(".domain").remove();
+
+  // X axis
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toFixed(1)));
+
+  // X label
+  svg.append("text")
+    .attr("x", (margin.left + width - margin.right) / 2)
+    .attr("y", height - 4)
+    .attr("text-anchor", "middle")
+    .attr("font-size", 12)
+    .attr("fill", "#8b949e")
+    .text("Expected Goals (xG)");
+
+  const tooltip = d3.select("#tooltip");
+
+  if (viewMode === "stacked") {
+    // Stacked bars
+    const barsG = svg.append("g");
+    teams.forEach(team => {
+      let offset = 0;
+      activeSituations.forEach(sit => {
+        const val = team[sit.key].xG;
+        barsG.append("rect")
+          .attr("x", x(offset))
+          .attr("y", y(team.short))
+          .attr("width", Math.max(0, x(offset + val) - x(offset)))
+          .attr("height", y.bandwidth())
+          .attr("rx", 3)
+          .attr("fill", sit.color)
+          .attr("opacity", 0.85)
+          .on("mouseover", (event) => showTooltip(event, team, sit))
+          .on("mousemove", moveTooltip)
+          .on("mouseout", hideTooltip);
+        offset += val;
+      });
+
+      // Total label
+      barsG.append("text")
+        .attr("x", x(offset) + 6)
+        .attr("y", y(team.short) + y.bandwidth() / 2)
+        .attr("dy", "0.35em")
+        .attr("font-size", 12)
+        .attr("font-weight", 600)
+        .attr("fill", "#e6edf3")
+        .text(offset.toFixed(1));
+    });
+  } else {
+    // Grouped bars
+    const subY = d3.scaleBand()
+      .domain(activeSituations.map(s => s.key))
+      .range([0, y.bandwidth()])
+      .padding(0.12);
+
+    const barsG = svg.append("g");
+    teams.forEach(team => {
+      activeSituations.forEach(sit => {
+        barsG.append("rect")
+          .attr("x", x(0))
+          .attr("y", y(team.short) + subY(sit.key))
+          .attr("width", Math.max(0, x(team[sit.key].xG) - x(0)))
+          .attr("height", subY.bandwidth())
+          .attr("rx", 2)
+          .attr("fill", sit.color)
+          .attr("opacity", 0.85)
+          .on("mouseover", (event) => showTooltip(event, team, sit))
+          .on("mousemove", moveTooltip)
+          .on("mouseout", hideTooltip);
+      });
+    });
+  }
+
+  function showTooltip(event, team, highlightSit) {
+    let html = `<div class="tt-team">${team.team}</div>`;
+    activeSituations.forEach(sit => {
+      const bold = sit.key === highlightSit.key ? "font-weight:700" : "";
+      html += `<div class="tt-row" style="${bold}">
+        <span class="tt-label"><span style="color:${sit.color}">&#9632;</span> ${sit.label}</span>
+        <span class="tt-val">${team[sit.key].xG.toFixed(2)} xG &nbsp;(${team[sit.key].goals}g / ${team[sit.key].shots}sh)</span>
+      </div>`;
+    });
+    const total = activeSituations.reduce((s, sit) => s + team[sit.key].xG, 0);
+    html += `<div class="tt-row tt-total">
+      <span class="tt-label">Total set piece</span>
+      <span class="tt-val">${total.toFixed(2)} xG</span>
+    </div>`;
+    tooltip.html(html).style("opacity", 1);
+    moveTooltip(event);
+  }
+
+  function moveTooltip(event) {
+    const pad = 16;
+    let left = event.clientX + pad;
+    let top = event.clientY + pad;
+    const rect = tooltip.node().getBoundingClientRect();
+    if (left + rect.width > window.innerWidth - 8) left = event.clientX - rect.width - pad;
+    if (top + rect.height > window.innerHeight - 8) top = event.clientY - rect.height - pad;
+    tooltip.style("left", left + "px").style("top", top + "px");
+  }
+
+  function hideTooltip() { tooltip.style("opacity", 0); }
+}
+
+// ── Lollipop chart: net xG ──────────────────────────────────────────
+function drawLollipop(teamsRaw) {
+  const teams = [...teamsRaw].map(t => ({
+    ...t,
+    short: SHORT_NAMES[t.team] || t.team,
+    net: +(t.total_setpiece_xG - t.total_setpiece_against_xG).toFixed(2),
+  })).sort((a, b) => b.net - a.net);
+
+  const svg = d3.select("#chart2");
+  svg.selectAll("*").remove();
+
+  const margin = { top: 12, right: 60, bottom: 40, left: 110 };
+  const rowH = 32;
+  const width = 1160;
+  const height = margin.top + margin.bottom + teams.length * rowH;
+
+  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
+
+  const extent = d3.extent(teams, d => d.net);
+  const absMax = Math.max(Math.abs(extent[0]), Math.abs(extent[1])) * 1.15;
+
+  const x = d3.scaleLinear().domain([-absMax, absMax]).range([margin.left, width - margin.right]);
+  const y = d3.scaleBand()
+    .domain(teams.map(d => d.short))
+    .range([margin.top, height - margin.bottom])
+    .paddingInner(0.25);
+
+  // Grid
+  svg.append("g")
+    .attr("class", "grid")
+    .attr("transform", `translate(0,${margin.top})`)
+    .call(d3.axisTop(x).ticks(10).tickSize(-(height - margin.top - margin.bottom)).tickFormat(""));
+
+  // Zero line
+  svg.append("line")
+    .attr("x1", x(0)).attr("x2", x(0))
+    .attr("y1", margin.top).attr("y2", height - margin.bottom)
+    .attr("stroke", "#e6edf3").attr("stroke-width", 1).attr("stroke-opacity", 0.4);
+
+  // Y axis
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y).tickSize(0).tickPadding(8))
+    .select(".domain").remove();
+
+  // X axis
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(x).ticks(10).tickFormat(d => (d > 0 ? "+" : "") + d.toFixed(1)));
+
+  svg.append("text")
+    .attr("x", (margin.left + width - margin.right) / 2)
+    .attr("y", height - 4)
+    .attr("text-anchor", "middle")
+    .attr("font-size", 12)
+    .attr("fill", "#8b949e")
+    .text("Net Set Piece xG (For − Against)");
+
+  const tooltip = d3.select("#tooltip");
+
+  teams.forEach(team => {
+    const midY = y(team.short) + y.bandwidth() / 2;
+    const positive = team.net >= 0;
+    const col = positive ? "#34d399" : "#f87171";
+
+    // Stem
+    svg.append("line")
+      .attr("x1", x(0)).attr("x2", x(team.net))
+      .attr("y1", midY).attr("y2", midY)
+      .attr("stroke", col).attr("stroke-width", 2.5).attr("stroke-linecap", "round");
+
+    // Dot
+    svg.append("circle")
+      .attr("cx", x(team.net)).attr("cy", midY).attr("r", 6)
+      .attr("fill", col).attr("stroke", "#0d1117").attr("stroke-width", 1.5)
+      .style("cursor", "pointer")
+      .on("mouseover", (event) => {
+        let html = `<div class="tt-team">${team.team}</div>`;
+        html += `<div class="tt-row"><span class="tt-label">Set piece xG For</span><span class="tt-val">${team.total_setpiece_xG.toFixed(2)}</span></div>`;
+        html += `<div class="tt-row"><span class="tt-label">Set piece xG Against</span><span class="tt-val">${team.total_setpiece_against_xG.toFixed(2)}</span></div>`;
+        html += `<div class="tt-row tt-total"><span class="tt-label">Net xG</span><span class="tt-val" style="color:${col}">${(team.net > 0 ? "+" : "") + team.net.toFixed(2)}</span></div>`;
+        tooltip.html(html).style("opacity", 1);
+      })
+      .on("mousemove", (event) => {
+        const pad = 16;
+        let left = event.clientX + pad, top = event.clientY + pad;
+        const rect = tooltip.node().getBoundingClientRect();
+        if (left + rect.width > window.innerWidth - 8) left = event.clientX - rect.width - pad;
+        if (top + rect.height > window.innerHeight - 8) top = event.clientY - rect.height - pad;
+        tooltip.style("left", left + "px").style("top", top + "px");
+      })
+      .on("mouseout", () => tooltip.style("opacity", 0));
+
+    // Label
+    svg.append("text")
+      .attr("x", x(team.net) + (positive ? 12 : -12))
+      .attr("y", midY)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", positive ? "start" : "end")
+      .attr("font-size", 11)
+      .attr("font-weight", 600)
+      .attr("fill", col)
+      .text((team.net > 0 ? "+" : "") + team.net.toFixed(2));
+  });
+}
+</script>
+</body>
+</html>
