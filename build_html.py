@@ -13,27 +13,31 @@ html = r"""<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EPL Set Piece xG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     :root {
-      --bg: #f5f5f0;
+      --bg: #FFFBFF;
       --surface: #ffffff;
       --border: #d0d7de;
-      --text: #1f2328;
-      --text-muted: #656d76;
-      --accent: #0969da;
+      --text: #020202;
+      --text-muted: #555555;
+      --accent: #FBB13D;
+      --accent-deep: #1B149F;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
       padding: 24px;
       min-height: 100vh;
     }
     header { max-width: 1200px; margin: 0 auto 32px; }
-    header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
-    header h1 span { color: var(--accent); }
+    header h1 { font-family: 'Lora', Georgia, serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    header h1 span { color: var(--accent-deep); }
     header p { color: var(--text-muted); font-size: 14px; line-height: 1.5; }
 
     /* Controls row */
@@ -64,11 +68,11 @@ html = r"""<!DOCTYPE html>
       font-size: 13px;
       transition: all 0.15s;
     }
-    .controls button:hover { border-color: var(--accent); color: var(--accent); }
+    .controls button:hover { border-color: var(--accent-deep); color: var(--accent-deep); }
     .controls button.active {
-      background: var(--accent);
+      background: var(--accent-deep);
       color: #fff;
-      border-color: var(--accent);
+      border-color: var(--accent-deep);
       font-weight: 600;
     }
     .controls .label {
@@ -123,6 +127,7 @@ html = r"""<!DOCTYPE html>
     .section-title {
       max-width: 1200px;
       margin: 40px auto 16px;
+      font-family: 'Lora', Georgia, serif;
       font-size: 20px;
       font-weight: 600;
     }
@@ -142,7 +147,7 @@ html = r"""<!DOCTYPE html>
       font-size: 12px;
       line-height: 1.6;
     }
-    footer a { color: var(--accent); text-decoration: none; }
+    footer a { color: var(--accent-deep); text-decoration: none; }
   </style>
 </head>
 <body>
@@ -150,8 +155,8 @@ html = r"""<!DOCTYPE html>
 <header>
   <h1>EPL Set Piece <span>xG</span></h1>
   <p>Expected goals from set pieces per Premier League team, broken down by situation type.
-     xG data from <a href="https://understat.com" style="color:var(--accent)">Understat</a>,
-     set piece counts from the <a href="https://www.premierleague.com" style="color:var(--accent)">Premier League</a>.</p>
+     xG data from <a href="https://understat.com" style="color:var(--accent-deep)">Understat</a>,
+     set piece counts from the <a href="https://www.premierleague.com" style="color:var(--accent-deep)">Premier League</a>.</p>
 </header>
 
 <!-- Controls -->
@@ -209,10 +214,10 @@ const ALL_DATA = """ + data_js + r""";
 const PL_COUNTS = """ + counts_js + r""";
 
 const SITUATIONS = [
-  { key: "FromCorner",     label: "Corners",    color: "#f97316" },
-  { key: "SetPiece",       label: "Set Piece",  color: "#a78bfa" },
-  { key: "DirectFreekick", label: "Direct FK",  color: "#10b981" },
-  { key: "Penalty",        label: "Penalties",  color: "#60a5fa" },
+  { key: "FromCorner",     label: "Corners",    color: "#9B9ECE" },
+  { key: "SetPiece",       label: "Set Piece",  color: "#1B149F" },
+  { key: "DirectFreekick", label: "Direct FK",  color: "#87BBA2" },
+  { key: "Penalty",        label: "Penalties",  color: "#FF5A5F" },
 ];
 
 // Maps Understat situation keys to PL API count field names
@@ -312,7 +317,7 @@ function drawBarChart(teamsRaw) {
   const activeSituations = isAll ? SITUATIONS : SITUATIONS.filter(s => s.key === activeFilter);
   const filterLabel = isAll ? "All Set Pieces" : activeSituations[0].label;
 
-  d3.select("#chart1-title").text(`Total Set Piece xG Created — ${filterLabel}`);
+  d3.select("#chart1-title").text(`Total Set Piece xG Created — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
 
   const teams = [...teamsRaw].sort((a, b) => {
     const aVal = activeSituations.reduce((s, sit) => s + a[sit.key].xG, 0);
@@ -346,7 +351,7 @@ function drawBarChart(teamsRaw) {
 
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
     .text(`Expected Goals (xG) — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
@@ -383,7 +388,7 @@ function drawBarChart(teamsRaw) {
     });
     barsG.append("text")
       .attr("x", x(offset) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-      .attr("dy", "0.35em").attr("font-size", 12).attr("font-weight", 600).attr("fill", "#1f2328")
+      .attr("dy", "0.35em").attr("font-size", 12).attr("font-weight", 600).attr("fill", "#020202")
       .text(offset.toFixed(1));
   });
 
@@ -393,7 +398,7 @@ function drawBarChart(teamsRaw) {
     let lx = 0;
     SITUATIONS.forEach(s => {
       lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", s.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(s.label);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(s.label);
       lx += s.label.length * 7 + 24;
     });
   }
@@ -405,7 +410,7 @@ function drawEfficiency(teamsRaw) {
   const activeSituations = isAll ? SITUATIONS : SITUATIONS.filter(s => s.key === activeFilter);
   const filterLabel = isAll ? "All Set Pieces" : activeSituations[0].label;
 
-  d3.select("#chart2-title").text(`Set Piece Efficiency — ${filterLabel}`);
+  d3.select("#chart2-title").text(`Net Set Piece xG — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
   d3.select("#chart2-subtitle").text(`Net xG (created − conceded). Green = positive balance, red = conceding more than creating.`);
 
   const teams = [...teamsRaw].map(t => {
@@ -444,7 +449,7 @@ function drawEfficiency(teamsRaw) {
   svg.append("line")
     .attr("x1", x(0)).attr("x2", x(0))
     .attr("y1", margin.top).attr("y2", height - margin.bottom)
-    .attr("stroke", "#1f2328").attr("stroke-width", 1).attr("stroke-opacity", 0.25);
+    .attr("stroke", "#020202").attr("stroke-width", 1).attr("stroke-opacity", 0.25);
 
   // Y axis
   svg.append("g").attr("class", "axis").attr("transform", `translate(${margin.left},0)`)
@@ -456,7 +461,7 @@ function drawEfficiency(teamsRaw) {
 
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
     .text(`Net Set Piece xG (Created − Conceded) — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
@@ -510,9 +515,9 @@ function drawXgPerAction(teamsRaw) {
   // "SetPiece" from Understat has no direct PL count equivalent, so we exclude it
   // when a specific filter is chosen and it's "SetPiece"
   const EFFICIENCY_TYPES = [
-    { key: "FromCorner",     countKey: "corners_taken",   label: "Corners",     color: "#f97316", unit: "corner" },
-    { key: "DirectFreekick", countKey: "freekicks_won",   label: "Free Kicks",  color: "#10b981", unit: "FK won" },
-    { key: "Penalty",        countKey: "penalties_won",    label: "Penalties",   color: "#60a5fa", unit: "pen" },
+    { key: "FromCorner",     countKey: "corners_taken",   label: "Corners",     color: "#9B9ECE", unit: "corner" },
+    { key: "DirectFreekick", countKey: "freekicks_won",   label: "Free Kicks",  color: "#87BBA2", unit: "FK won" },
+    { key: "Penalty",        countKey: "penalties_won",    label: "Penalties",   color: "#FF5A5F", unit: "pen" },
   ];
 
   const isAll = activeFilter === "all";
@@ -528,7 +533,7 @@ function drawXgPerAction(teamsRaw) {
     svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
     svg.append("text")
       .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#656d76")
+      .attr("font-size", 14).attr("fill", "#555555")
       .text("Select a different filter to see xG per action.");
     return;
   }
@@ -536,7 +541,7 @@ function drawXgPerAction(teamsRaw) {
   const activeTypes = isAll ? EFFICIENCY_TYPES : EFFICIENCY_TYPES.filter(e => e.key === activeFilter);
   const filterLabel = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
 
-  d3.select("#chart3-title").text(`xG per Action — ${filterLabel}`);
+  d3.select("#chart3-title").text(`xG per Action — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
   d3.select("#chart3-subtitle").text(
     isAll
       ? "xG generated per set piece taken (corners, free kicks, penalties). Grouped bars show efficiency by type."
@@ -549,7 +554,7 @@ function drawXgPerAction(teamsRaw) {
     svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
     svg.append("text")
       .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#656d76")
+      .attr("font-size", 14).attr("fill", "#555555")
       .text("No Premier League count data available for this season.");
     return;
   }
@@ -637,7 +642,7 @@ function drawXgPerAction(teamsRaw) {
 
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
     .text(`xG per Action — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
@@ -716,7 +721,7 @@ function drawXgPerAction(teamsRaw) {
 
       barsG.append("text")
         .attr("x", x(eff) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#1f2328")
+        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#020202")
         .text(eff.toFixed(4));
     });
   }
@@ -727,7 +732,7 @@ function drawXgPerAction(teamsRaw) {
     let lx = 0;
     activeTypes.forEach(et => {
       lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(`${et.label} (xG/${et.unit})`);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(`${et.label} (xG/${et.unit})`);
       lx += (et.label.length + et.unit.length + 6) * 6.5 + 30;
     });
   }
@@ -739,9 +744,9 @@ function drawXgAllowedPerAction(teamsRaw) {
   const hasCounts = Object.keys(countsLookup).length > 0;
 
   const DEFENSE_TYPES = [
-    { key: "FromCorner",     countKey: "corners_conceded",   label: "Corners",     color: "#f97316", unit: "corner" },
-    { key: "DirectFreekick", countKey: "freekicks_conceded", label: "Free Kicks",  color: "#10b981", unit: "FK" },
-    { key: "Penalty",        countKey: "penalties_conceded",  label: "Penalties",   color: "#60a5fa", unit: "pen" },
+    { key: "FromCorner",     countKey: "corners_conceded",   label: "Corners",     color: "#9B9ECE", unit: "corner" },
+    { key: "DirectFreekick", countKey: "freekicks_conceded", label: "Free Kicks",  color: "#87BBA2", unit: "FK" },
+    { key: "Penalty",        countKey: "penalties_conceded",  label: "Penalties",   color: "#FF5A5F", unit: "pen" },
   ];
 
   const isAll = activeFilter === "all";
@@ -756,7 +761,7 @@ function drawXgAllowedPerAction(teamsRaw) {
     svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
     svg.append("text")
       .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#656d76")
+      .attr("font-size", 14).attr("fill", "#555555")
       .text("Select a different filter to see xG allowed per action.");
     return;
   }
@@ -764,7 +769,7 @@ function drawXgAllowedPerAction(teamsRaw) {
   const activeTypes = isAll ? DEFENSE_TYPES : DEFENSE_TYPES.filter(e => e.key === activeFilter);
   const filterLabel = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
 
-  d3.select("#chart4-title").text(`xG Allowed per Action — ${filterLabel}`);
+  d3.select("#chart4-title").text(`xG Allowed per Action — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
   d3.select("#chart4-subtitle").text(
     isAll
       ? "xG conceded per set piece faced (corners, free kicks, penalties). Higher = more vulnerable defensively."
@@ -777,7 +782,7 @@ function drawXgAllowedPerAction(teamsRaw) {
     svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
     svg.append("text")
       .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#656d76")
+      .attr("font-size", 14).attr("fill", "#555555")
       .text("No Premier League count data available for this season.");
     return;
   }
@@ -864,7 +869,7 @@ function drawXgAllowedPerAction(teamsRaw) {
 
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
     .text(`xG Allowed per Action — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
@@ -940,7 +945,7 @@ function drawXgAllowedPerAction(teamsRaw) {
 
       barsG.append("text")
         .attr("x", x(eff) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#1f2328")
+        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#020202")
         .text(eff.toFixed(4));
     });
   }
@@ -951,7 +956,7 @@ function drawXgAllowedPerAction(teamsRaw) {
     let lx = 0;
     activeTypes.forEach(et => {
       lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(`${et.label} (xG/${et.unit} faced)`);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(`${et.label} (xG/${et.unit} faced)`);
       lx += (et.label.length + et.unit.length + 12) * 6.5 + 30;
     });
   }

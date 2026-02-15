@@ -4,27 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EPL Set Piece xG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     :root {
-      --bg: #f5f5f0;
+      --bg: #FFFBFF;
       --surface: #ffffff;
       --border: #d0d7de;
-      --text: #1f2328;
-      --text-muted: #656d76;
-      --accent: #0969da;
+      --text: #020202;
+      --text-muted: #555555;
+      --accent: #FBB13D;
+      --accent-deep: #1B149F;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
       padding: 24px;
       min-height: 100vh;
     }
     header { max-width: 1200px; margin: 0 auto 32px; }
-    header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
-    header h1 span { color: var(--accent); }
+    header h1 { font-family: 'Lora', Georgia, serif; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    header h1 span { color: var(--accent-deep); }
     header p { color: var(--text-muted); font-size: 14px; line-height: 1.5; }
 
     /* Controls row */
@@ -55,11 +59,11 @@
       font-size: 13px;
       transition: all 0.15s;
     }
-    .controls button:hover { border-color: var(--accent); color: var(--accent); }
+    .controls button:hover { border-color: var(--accent-deep); color: var(--accent-deep); }
     .controls button.active {
-      background: var(--accent);
+      background: var(--accent-deep);
       color: #fff;
-      border-color: var(--accent);
+      border-color: var(--accent-deep);
       font-weight: 600;
     }
     .controls .label {
@@ -114,6 +118,7 @@
     .section-title {
       max-width: 1200px;
       margin: 40px auto 16px;
+      font-family: 'Lora', Georgia, serif;
       font-size: 20px;
       font-weight: 600;
     }
@@ -133,7 +138,7 @@
       font-size: 12px;
       line-height: 1.6;
     }
-    footer a { color: var(--accent); text-decoration: none; }
+    footer a { color: var(--accent-deep); text-decoration: none; }
   </style>
 </head>
 <body>
@@ -141,8 +146,8 @@
 <header>
   <h1>EPL Set Piece <span>xG</span></h1>
   <p>Expected goals from set pieces per Premier League team, broken down by situation type.
-     xG data from <a href="https://understat.com" style="color:var(--accent)">Understat</a>,
-     set piece counts from the <a href="https://www.premierleague.com" style="color:var(--accent)">Premier League</a>.</p>
+     xG data from <a href="https://understat.com" style="color:var(--accent-deep)">Understat</a>,
+     set piece counts from the <a href="https://www.premierleague.com" style="color:var(--accent-deep)">Premier League</a>.</p>
 </header>
 
 <!-- Controls -->
@@ -200,10 +205,10 @@ const ALL_DATA = {"2014":{"season":"2014/2015","teams":[{"team":"Crystal Palace"
 const PL_COUNTS = {"2014":{"season":"2014/2015","teams":[{"team":"Manchester City","corners_taken":277,"freekicks_won":297,"penalties_won":8,"corners_conceded":155,"freekicks_conceded":445,"penalties_conceded":4},{"team":"Arsenal","corners_taken":254,"freekicks_won":418,"penalties_won":7,"corners_conceded":172,"freekicks_conceded":376,"penalties_conceded":3},{"team":"West Ham","corners_taken":241,"freekicks_won":419,"penalties_won":2,"corners_conceded":212,"freekicks_conceded":420,"penalties_conceded":5},{"team":"Chelsea","corners_taken":226,"freekicks_won":432,"penalties_won":5,"corners_conceded":167,"freekicks_conceded":382,"penalties_conceded":3},{"team":"Tottenham","corners_taken":224,"freekicks_won":383,"penalties_won":5,"corners_conceded":211,"freekicks_conceded":442,"penalties_conceded":7},{"team":"Newcastle United","corners_taken":222,"freekicks_won":441,"penalties_won":1,"corners_conceded":183,"freekicks_conceded":434,"penalties_conceded":4},{"team":"Manchester United","corners_taken":214,"freekicks_won":395,"penalties_won":5,"corners_conceded":172,"freekicks_conceded":453,"penalties_conceded":4},{"team":"Leicester","corners_taken":211,"freekicks_won":348,"penalties_won":4,"corners_conceded":239,"freekicks_conceded":456,"penalties_conceded":4},{"team":"Crystal Palace","corners_taken":209,"freekicks_won":434,"penalties_won":6,"corners_conceded":228,"freekicks_conceded":527,"penalties_conceded":6},{"team":"Southampton","corners_taken":208,"freekicks_won":397,"penalties_won":3,"corners_conceded":163,"freekicks_conceded":469,"penalties_conceded":2},{"team":"Liverpool","corners_taken":198,"freekicks_won":466,"penalties_won":6,"corners_conceded":200,"freekicks_conceded":385,"penalties_conceded":3},{"team":"Stoke","corners_taken":195,"freekicks_won":409,"penalties_won":3,"corners_conceded":234,"freekicks_conceded":487,"penalties_conceded":5},{"team":"Everton","corners_taken":194,"freekicks_won":450,"penalties_won":7,"corners_conceded":203,"freekicks_conceded":390,"penalties_conceded":4},{"team":"Sunderland","corners_taken":186,"freekicks_won":447,"penalties_won":4,"corners_conceded":222,"freekicks_conceded":441,"penalties_conceded":4},{"team":"Queens Park Rangers","corners_taken":179,"freekicks_won":392,"penalties_won":5,"corners_conceded":245,"freekicks_conceded":447,"penalties_conceded":4},{"team":"Aston Villa","corners_taken":171,"freekicks_won":422,"penalties_won":1,"corners_conceded":217,"freekicks_conceded":403,"penalties_conceded":4},{"team":"Burnley","corners_taken":171,"freekicks_won":399,"penalties_won":3,"corners_conceded":241,"freekicks_conceded":408,"penalties_conceded":5},{"team":"West Bromwich Albion","corners_taken":171,"freekicks_won":406,"penalties_won":5,"corners_conceded":188,"freekicks_conceded":423,"penalties_conceded":7},{"team":"Hull","corners_taken":169,"freekicks_won":401,"penalties_won":1,"corners_conceded":222,"freekicks_conceded":451,"penalties_conceded":3},{"team":"Swansea","corners_taken":151,"freekicks_won":463,"penalties_won":2,"corners_conceded":210,"freekicks_conceded":398,"penalties_conceded":2}]},"2015":{"season":"2015/2016","teams":[{"team":"Liverpool","corners_taken":265,"freekicks_won":378,"penalties_won":2,"corners_conceded":175,"freekicks_conceded":422,"penalties_conceded":3},{"team":"Manchester City","corners_taken":257,"freekicks_won":385,"penalties_won":8,"corners_conceded":167,"freekicks_conceded":409,"penalties_conceded":1},{"team":"Tottenham","corners_taken":254,"freekicks_won":387,"penalties_won":5,"corners_conceded":181,"freekicks_conceded":453,"penalties_conceded":2},{"team":"Chelsea","corners_taken":240,"freekicks_won":480,"penalties_won":5,"corners_conceded":208,"freekicks_conceded":404,"penalties_conceded":4},{"team":"Manchester United","corners_taken":228,"freekicks_won":357,"penalties_won":3,"corners_conceded":145,"freekicks_conceded":473,"penalties_conceded":2},{"team":"Arsenal","corners_taken":227,"freekicks_won":432,"penalties_won":2,"corners_conceded":181,"freekicks_conceded":350,"penalties_conceded":1},{"team":"West Ham","corners_taken":224,"freekicks_won":450,"penalties_won":4,"corners_conceded":197,"freekicks_conceded":382,"penalties_conceded":8},{"team":"Bournemouth","corners_taken":221,"freekicks_won":395,"penalties_won":4,"corners_conceded":169,"freekicks_conceded":361,"penalties_conceded":6},{"team":"Southampton","corners_taken":220,"freekicks_won":365,"penalties_won":4,"corners_conceded":198,"freekicks_conceded":419,"penalties_conceded":1},{"team":"Crystal Palace","corners_taken":219,"freekicks_won":428,"penalties_won":5,"corners_conceded":220,"freekicks_conceded":470,"penalties_conceded":4},{"team":"Everton","corners_taken":218,"freekicks_won":411,"penalties_won":5,"corners_conceded":229,"freekicks_conceded":316,"penalties_conceded":6},{"team":"Leicester","corners_taken":197,"freekicks_won":355,"penalties_won":13,"corners_conceded":241,"freekicks_conceded":406,"penalties_conceded":4},{"team":"Norwich","corners_taken":188,"freekicks_won":309,"penalties_won":1,"corners_conceded":203,"freekicks_conceded":417,"penalties_conceded":10},{"team":"West Bromwich Albion","corners_taken":188,"freekicks_won":391,"penalties_won":5,"corners_conceded":222,"freekicks_conceded":392,"penalties_conceded":6},{"team":"Aston Villa","corners_taken":167,"freekicks_won":364,"penalties_won":2,"corners_conceded":234,"freekicks_conceded":431,"penalties_conceded":5},{"team":"Watford","corners_taken":164,"freekicks_won":387,"penalties_won":7,"corners_conceded":245,"freekicks_conceded":459,"penalties_conceded":8},{"team":"Swansea","corners_taken":163,"freekicks_won":452,"penalties_won":5,"corners_conceded":197,"freekicks_conceded":393,"penalties_conceded":2},{"team":"Newcastle United","corners_taken":161,"freekicks_won":362,"penalties_won":3,"corners_conceded":243,"freekicks_conceded":417,"penalties_conceded":5},{"team":"Stoke","corners_taken":153,"freekicks_won":384,"penalties_won":5,"corners_conceded":239,"freekicks_conceded":419,"penalties_conceded":5},{"team":"Sunderland","corners_taken":153,"freekicks_won":384,"penalties_won":3,"corners_conceded":225,"freekicks_conceded":402,"penalties_conceded":8}]},"2016":{"season":"2016/2017","teams":[{"team":"Manchester City","corners_taken":280,"freekicks_won":424,"penalties_won":9,"corners_conceded":131,"freekicks_conceded":395,"penalties_conceded":5},{"team":"Tottenham","corners_taken":273,"freekicks_won":457,"penalties_won":9,"corners_conceded":137,"freekicks_conceded":432,"penalties_conceded":2},{"team":"Liverpool","corners_taken":249,"freekicks_won":378,"penalties_won":8,"corners_conceded":133,"freekicks_conceded":397,"penalties_conceded":5},{"team":"Arsenal","corners_taken":227,"freekicks_won":386,"penalties_won":6,"corners_conceded":188,"freekicks_conceded":398,"penalties_conceded":10},{"team":"Chelsea","corners_taken":218,"freekicks_won":468,"penalties_won":4,"corners_conceded":160,"freekicks_conceded":395,"penalties_conceded":2},{"team":"Manchester United","corners_taken":217,"freekicks_won":441,"penalties_won":4,"corners_conceded":148,"freekicks_conceded":496,"penalties_conceded":5},{"team":"Crystal Palace","corners_taken":203,"freekicks_won":462,"penalties_won":7,"corners_conceded":224,"freekicks_conceded":470,"penalties_conceded":2},{"team":"Southampton","corners_taken":198,"freekicks_won":413,"penalties_won":6,"corners_conceded":192,"freekicks_conceded":428,"penalties_conceded":9},{"team":"Leicester","corners_taken":197,"freekicks_won":325,"penalties_won":6,"corners_conceded":219,"freekicks_conceded":451,"penalties_conceded":4},{"team":"Everton","corners_taken":196,"freekicks_won":410,"penalties_won":4,"corners_conceded":215,"freekicks_conceded":459,"penalties_conceded":5},{"team":"Swansea","corners_taken":196,"freekicks_won":419,"penalties_won":3,"corners_conceded":186,"freekicks_conceded":401,"penalties_conceded":8},{"team":"Bournemouth","corners_taken":193,"freekicks_won":479,"penalties_won":10,"corners_conceded":205,"freekicks_conceded":368,"penalties_conceded":5},{"team":"Stoke","corners_taken":188,"freekicks_won":434,"penalties_won":6,"corners_conceded":253,"freekicks_conceded":435,"penalties_conceded":2},{"team":"Hull","corners_taken":179,"freekicks_won":380,"penalties_won":3,"corners_conceded":245,"freekicks_conceded":402,"penalties_conceded":13},{"team":"West Ham","corners_taken":172,"freekicks_won":457,"penalties_won":4,"corners_conceded":183,"freekicks_conceded":408,"penalties_conceded":8},{"team":"Watford","corners_taken":164,"freekicks_won":408,"penalties_won":3,"corners_conceded":202,"freekicks_conceded":517,"penalties_conceded":4},{"team":"Sunderland","corners_taken":159,"freekicks_won":388,"penalties_won":5,"corners_conceded":251,"freekicks_conceded":438,"penalties_conceded":4},{"team":"West Bromwich Albion","corners_taken":159,"freekicks_won":338,"penalties_won":1,"corners_conceded":211,"freekicks_conceded":449,"penalties_conceded":3},{"team":"Burnley","corners_taken":149,"freekicks_won":407,"penalties_won":6,"corners_conceded":264,"freekicks_conceded":429,"penalties_conceded":5},{"team":"Middlesbrough","corners_taken":141,"freekicks_won":391,"penalties_won":2,"corners_conceded":220,"freekicks_conceded":482,"penalties_conceded":5}]},"2017":{"season":"2017/2018","teams":[{"team":"Manchester City","corners_taken":284,"freekicks_won":354,"penalties_won":8,"corners_conceded":103,"freekicks_conceded":344,"penalties_conceded":2},{"team":"Tottenham","corners_taken":246,"freekicks_won":394,"penalties_won":3,"corners_conceded":162,"freekicks_conceded":384,"penalties_conceded":3},{"team":"Chelsea","corners_taken":230,"freekicks_won":405,"penalties_won":3,"corners_conceded":159,"freekicks_conceded":363,"penalties_conceded":2},{"team":"Liverpool","corners_taken":230,"freekicks_won":305,"penalties_won":3,"corners_conceded":126,"freekicks_conceded":344,"penalties_conceded":6},{"team":"Southampton","corners_taken":227,"freekicks_won":377,"penalties_won":3,"corners_conceded":201,"freekicks_conceded":416,"penalties_conceded":2},{"team":"Arsenal","corners_taken":225,"freekicks_won":377,"penalties_won":5,"corners_conceded":180,"freekicks_conceded":383,"penalties_conceded":6},{"team":"Manchester United","corners_taken":220,"freekicks_won":422,"penalties_won":3,"corners_conceded":175,"freekicks_conceded":405,"penalties_conceded":1},{"team":"Bournemouth","corners_taken":218,"freekicks_won":411,"penalties_won":3,"corners_conceded":212,"freekicks_conceded":339,"penalties_conceded":3},{"team":"Crystal Palace","corners_taken":210,"freekicks_won":404,"penalties_won":10,"corners_conceded":209,"freekicks_conceded":425,"penalties_conceded":2},{"team":"Leicester","corners_taken":203,"freekicks_won":357,"penalties_won":6,"corners_conceded":216,"freekicks_conceded":364,"penalties_conceded":4},{"team":"Watford","corners_taken":183,"freekicks_won":381,"penalties_won":6,"corners_conceded":199,"freekicks_conceded":441,"penalties_conceded":6},{"team":"West Bromwich Albion","corners_taken":176,"freekicks_won":345,"penalties_won":1,"corners_conceded":177,"freekicks_conceded":440,"penalties_conceded":1},{"team":"Burnley","corners_taken":167,"freekicks_won":422,"penalties_won":1,"corners_conceded":240,"freekicks_conceded":350,"penalties_conceded":6},{"team":"Newcastle United","corners_taken":167,"freekicks_won":369,"penalties_won":1,"corners_conceded":224,"freekicks_conceded":409,"penalties_conceded":6},{"team":"Huddersfield","corners_taken":165,"freekicks_won":363,"penalties_won":2,"corners_conceded":210,"freekicks_conceded":397,"penalties_conceded":6},{"team":"Brighton","corners_taken":163,"freekicks_won":277,"penalties_won":7,"corners_conceded":230,"freekicks_conceded":413,"penalties_conceded":3},{"team":"West Ham","corners_taken":161,"freekicks_won":450,"penalties_won":4,"corners_conceded":208,"freekicks_conceded":379,"penalties_conceded":7},{"team":"Everton","corners_taken":150,"freekicks_won":364,"penalties_won":8,"corners_conceded":213,"freekicks_conceded":460,"penalties_conceded":5},{"team":"Swansea","corners_taken":150,"freekicks_won":400,"penalties_won":1,"corners_conceded":197,"freekicks_conceded":377,"penalties_conceded":7},{"team":"Stoke","corners_taken":136,"freekicks_won":375,"penalties_won":3,"corners_conceded":282,"freekicks_conceded":436,"penalties_conceded":5}]},"2018":{"season":"2018/2019","teams":[{"team":"Manchester City","corners_taken":298,"freekicks_won":301,"penalties_won":4,"corners_conceded":83,"freekicks_conceded":328,"penalties_conceded":4},{"team":"Liverpool","corners_taken":249,"freekicks_won":347,"penalties_won":7,"corners_conceded":126,"freekicks_conceded":315,"penalties_conceded":1},{"team":"Chelsea","corners_taken":215,"freekicks_won":424,"penalties_won":5,"corners_conceded":141,"freekicks_conceded":339,"penalties_conceded":2},{"team":"Everton","corners_taken":215,"freekicks_won":418,"penalties_won":5,"corners_conceded":180,"freekicks_conceded":432,"penalties_conceded":5},{"team":"Leicester","corners_taken":210,"freekicks_won":378,"penalties_won":7,"corners_conceded":204,"freekicks_conceded":351,"penalties_conceded":5},{"team":"Arsenal","corners_taken":209,"freekicks_won":455,"penalties_won":5,"corners_conceded":185,"freekicks_conceded":412,"penalties_conceded":7},{"team":"Crystal Palace","corners_taken":205,"freekicks_won":391,"penalties_won":11,"corners_conceded":216,"freekicks_conceded":386,"penalties_conceded":5},{"team":"Manchester United","corners_taken":200,"freekicks_won":397,"penalties_won":12,"corners_conceded":188,"freekicks_conceded":433,"penalties_conceded":6},{"team":"Wolverhampton Wanderers","corners_taken":195,"freekicks_won":325,"penalties_won":4,"corners_conceded":191,"freekicks_conceded":409,"penalties_conceded":4},{"team":"Tottenham","corners_taken":194,"freekicks_won":364,"penalties_won":4,"corners_conceded":188,"freekicks_conceded":376,"penalties_conceded":5},{"team":"Southampton","corners_taken":193,"freekicks_won":341,"penalties_won":5,"corners_conceded":214,"freekicks_conceded":420,"penalties_conceded":3},{"team":"Bournemouth","corners_taken":191,"freekicks_won":441,"penalties_won":9,"corners_conceded":225,"freekicks_conceded":340,"penalties_conceded":5},{"team":"West Ham","corners_taken":188,"freekicks_won":388,"penalties_won":5,"corners_conceded":207,"freekicks_conceded":331,"penalties_conceded":5},{"team":"Newcastle United","corners_taken":181,"freekicks_won":332,"penalties_won":3,"corners_conceded":231,"freekicks_conceded":423,"penalties_conceded":7},{"team":"Watford","corners_taken":177,"freekicks_won":382,"penalties_won":1,"corners_conceded":212,"freekicks_conceded":433,"penalties_conceded":5},{"team":"Cardiff","corners_taken":168,"freekicks_won":390,"penalties_won":5,"corners_conceded":271,"freekicks_conceded":374,"penalties_conceded":8},{"team":"Huddersfield","corners_taken":162,"freekicks_won":370,"penalties_won":2,"corners_conceded":171,"freekicks_conceded":420,"penalties_conceded":8},{"team":"Fulham","corners_taken":161,"freekicks_won":342,"penalties_won":3,"corners_conceded":228,"freekicks_conceded":423,"penalties_conceded":7},{"team":"Brighton","corners_taken":156,"freekicks_won":301,"penalties_won":6,"corners_conceded":216,"freekicks_conceded":463,"penalties_conceded":10},{"team":"Burnley","corners_taken":140,"freekicks_won":356,"penalties_won":2,"corners_conceded":245,"freekicks_conceded":360,"penalties_conceded":5}]},"2019":{"season":"2019/2020","teams":[{"team":"Manchester City","corners_taken":298,"freekicks_won":296,"penalties_won":13,"corners_conceded":99,"freekicks_conceded":362,"penalties_conceded":3},{"team":"Liverpool","corners_taken":257,"freekicks_won":293,"penalties_won":5,"corners_conceded":160,"freekicks_conceded":331,"penalties_conceded":1},{"team":"Chelsea","corners_taken":247,"freekicks_won":384,"penalties_won":7,"corners_conceded":134,"freekicks_conceded":386,"penalties_conceded":2},{"team":"Arsenal","corners_taken":231,"freekicks_won":437,"penalties_won":3,"corners_conceded":229,"freekicks_conceded":421,"penalties_conceded":8},{"team":"Leicester","corners_taken":221,"freekicks_won":444,"penalties_won":8,"corners_conceded":175,"freekicks_conceded":418,"penalties_conceded":11},{"team":"Sheffield United","corners_taken":212,"freekicks_won":306,"penalties_won":1,"corners_conceded":218,"freekicks_conceded":412,"penalties_conceded":4},{"team":"Southampton","corners_taken":210,"freekicks_won":388,"penalties_won":6,"corners_conceded":224,"freekicks_conceded":450,"penalties_conceded":4},{"team":"Manchester United","corners_taken":204,"freekicks_won":427,"penalties_won":14,"corners_conceded":186,"freekicks_conceded":423,"penalties_conceded":3},{"team":"Everton","corners_taken":203,"freekicks_won":394,"penalties_won":1,"corners_conceded":183,"freekicks_conceded":472,"penalties_conceded":5},{"team":"Aston Villa","corners_taken":200,"freekicks_won":525,"penalties_won":4,"corners_conceded":243,"freekicks_conceded":451,"penalties_conceded":6},{"team":"Tottenham","corners_taken":200,"freekicks_won":424,"penalties_won":4,"corners_conceded":208,"freekicks_conceded":423,"penalties_conceded":7},{"team":"Bournemouth","corners_taken":194,"freekicks_won":387,"penalties_won":4,"corners_conceded":253,"freekicks_conceded":369,"penalties_conceded":7},{"team":"Wolverhampton Wanderers","corners_taken":193,"freekicks_won":359,"penalties_won":4,"corners_conceded":149,"freekicks_conceded":407,"penalties_conceded":3},{"team":"West Ham","corners_taken":190,"freekicks_won":345,"penalties_won":4,"corners_conceded":220,"freekicks_conceded":387,"penalties_conceded":6},{"team":"Brighton","corners_taken":178,"freekicks_won":325,"penalties_won":2,"corners_conceded":205,"freekicks_conceded":386,"penalties_conceded":2},{"team":"Crystal Palace","corners_taken":177,"freekicks_won":479,"penalties_won":3,"corners_conceded":235,"freekicks_conceded":424,"penalties_conceded":3},{"team":"Burnley","corners_taken":171,"freekicks_won":368,"penalties_won":3,"corners_conceded":240,"freekicks_conceded":412,"penalties_conceded":5},{"team":"Watford","corners_taken":167,"freekicks_won":342,"penalties_won":8,"corners_conceded":201,"freekicks_conceded":481,"penalties_conceded":9},{"team":"Norwich","corners_taken":162,"freekicks_won":430,"penalties_won":2,"corners_conceded":266,"freekicks_conceded":363,"penalties_conceded":7},{"team":"Newcastle United","corners_taken":151,"freekicks_won":423,"penalties_won":1,"corners_conceded":252,"freekicks_conceded":370,"penalties_conceded":2}]},"2020":{"season":"2020/2021","teams":[{"team":"Liverpool","corners_taken":257,"freekicks_won":315,"penalties_won":7,"corners_conceded":122,"freekicks_conceded":396,"penalties_conceded":9},{"team":"Manchester City","corners_taken":247,"freekicks_won":372,"penalties_won":9,"corners_conceded":112,"freekicks_conceded":361,"penalties_conceded":11},{"team":"Leeds","corners_taken":229,"freekicks_won":409,"penalties_won":4,"corners_conceded":212,"freekicks_conceded":432,"penalties_conceded":10},{"team":"Chelsea","corners_taken":226,"freekicks_won":363,"penalties_won":11,"corners_conceded":160,"freekicks_conceded":433,"penalties_conceded":5},{"team":"Brighton","corners_taken":219,"freekicks_won":356,"penalties_won":9,"corners_conceded":167,"freekicks_conceded":428,"penalties_conceded":8},{"team":"Aston Villa","corners_taken":213,"freekicks_won":553,"penalties_won":8,"corners_conceded":194,"freekicks_conceded":439,"penalties_conceded":6},{"team":"Leicester","corners_taken":212,"freekicks_won":421,"penalties_won":14,"corners_conceded":181,"freekicks_conceded":413,"penalties_conceded":5},{"team":"Wolverhampton Wanderers","corners_taken":208,"freekicks_won":383,"penalties_won":6,"corners_conceded":186,"freekicks_conceded":426,"penalties_conceded":9},{"team":"Arsenal","corners_taken":207,"freekicks_won":400,"penalties_won":8,"corners_conceded":166,"freekicks_conceded":346,"penalties_conceded":3},{"team":"Manchester United","corners_taken":197,"freekicks_won":400,"penalties_won":13,"corners_conceded":163,"freekicks_conceded":452,"penalties_conceded":5},{"team":"Southampton","corners_taken":177,"freekicks_won":421,"penalties_won":8,"corners_conceded":197,"freekicks_conceded":428,"penalties_conceded":9},{"team":"Burnley","corners_taken":172,"freekicks_won":387,"penalties_won":3,"corners_conceded":240,"freekicks_conceded":384,"penalties_conceded":4},{"team":"Sheffield United","corners_taken":170,"freekicks_won":293,"penalties_won":4,"corners_conceded":243,"freekicks_conceded":459,"penalties_conceded":4},{"team":"Tottenham","corners_taken":168,"freekicks_won":468,"penalties_won":5,"corners_conceded":201,"freekicks_conceded":440,"penalties_conceded":10},{"team":"Everton","corners_taken":167,"freekicks_won":391,"penalties_won":5,"corners_conceded":227,"freekicks_conceded":386,"penalties_conceded":6},{"team":"West Ham","corners_taken":167,"freekicks_won":354,"penalties_won":4,"corners_conceded":184,"freekicks_conceded":375,"penalties_conceded":5},{"team":"Fulham","corners_taken":164,"freekicks_won":372,"penalties_won":6,"corners_conceded":192,"freekicks_conceded":484,"penalties_conceded":8},{"team":"Newcastle United","corners_taken":161,"freekicks_won":419,"penalties_won":7,"corners_conceded":229,"freekicks_conceded":388,"penalties_conceded":5},{"team":"Crystal Palace","corners_taken":151,"freekicks_won":436,"penalties_won":5,"corners_conceded":230,"freekicks_conceded":409,"penalties_conceded":4},{"team":"West Bromwich Albion","corners_taken":145,"freekicks_won":411,"penalties_won":4,"corners_conceded":267,"freekicks_conceded":404,"penalties_conceded":12}]},"2021":{"season":"2021/2022","teams":[{"team":"Manchester City","corners_taken":316,"freekicks_won":330,"penalties_won":10,"corners_conceded":108,"freekicks_conceded":321,"penalties_conceded":2},{"team":"Liverpool","corners_taken":282,"freekicks_won":286,"penalties_won":8,"corners_conceded":117,"freekicks_conceded":363,"penalties_conceded":0},{"team":"Chelsea","corners_taken":241,"freekicks_won":392,"penalties_won":9,"corners_conceded":152,"freekicks_conceded":409,"penalties_conceded":6},{"team":"Southampton","corners_taken":233,"freekicks_won":362,"penalties_won":5,"corners_conceded":197,"freekicks_conceded":402,"penalties_conceded":2},{"team":"Arsenal","corners_taken":208,"freekicks_won":357,"penalties_won":8,"corners_conceded":176,"freekicks_conceded":365,"penalties_conceded":7},{"team":"Brighton","corners_taken":200,"freekicks_won":355,"penalties_won":7,"corners_conceded":212,"freekicks_conceded":393,"penalties_conceded":4},{"team":"West Ham","corners_taken":200,"freekicks_won":274,"penalties_won":6,"corners_conceded":200,"freekicks_conceded":323,"penalties_conceded":6},{"team":"Manchester United","corners_taken":197,"freekicks_won":320,"penalties_won":5,"corners_conceded":209,"freekicks_conceded":396,"penalties_conceded":5},{"team":"Aston Villa","corners_taken":196,"freekicks_won":501,"penalties_won":3,"corners_conceded":222,"freekicks_conceded":401,"penalties_conceded":7},{"team":"Tottenham","corners_taken":193,"freekicks_won":406,"penalties_won":5,"corners_conceded":193,"freekicks_conceded":386,"penalties_conceded":3},{"team":"Leicester","corners_taken":185,"freekicks_won":396,"penalties_won":2,"corners_conceded":220,"freekicks_conceded":356,"penalties_conceded":9},{"team":"Burnley","corners_taken":183,"freekicks_won":330,"penalties_won":4,"corners_conceded":265,"freekicks_conceded":394,"penalties_conceded":5},{"team":"Crystal Palace","corners_taken":175,"freekicks_won":480,"penalties_won":8,"corners_conceded":184,"freekicks_conceded":414,"penalties_conceded":5},{"team":"Leeds","corners_taken":170,"freekicks_won":365,"penalties_won":5,"corners_conceded":182,"freekicks_conceded":469,"penalties_conceded":6},{"team":"Wolverhampton Wanderers","corners_taken":168,"freekicks_won":335,"penalties_won":2,"corners_conceded":204,"freekicks_conceded":366,"penalties_conceded":10},{"team":"Norwich","corners_taken":165,"freekicks_won":431,"penalties_won":4,"corners_conceded":253,"freekicks_conceded":356,"penalties_conceded":12},{"team":"Everton","corners_taken":161,"freekicks_won":388,"penalties_won":8,"corners_conceded":219,"freekicks_conceded":368,"penalties_conceded":3},{"team":"Watford","corners_taken":161,"freekicks_won":351,"penalties_won":3,"corners_conceded":235,"freekicks_conceded":442,"penalties_conceded":8},{"team":"Newcastle United","corners_taken":160,"freekicks_won":364,"penalties_won":4,"corners_conceded":190,"freekicks_conceded":392,"penalties_conceded":6},{"team":"Brentford","corners_taken":159,"freekicks_won":363,"penalties_won":6,"corners_conceded":232,"freekicks_conceded":371,"penalties_conceded":5}]},"2022":{"season":"2022/2023","teams":[{"team":"Newcastle United","corners_taken":270,"freekicks_won":399,"penalties_won":6,"corners_conceded":163,"freekicks_conceded":406,"penalties_conceded":5},{"team":"Manchester City","corners_taken":238,"freekicks_won":384,"penalties_won":10,"corners_conceded":97,"freekicks_conceded":347,"penalties_conceded":3},{"team":"Liverpool","corners_taken":235,"freekicks_won":321,"penalties_won":4,"corners_conceded":136,"freekicks_conceded":405,"penalties_conceded":4},{"team":"Brighton","corners_taken":233,"freekicks_won":407,"penalties_won":6,"corners_conceded":136,"freekicks_conceded":427,"penalties_conceded":8},{"team":"Arsenal","corners_taken":223,"freekicks_won":435,"penalties_won":4,"corners_conceded":141,"freekicks_conceded":373,"penalties_conceded":6},{"team":"Chelsea","corners_taken":209,"freekicks_won":462,"penalties_won":4,"corners_conceded":182,"freekicks_conceded":397,"penalties_conceded":1},{"team":"West Ham","corners_taken":206,"freekicks_won":316,"penalties_won":10,"corners_conceded":194,"freekicks_conceded":362,"penalties_conceded":7},{"team":"Tottenham","corners_taken":203,"freekicks_won":353,"penalties_won":7,"corners_conceded":197,"freekicks_conceded":424,"penalties_conceded":4},{"team":"Leeds","corners_taken":199,"freekicks_won":405,"penalties_won":3,"corners_conceded":182,"freekicks_conceded":467,"penalties_conceded":6},{"team":"Manchester United","corners_taken":196,"freekicks_won":297,"penalties_won":3,"corners_conceded":207,"freekicks_conceded":424,"penalties_conceded":3},{"team":"Crystal Palace","corners_taken":186,"freekicks_won":479,"penalties_won":3,"corners_conceded":178,"freekicks_conceded":446,"penalties_conceded":5},{"team":"Wolverhampton Wanderers","corners_taken":185,"freekicks_won":389,"penalties_won":3,"corners_conceded":204,"freekicks_conceded":463,"penalties_conceded":4},{"team":"Fulham","corners_taken":182,"freekicks_won":405,"penalties_won":9,"corners_conceded":204,"freekicks_conceded":411,"penalties_conceded":8},{"team":"Everton","corners_taken":175,"freekicks_won":382,"penalties_won":3,"corners_conceded":239,"freekicks_conceded":396,"penalties_conceded":6},{"team":"Aston Villa","corners_taken":163,"freekicks_won":498,"penalties_won":4,"corners_conceded":212,"freekicks_conceded":417,"penalties_conceded":6},{"team":"Brentford","corners_taken":163,"freekicks_won":399,"penalties_won":8,"corners_conceded":214,"freekicks_conceded":354,"penalties_conceded":3},{"team":"Southampton","corners_taken":157,"freekicks_won":378,"penalties_won":4,"corners_conceded":208,"freekicks_conceded":430,"penalties_conceded":3},{"team":"Bournemouth","corners_taken":144,"freekicks_won":365,"corners_conceded":272,"freekicks_conceded":391,"penalties_conceded":7,"penalties_won":0},{"team":"Leicester","corners_taken":135,"freekicks_won":397,"penalties_won":7,"corners_conceded":236,"freekicks_conceded":410,"penalties_conceded":6},{"team":"Nottingham Forest","corners_taken":128,"freekicks_won":390,"penalties_won":6,"corners_conceded":239,"freekicks_conceded":445,"penalties_conceded":9}]},"2023":{"season":"2023/2024","teams":[{"team":"Liverpool","corners_taken":287,"freekicks_won":376,"penalties_won":9,"corners_conceded":152,"freekicks_conceded":463,"penalties_conceded":1},{"team":"Manchester City","corners_taken":286,"freekicks_won":410,"penalties_won":10,"corners_conceded":129,"freekicks_conceded":289,"penalties_conceded":3},{"team":"Arsenal","corners_taken":265,"freekicks_won":394,"penalties_won":10,"corners_conceded":113,"freekicks_conceded":391,"penalties_conceded":3},{"team":"Bournemouth","corners_taken":235,"freekicks_won":376,"penalties_won":3,"corners_conceded":214,"freekicks_conceded":507,"penalties_conceded":7},{"team":"Tottenham","corners_taken":234,"freekicks_won":510,"penalties_won":2,"corners_conceded":236,"freekicks_conceded":425,"penalties_conceded":7},{"team":"Aston Villa","corners_taken":231,"freekicks_won":473,"penalties_won":4,"corners_conceded":161,"freekicks_conceded":412,"penalties_conceded":2},{"team":"Manchester United","corners_taken":224,"freekicks_won":340,"penalties_won":7,"corners_conceded":279,"freekicks_conceded":401,"penalties_conceded":7},{"team":"Fulham","corners_taken":212,"freekicks_won":364,"penalties_won":2,"corners_conceded":189,"freekicks_conceded":384,"penalties_conceded":8},{"team":"Brighton","corners_taken":206,"freekicks_won":454,"penalties_won":6,"corners_conceded":167,"freekicks_conceded":414,"penalties_conceded":6},{"team":"Luton","corners_taken":203,"freekicks_won":448,"penalties_won":5,"corners_conceded":226,"freekicks_conceded":443,"penalties_conceded":4},{"team":"Chelsea","corners_taken":202,"freekicks_won":451,"penalties_won":12,"corners_conceded":191,"freekicks_conceded":446,"penalties_conceded":5},{"team":"Newcastle United","corners_taken":192,"freekicks_won":469,"penalties_won":9,"corners_conceded":195,"freekicks_conceded":386,"penalties_conceded":5},{"team":"Brentford","corners_taken":184,"freekicks_won":419,"penalties_won":3,"corners_conceded":219,"freekicks_conceded":385,"penalties_conceded":2},{"team":"Everton","corners_taken":181,"freekicks_won":361,"penalties_won":3,"corners_conceded":242,"freekicks_conceded":457,"penalties_conceded":8},{"team":"Burnley","corners_taken":180,"freekicks_won":353,"penalties_won":3,"corners_conceded":243,"freekicks_conceded":429,"penalties_conceded":7},{"team":"Crystal Palace","corners_taken":178,"freekicks_won":427,"penalties_won":4,"corners_conceded":197,"freekicks_conceded":457,"penalties_conceded":3},{"team":"West Ham","corners_taken":166,"freekicks_won":392,"penalties_won":5,"corners_conceded":229,"freekicks_conceded":390,"penalties_conceded":10},{"team":"Wolverhampton Wanderers","corners_taken":156,"freekicks_won":405,"penalties_won":4,"corners_conceded":225,"freekicks_conceded":476,"penalties_conceded":8},{"team":"Nottingham Forest","corners_taken":148,"freekicks_won":371,"penalties_won":1,"corners_conceded":248,"freekicks_conceded":428,"penalties_conceded":4},{"team":"Sheffield United","corners_taken":141,"freekicks_won":318,"penalties_won":5,"corners_conceded":272,"freekicks_conceded":423,"penalties_conceded":7}]},"2024":{"season":"2024/2025","teams":[{"team":"Manchester City","corners_taken":253,"freekicks_won":382,"penalties_won":4,"corners_conceded":124,"freekicks_conceded":287,"penalties_conceded":4},{"team":"Liverpool","corners_taken":252,"freekicks_won":359,"penalties_won":9,"corners_conceded":141,"freekicks_conceded":430,"penalties_conceded":2},{"team":"Arsenal","corners_taken":251,"freekicks_won":405,"penalties_won":2,"corners_conceded":118,"freekicks_conceded":401,"penalties_conceded":3},{"team":"Tottenham","corners_taken":243,"freekicks_won":483,"penalties_won":4,"corners_conceded":206,"freekicks_conceded":446,"penalties_conceded":3},{"team":"Chelsea","corners_taken":234,"freekicks_won":444,"penalties_won":5,"corners_conceded":141,"freekicks_conceded":436,"penalties_conceded":6},{"team":"Aston Villa","corners_taken":230,"freekicks_won":499,"penalties_won":6,"corners_conceded":172,"freekicks_conceded":406,"penalties_conceded":3},{"team":"Bournemouth","corners_taken":228,"freekicks_won":400,"penalties_won":7,"corners_conceded":184,"freekicks_conceded":525,"penalties_conceded":4},{"team":"Newcastle United","corners_taken":217,"freekicks_won":450,"penalties_won":6,"corners_conceded":202,"freekicks_conceded":394,"penalties_conceded":2},{"team":"Fulham","corners_taken":203,"freekicks_won":359,"penalties_won":4,"corners_conceded":173,"freekicks_conceded":432,"penalties_conceded":4},{"team":"Manchester United","corners_taken":197,"freekicks_won":371,"penalties_won":4,"corners_conceded":181,"freekicks_conceded":403,"penalties_conceded":4},{"team":"Brighton","corners_taken":188,"freekicks_won":411,"penalties_won":7,"corners_conceded":184,"freekicks_conceded":438,"penalties_conceded":9},{"team":"Brentford","corners_taken":174,"freekicks_won":339,"penalties_won":6,"corners_conceded":245,"freekicks_conceded":320,"penalties_conceded":1},{"team":"Crystal Palace","corners_taken":171,"freekicks_won":403,"penalties_won":4,"corners_conceded":214,"freekicks_conceded":417,"penalties_conceded":2},{"team":"Nottingham Forest","corners_taken":159,"freekicks_won":419,"penalties_won":3,"corners_conceded":241,"freekicks_conceded":401,"penalties_conceded":3},{"team":"Everton","corners_taken":154,"freekicks_won":384,"penalties_won":2,"corners_conceded":230,"freekicks_conceded":430,"penalties_conceded":2},{"team":"Southampton","corners_taken":152,"freekicks_won":421,"penalties_won":2,"corners_conceded":246,"freekicks_conceded":459,"penalties_conceded":9},{"team":"West Ham","corners_taken":152,"freekicks_won":397,"penalties_won":3,"corners_conceded":209,"freekicks_conceded":443,"penalties_conceded":3},{"team":"Wolverhampton Wanderers","corners_taken":148,"freekicks_won":425,"corners_conceded":218,"freekicks_conceded":480,"penalties_conceded":9,"penalties_won":0},{"team":"Ipswich","corners_taken":145,"freekicks_won":404,"penalties_won":2,"corners_conceded":252,"freekicks_conceded":430,"penalties_conceded":6},{"team":"Leicester","corners_taken":139,"freekicks_won":393,"penalties_won":3,"corners_conceded":231,"freekicks_conceded":420,"penalties_conceded":4}]}};
 
 const SITUATIONS = [
-  { key: "FromCorner",     label: "Corners",    color: "#f97316" },
-  { key: "SetPiece",       label: "Set Piece",  color: "#a78bfa" },
-  { key: "DirectFreekick", label: "Direct FK",  color: "#10b981" },
-  { key: "Penalty",        label: "Penalties",  color: "#60a5fa" },
+  { key: "FromCorner",     label: "Corners",    color: "#9B9ECE" },
+  { key: "SetPiece",       label: "Set Piece",  color: "#1B149F" },
+  { key: "DirectFreekick", label: "Direct FK",  color: "#87BBA2" },
+  { key: "Penalty",        label: "Penalties",  color: "#FF5A5F" },
 ];
 
 // Maps Understat situation keys to PL API count field names
@@ -303,7 +308,7 @@ function drawBarChart(teamsRaw) {
   const activeSituations = isAll ? SITUATIONS : SITUATIONS.filter(s => s.key === activeFilter);
   const filterLabel = isAll ? "All Set Pieces" : activeSituations[0].label;
 
-  d3.select("#chart1-title").text(`Total Set Piece xG Created — ${filterLabel}`);
+  d3.select("#chart1-title").text(`Total Set Piece xG Created — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
 
   const teams = [...teamsRaw].sort((a, b) => {
     const aVal = activeSituations.reduce((s, sit) => s + a[sit.key].xG, 0);
@@ -337,7 +342,7 @@ function drawBarChart(teamsRaw) {
 
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
     .text(`Expected Goals (xG) — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
@@ -374,7 +379,7 @@ function drawBarChart(teamsRaw) {
     });
     barsG.append("text")
       .attr("x", x(offset) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-      .attr("dy", "0.35em").attr("font-size", 12).attr("font-weight", 600).attr("fill", "#1f2328")
+      .attr("dy", "0.35em").attr("font-size", 12).attr("font-weight", 600).attr("fill", "#020202")
       .text(offset.toFixed(1));
   });
 
@@ -384,7 +389,7 @@ function drawBarChart(teamsRaw) {
     let lx = 0;
     SITUATIONS.forEach(s => {
       lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", s.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(s.label);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(s.label);
       lx += s.label.length * 7 + 24;
     });
   }
@@ -396,7 +401,7 @@ function drawEfficiency(teamsRaw) {
   const activeSituations = isAll ? SITUATIONS : SITUATIONS.filter(s => s.key === activeFilter);
   const filterLabel = isAll ? "All Set Pieces" : activeSituations[0].label;
 
-  d3.select("#chart2-title").text(`Set Piece Efficiency — ${filterLabel}`);
+  d3.select("#chart2-title").text(`Net Set Piece xG — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
   d3.select("#chart2-subtitle").text(`Net xG (created − conceded). Green = positive balance, red = conceding more than creating.`);
 
   const teams = [...teamsRaw].map(t => {
@@ -435,7 +440,7 @@ function drawEfficiency(teamsRaw) {
   svg.append("line")
     .attr("x1", x(0)).attr("x2", x(0))
     .attr("y1", margin.top).attr("y2", height - margin.bottom)
-    .attr("stroke", "#1f2328").attr("stroke-width", 1).attr("stroke-opacity", 0.25);
+    .attr("stroke", "#020202").attr("stroke-width", 1).attr("stroke-opacity", 0.25);
 
   // Y axis
   svg.append("g").attr("class", "axis").attr("transform", `translate(${margin.left},0)`)
@@ -447,7 +452,7 @@ function drawEfficiency(teamsRaw) {
 
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
     .text(`Net Set Piece xG (Created − Conceded) — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
@@ -501,9 +506,9 @@ function drawXgPerAction(teamsRaw) {
   // "SetPiece" from Understat has no direct PL count equivalent, so we exclude it
   // when a specific filter is chosen and it's "SetPiece"
   const EFFICIENCY_TYPES = [
-    { key: "FromCorner",     countKey: "corners_taken",   label: "Corners",     color: "#f97316", unit: "corner" },
-    { key: "DirectFreekick", countKey: "freekicks_won",   label: "Free Kicks",  color: "#10b981", unit: "FK won" },
-    { key: "Penalty",        countKey: "penalties_won",    label: "Penalties",   color: "#60a5fa", unit: "pen" },
+    { key: "FromCorner",     countKey: "corners_taken",   label: "Corners",     color: "#9B9ECE", unit: "corner" },
+    { key: "DirectFreekick", countKey: "freekicks_won",   label: "Free Kicks",  color: "#87BBA2", unit: "FK won" },
+    { key: "Penalty",        countKey: "penalties_won",    label: "Penalties",   color: "#FF5A5F", unit: "pen" },
   ];
 
   const isAll = activeFilter === "all";
@@ -519,7 +524,7 @@ function drawXgPerAction(teamsRaw) {
     svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
     svg.append("text")
       .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#656d76")
+      .attr("font-size", 14).attr("fill", "#555555")
       .text("Select a different filter to see xG per action.");
     return;
   }
@@ -527,7 +532,7 @@ function drawXgPerAction(teamsRaw) {
   const activeTypes = isAll ? EFFICIENCY_TYPES : EFFICIENCY_TYPES.filter(e => e.key === activeFilter);
   const filterLabel = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
 
-  d3.select("#chart3-title").text(`xG per Action — ${filterLabel}`);
+  d3.select("#chart3-title").text(`xG per Action — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
   d3.select("#chart3-subtitle").text(
     isAll
       ? "xG generated per set piece taken (corners, free kicks, penalties). Grouped bars show efficiency by type."
@@ -540,7 +545,7 @@ function drawXgPerAction(teamsRaw) {
     svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
     svg.append("text")
       .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#656d76")
+      .attr("font-size", 14).attr("fill", "#555555")
       .text("No Premier League count data available for this season.");
     return;
   }
@@ -628,7 +633,7 @@ function drawXgPerAction(teamsRaw) {
 
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
     .text(`xG per Action — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
@@ -707,7 +712,7 @@ function drawXgPerAction(teamsRaw) {
 
       barsG.append("text")
         .attr("x", x(eff) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#1f2328")
+        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#020202")
         .text(eff.toFixed(4));
     });
   }
@@ -718,7 +723,7 @@ function drawXgPerAction(teamsRaw) {
     let lx = 0;
     activeTypes.forEach(et => {
       lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(`${et.label} (xG/${et.unit})`);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(`${et.label} (xG/${et.unit})`);
       lx += (et.label.length + et.unit.length + 6) * 6.5 + 30;
     });
   }
@@ -730,9 +735,9 @@ function drawXgAllowedPerAction(teamsRaw) {
   const hasCounts = Object.keys(countsLookup).length > 0;
 
   const DEFENSE_TYPES = [
-    { key: "FromCorner",     countKey: "corners_conceded",   label: "Corners",     color: "#f97316", unit: "corner" },
-    { key: "DirectFreekick", countKey: "freekicks_conceded", label: "Free Kicks",  color: "#10b981", unit: "FK" },
-    { key: "Penalty",        countKey: "penalties_conceded",  label: "Penalties",   color: "#60a5fa", unit: "pen" },
+    { key: "FromCorner",     countKey: "corners_conceded",   label: "Corners",     color: "#9B9ECE", unit: "corner" },
+    { key: "DirectFreekick", countKey: "freekicks_conceded", label: "Free Kicks",  color: "#87BBA2", unit: "FK" },
+    { key: "Penalty",        countKey: "penalties_conceded",  label: "Penalties",   color: "#FF5A5F", unit: "pen" },
   ];
 
   const isAll = activeFilter === "all";
@@ -747,7 +752,7 @@ function drawXgAllowedPerAction(teamsRaw) {
     svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
     svg.append("text")
       .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#656d76")
+      .attr("font-size", 14).attr("fill", "#555555")
       .text("Select a different filter to see xG allowed per action.");
     return;
   }
@@ -755,7 +760,7 @@ function drawXgAllowedPerAction(teamsRaw) {
   const activeTypes = isAll ? DEFENSE_TYPES : DEFENSE_TYPES.filter(e => e.key === activeFilter);
   const filterLabel = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
 
-  d3.select("#chart4-title").text(`xG Allowed per Action — ${filterLabel}`);
+  d3.select("#chart4-title").text(`xG Allowed per Action — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
   d3.select("#chart4-subtitle").text(
     isAll
       ? "xG conceded per set piece faced (corners, free kicks, penalties). Higher = more vulnerable defensively."
@@ -768,7 +773,7 @@ function drawXgAllowedPerAction(teamsRaw) {
     svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
     svg.append("text")
       .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#656d76")
+      .attr("font-size", 14).attr("fill", "#555555")
       .text("No Premier League count data available for this season.");
     return;
   }
@@ -855,7 +860,7 @@ function drawXgAllowedPerAction(teamsRaw) {
 
   svg.append("text")
     .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
     .text(`xG Allowed per Action — ${filterLabel}`);
 
   const tooltip = d3.select("#tooltip");
@@ -931,7 +936,7 @@ function drawXgAllowedPerAction(teamsRaw) {
 
       barsG.append("text")
         .attr("x", x(eff) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#1f2328")
+        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#020202")
         .text(eff.toFixed(4));
     });
   }
@@ -942,7 +947,7 @@ function drawXgAllowedPerAction(teamsRaw) {
     let lx = 0;
     activeTypes.forEach(et => {
       lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(`${et.label} (xG/${et.unit} faced)`);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(`${et.label} (xG/${et.unit} faced)`);
       lx += (et.label.length + et.unit.length + 12) * 6.5 + 30;
     });
   }
