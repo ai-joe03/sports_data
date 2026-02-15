@@ -188,6 +188,13 @@ html = r"""<!DOCTYPE html>
   <svg id="chart3"></svg>
 </div>
 
+<!-- Chart 4: xG Allowed per Action -->
+<h2 class="section-title" id="chart4-title">Defensive Set Piece Vulnerability: xG Allowed per Action</h2>
+<p class="section-subtitle" id="chart4-subtitle">Expected goals conceded per set piece faced. Higher = more vulnerable from each opponent opportunity.</p>
+<div class="chart-container" id="chart4-container">
+  <svg id="chart4"></svg>
+</div>
+
 <div class="tooltip" id="tooltip"></div>
 
 <footer>
@@ -267,6 +274,7 @@ function redrawAll() {
   drawBarChart(teams);
   drawEfficiency(teams);
   drawXgPerAction(teams);
+  drawXgAllowedPerAction(teams);
 }
 
 seasonSelect.on("change", function () {
@@ -721,6 +729,230 @@ function drawXgPerAction(teamsRaw) {
       lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
       lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(`${et.label} (xG/${et.unit})`);
       lx += (et.label.length + et.unit.length + 6) * 6.5 + 30;
+    });
+  }
+}
+
+// ── Chart 4: xG Allowed per Action (defensive vulnerability) ────────
+function drawXgAllowedPerAction(teamsRaw) {
+  const countsLookup = getCountsLookup();
+  const hasCounts = Object.keys(countsLookup).length > 0;
+
+  const DEFENSE_TYPES = [
+    { key: "FromCorner",     countKey: "corners_conceded",   label: "Corners",     color: "#f97316", unit: "corner" },
+    { key: "DirectFreekick", countKey: "freekicks_conceded", label: "Free Kicks",  color: "#10b981", unit: "FK" },
+    { key: "Penalty",        countKey: "penalties_conceded",  label: "Penalties",   color: "#60a5fa", unit: "pen" },
+  ];
+
+  const isAll = activeFilter === "all";
+
+  if (!isAll && activeFilter === "SetPiece") {
+    const svg = d3.select("#chart4");
+    svg.selectAll("*").remove();
+    d3.select("#chart4-title").text("Defensive Set Piece Vulnerability: xG Allowed per Action");
+    d3.select("#chart4-subtitle").text(
+      "No raw count data available for indirect set pieces. Select Corners, Direct FK, Penalties, or All."
+    );
+    svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
+    svg.append("text")
+      .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
+      .attr("font-size", 14).attr("fill", "#656d76")
+      .text("Select a different filter to see xG allowed per action.");
+    return;
+  }
+
+  const activeTypes = isAll ? DEFENSE_TYPES : DEFENSE_TYPES.filter(e => e.key === activeFilter);
+  const filterLabel = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
+
+  d3.select("#chart4-title").text(`xG Allowed per Action — ${filterLabel}`);
+  d3.select("#chart4-subtitle").text(
+    isAll
+      ? "xG conceded per set piece faced (corners, free kicks, penalties). Higher = more vulnerable defensively."
+      : `xG conceded per ${activeTypes[0].unit} faced — higher = more vulnerable from each opponent opportunity.`
+  );
+
+  if (!hasCounts) {
+    const svg = d3.select("#chart4");
+    svg.selectAll("*").remove();
+    svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
+    svg.append("text")
+      .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
+      .attr("font-size", 14).attr("fill", "#656d76")
+      .text("No Premier League count data available for this season.");
+    return;
+  }
+
+  // Build team data with defensive efficiency values
+  const teams = teamsRaw.map(t => {
+    const counts = countsLookup[t.team];
+    if (!counts) return null;
+
+    const entry = {
+      team: t.team,
+      short: SHORT_NAMES[t.team] || t.team,
+    };
+
+    let totalAgainstXG = 0;
+    let totalConcededCount = 0;
+
+    activeTypes.forEach(etype => {
+      const againstXG = t[etype.key] ? t[etype.key].against_xG : 0;
+      const conceded = counts[etype.countKey] || 0;
+      const efficiency = conceded > 0 ? againstXG / conceded : 0;
+      entry[etype.key] = {
+        against_xG: againstXG,
+        conceded: conceded,
+        efficiency: efficiency,
+        against_goals: t[etype.key] ? t[etype.key].against_goals : 0,
+        against_shots: t[etype.key] ? t[etype.key].against_shots : 0,
+      };
+      totalAgainstXG += againstXG;
+      totalConcededCount += conceded;
+    });
+
+    entry.totalEfficiency = totalConcededCount > 0 ? totalAgainstXG / totalConcededCount : 0;
+    entry.totalAgainstXG = totalAgainstXG;
+    entry.totalConcededCount = totalConcededCount;
+
+    return entry;
+  }).filter(Boolean);
+
+  // Sort by worst (highest) defensive vulnerability first
+  if (isAll) {
+    teams.sort((a, b) => b.totalEfficiency - a.totalEfficiency);
+  } else {
+    const k = activeTypes[0].key;
+    teams.sort((a, b) => b[k].efficiency - a[k].efficiency);
+  }
+
+  const svg = d3.select("#chart4");
+  svg.selectAll("*").remove();
+
+  const margin = { top: 32, right: 80, bottom: 40, left: 110 };
+  const groupHeight = isAll ? 50 : 28;
+  const gap = isAll ? 10 : 6;
+  const width = 1160;
+  const height = margin.top + margin.bottom + teams.length * (groupHeight + gap);
+
+  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
+
+  let xMax;
+  if (isAll) {
+    xMax = d3.max(teams, d => d3.max(activeTypes, et => d[et.key].efficiency));
+  } else {
+    xMax = d3.max(teams, d => d[activeTypes[0].key].efficiency);
+  }
+  xMax = Math.max(xMax * 1.15, 0.01);
+
+  const x = d3.scaleLinear().domain([0, xMax]).range([margin.left, width - margin.right]);
+  const y = d3.scaleBand()
+    .domain(teams.map(d => d.short))
+    .range([margin.top, height - margin.bottom])
+    .paddingInner(gap / (groupHeight + gap));
+
+  // Grid
+  svg.append("g").attr("class", "grid").attr("transform", `translate(0,${margin.top})`)
+    .call(d3.axisTop(x).ticks(8).tickSize(-(height - margin.top - margin.bottom)).tickFormat(""));
+
+  // Y axis
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+
+  // X axis
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toFixed(3)));
+
+  svg.append("text")
+    .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .text(`xG Allowed per Action — ${filterLabel}`);
+
+  const tooltip = d3.select("#tooltip");
+  const barsG = svg.append("g");
+
+  if (isAll) {
+    const subBarHeight = y.bandwidth() / activeTypes.length;
+
+    teams.forEach(team => {
+      activeTypes.forEach((etype, i) => {
+        const eff = team[etype.key].efficiency;
+        const barY = y(team.short) + i * subBarHeight;
+
+        barsG.append("rect")
+          .attr("x", x(0)).attr("y", barY)
+          .attr("width", Math.max(0, x(eff) - x(0)))
+          .attr("height", subBarHeight - 1).attr("rx", 2)
+          .attr("fill", etype.color).attr("opacity", 0.85)
+          .style("cursor", "pointer")
+          .on("mouseover", (event) => {
+            let html = `<div class="tt-team">${team.team}</div>`;
+            activeTypes.forEach(et => {
+              const d = team[et.key];
+              const bold = et.key === etype.key ? "font-weight:700" : "";
+              html += `<div class="tt-row" style="${bold}">
+                <span class="tt-label"><span style="color:${et.color}">&#9632;</span> ${et.label}</span>
+                <span class="tt-val">${d.efficiency.toFixed(4)} xG/${et.unit}</span>
+              </div>`;
+              html += `<div class="tt-row" style="font-size:11px;${bold}">
+                <span class="tt-label" style="padding-left:16px">${d.against_xG.toFixed(2)} xG from ${d.conceded} ${et.unit}s faced</span>
+                <span class="tt-val">${d.against_goals}g / ${d.against_shots}sh</span>
+              </div>`;
+            });
+            html += `<div class="tt-row tt-total" style="font-weight:700">
+              <span class="tt-label">Overall</span>
+              <span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/action (${team.totalConcededCount} faced)</span>
+            </div>`;
+            tooltip.html(html).style("opacity", 1);
+            moveTooltip(event);
+          })
+          .on("mousemove", moveTooltip)
+          .on("mouseout", hideTooltip);
+
+        barsG.append("text")
+          .attr("x", x(eff) + 4).attr("y", barY + (subBarHeight - 1) / 2)
+          .attr("dy", "0.35em").attr("font-size", 10).attr("font-weight", 600).attr("fill", etype.color)
+          .text(eff.toFixed(4));
+      });
+    });
+  } else {
+    const etype = activeTypes[0];
+    teams.forEach(team => {
+      const eff = team[etype.key].efficiency;
+
+      barsG.append("rect")
+        .attr("x", x(0)).attr("y", y(team.short))
+        .attr("width", Math.max(0, x(eff) - x(0)))
+        .attr("height", y.bandwidth()).attr("rx", 3)
+        .attr("fill", etype.color).attr("opacity", 0.85)
+        .style("cursor", "pointer")
+        .on("mouseover", (event) => {
+          const d = team[etype.key];
+          let html = `<div class="tt-team">${team.team}</div>`;
+          html += `<div class="tt-row"><span class="tt-label">${etype.label} faced</span><span class="tt-val">${d.conceded}</span></div>`;
+          html += `<div class="tt-row"><span class="tt-label">xG conceded from ${etype.label.toLowerCase()}</span><span class="tt-val">${d.against_xG.toFixed(2)}</span></div>`;
+          html += `<div class="tt-row"><span class="tt-label">Goals / Shots against</span><span class="tt-val">${d.against_goals} / ${d.against_shots}</span></div>`;
+          html += `<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">xG per ${etype.unit} faced</span><span class="tt-val" style="color:${etype.color}">${d.efficiency.toFixed(4)}</span></div>`;
+          tooltip.html(html).style("opacity", 1);
+          moveTooltip(event);
+        })
+        .on("mousemove", moveTooltip)
+        .on("mouseout", hideTooltip);
+
+      barsG.append("text")
+        .attr("x", x(eff) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
+        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#1f2328")
+        .text(eff.toFixed(4));
+    });
+  }
+
+  // Legend
+  if (isAll) {
+    const lg = svg.append("g").attr("transform", `translate(${margin.left}, 6)`);
+    let lx = 0;
+    activeTypes.forEach(et => {
+      lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(`${et.label} (xG/${et.unit} faced)`);
+      lx += (et.label.length + et.unit.length + 12) * 6.5 + 30;
     });
   }
 }

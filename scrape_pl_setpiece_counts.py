@@ -1,7 +1,8 @@
 """Scrape raw set piece counts from the Premier League API.
 
-Fetches corners taken, free kicks won, and penalties won per team per season
-from the official Premier League stats API (footballapi.pulselive.com).
+Fetches corners taken/conceded, free kicks won/conceded, and penalties
+won/conceded per team per season from the official Premier League stats
+API (footballapi.pulselive.com).
 
 Usage:
     python scrape_pl_setpiece_counts.py
@@ -40,6 +41,9 @@ STATS = {
     "corners_taken": "corner_taken",
     "freekicks_won": "fk_foul_won",
     "penalties_won": "penalty_won",
+    "corners_conceded": "lost_corners",
+    "freekicks_conceded": "fk_foul_lost",
+    "penalties_conceded": "penalty_conceded",
 }
 
 # Map PL API team names to Understat names for joining
