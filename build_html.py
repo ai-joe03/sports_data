@@ -4,6 +4,9 @@ import json
 data = json.load(open("data/all_seasons.json"))
 data_js = json.dumps(data, separators=(",", ":"))
 
+counts_data = json.load(open("data/pl_setpiece_counts.json"))
+counts_js = json.dumps(counts_data, separators=(",", ":"))
+
 html = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,7 +112,7 @@ html = r"""<!DOCTYPE html>
       z-index: 100;
       opacity: 0;
       transition: opacity 0.15s;
-      max-width: 300px;
+      max-width: 360px;
     }
     .tooltip .tt-team { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
     .tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; }
@@ -147,7 +150,8 @@ html = r"""<!DOCTYPE html>
 <header>
   <h1>EPL Set Piece <span>xG</span></h1>
   <p>Expected goals from set pieces per Premier League team, broken down by situation type.
-     Data sourced from <a href="https://understat.com" style="color:var(--accent)">Understat</a>.</p>
+     xG data from <a href="https://understat.com" style="color:var(--accent)">Understat</a>,
+     set piece counts from the <a href="https://www.premierleague.com" style="color:var(--accent)">Premier League</a>.</p>
 </header>
 
 <!-- Controls -->
@@ -171,22 +175,31 @@ html = r"""<!DOCTYPE html>
 </div>
 
 <!-- Chart 2: Efficiency (for - against) -->
-<h2 class="section-title" id="chart2-title">Set Piece Efficiency: xG Created − Conceded</h2>
+<h2 class="section-title" id="chart2-title">Set Piece Efficiency: xG Created &#8722; Conceded</h2>
 <p class="section-subtitle" id="chart2-subtitle">Net set piece xG (positive = create more than they concede from set pieces)</p>
 <div class="chart-container" id="chart2-container">
   <svg id="chart2"></svg>
 </div>
 
+<!-- Chart 3: xG per Action (efficiency) -->
+<h2 class="section-title" id="chart3-title">Set Piece Conversion Efficiency: xG per Action</h2>
+<p class="section-subtitle" id="chart3-subtitle">Expected goals generated per set piece taken. Higher = more dangerous from each opportunity.</p>
+<div class="chart-container" id="chart3-container">
+  <svg id="chart3"></svg>
+</div>
+
 <div class="tooltip" id="tooltip"></div>
 
 <footer>
-  Data via <a href="https://understat.com">understat.com</a>.
-  Representative figures — run the scraper for exact live values. Visualised with <a href="https://d3js.org">D3.js v7</a>.
+  xG data via <a href="https://understat.com">understat.com</a>.
+  Set piece counts via <a href="https://www.premierleague.com">premierleague.com</a>.
+  Visualised with <a href="https://d3js.org">D3.js v7</a>.
 </footer>
 
 <script>
 // ── Data ────────────────────────────────────────────────────────────
 const ALL_DATA = """ + data_js + r""";
+const PL_COUNTS = """ + counts_js + r""";
 
 const SITUATIONS = [
   { key: "FromCorner",     label: "Corners",    color: "#f97316" },
@@ -194,6 +207,13 @@ const SITUATIONS = [
   { key: "DirectFreekick", label: "Direct FK",  color: "#10b981" },
   { key: "Penalty",        label: "Penalties",  color: "#60a5fa" },
 ];
+
+// Maps Understat situation keys to PL API count field names
+const SITUATION_TO_COUNT = {
+  "FromCorner": "corners_taken",
+  "DirectFreekick": "freekicks_won",
+  "Penalty": "penalties_won",
+};
 
 const SHORT_NAMES = {
   "Wolverhampton Wanderers": "Wolves",
@@ -229,12 +249,24 @@ function getTeams() {
   }));
 }
 
+// Build a lookup of PL counts by team name for current season
+function getCountsLookup() {
+  const seasonCounts = PL_COUNTS[activeSeason];
+  if (!seasonCounts) return {};
+  const lookup = {};
+  seasonCounts.teams.forEach(t => {
+    lookup[t.team] = t;
+  });
+  return lookup;
+}
+
 function redrawAll() {
   const teams = getTeams();
   const seasonLabel = ALL_DATA[activeSeason].season;
   d3.select("header h1").html(`EPL Set Piece <span>xG</span> — ${seasonLabel}`);
   drawBarChart(teams);
   drawEfficiency(teams);
+  drawXgPerAction(teams);
 }
 
 seasonSelect.on("change", function () {
@@ -459,6 +491,238 @@ function drawEfficiency(teamsRaw) {
       .attr("text-anchor", anchor).attr("font-size", 11).attr("font-weight", 600).attr("fill", col)
       .text((team.net > 0 ? "+" : "") + team.net.toFixed(2));
   });
+}
+
+// ── Chart 3: xG per Action (efficiency per set piece taken) ─────────
+function drawXgPerAction(teamsRaw) {
+  const countsLookup = getCountsLookup();
+  const hasCounts = Object.keys(countsLookup).length > 0;
+
+  // Determine which efficiency metrics to show based on active filter
+  // "SetPiece" from Understat has no direct PL count equivalent, so we exclude it
+  // when a specific filter is chosen and it's "SetPiece"
+  const EFFICIENCY_TYPES = [
+    { key: "FromCorner",     countKey: "corners_taken",   label: "Corners",     color: "#f97316", unit: "corner" },
+    { key: "DirectFreekick", countKey: "freekicks_won",   label: "Free Kicks",  color: "#10b981", unit: "FK won" },
+    { key: "Penalty",        countKey: "penalties_won",    label: "Penalties",   color: "#60a5fa", unit: "pen" },
+  ];
+
+  const isAll = activeFilter === "all";
+
+  // For "SetPiece" filter there's no PL count, show a notice
+  if (!isAll && activeFilter === "SetPiece") {
+    const svg = d3.select("#chart3");
+    svg.selectAll("*").remove();
+    d3.select("#chart3-title").text("Set Piece Conversion Efficiency: xG per Action");
+    d3.select("#chart3-subtitle").text(
+      "No raw count data available for indirect set pieces. Select Corners, Direct FK, Penalties, or All."
+    );
+    svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
+    svg.append("text")
+      .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
+      .attr("font-size", 14).attr("fill", "#656d76")
+      .text("Select a different filter to see xG per action.");
+    return;
+  }
+
+  const activeTypes = isAll ? EFFICIENCY_TYPES : EFFICIENCY_TYPES.filter(e => e.key === activeFilter);
+  const filterLabel = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
+
+  d3.select("#chart3-title").text(`xG per Action — ${filterLabel}`);
+  d3.select("#chart3-subtitle").text(
+    isAll
+      ? "xG generated per set piece taken (corners, free kicks, penalties). Grouped bars show efficiency by type."
+      : `xG generated per ${activeTypes[0].unit} — higher = more dangerous from each opportunity.`
+  );
+
+  if (!hasCounts) {
+    const svg = d3.select("#chart3");
+    svg.selectAll("*").remove();
+    svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
+    svg.append("text")
+      .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
+      .attr("font-size", 14).attr("fill", "#656d76")
+      .text("No Premier League count data available for this season.");
+    return;
+  }
+
+  // Build team data with efficiency values
+  const teams = teamsRaw.map(t => {
+    const counts = countsLookup[t.team];
+    if (!counts) return null;
+
+    const entry = {
+      team: t.team,
+      short: SHORT_NAMES[t.team] || t.team,
+    };
+
+    let totalXG = 0;
+    let totalCount = 0;
+
+    activeTypes.forEach(etype => {
+      const xg = t[etype.key] ? t[etype.key].xG : 0;
+      const count = counts[etype.countKey] || 0;
+      const efficiency = count > 0 ? xg / count : 0;
+      entry[etype.key] = {
+        xG: xg,
+        count: count,
+        efficiency: efficiency,
+        goals: t[etype.key] ? t[etype.key].goals : 0,
+        shots: t[etype.key] ? t[etype.key].shots : 0,
+      };
+      totalXG += xg;
+      totalCount += count;
+    });
+
+    entry.totalEfficiency = totalCount > 0 ? totalXG / totalCount : 0;
+    entry.totalXG = totalXG;
+    entry.totalCount = totalCount;
+
+    return entry;
+  }).filter(Boolean);
+
+  // Sort by overall efficiency for "all", or by the single type's efficiency
+  if (isAll) {
+    teams.sort((a, b) => b.totalEfficiency - a.totalEfficiency);
+  } else {
+    const k = activeTypes[0].key;
+    teams.sort((a, b) => b[k].efficiency - a[k].efficiency);
+  }
+
+  const svg = d3.select("#chart3");
+  svg.selectAll("*").remove();
+
+  const margin = { top: 32, right: 80, bottom: 40, left: 110 };
+  const groupHeight = isAll ? 50 : 28;
+  const gap = isAll ? 10 : 6;
+  const width = 1160;
+  const height = margin.top + margin.bottom + teams.length * (groupHeight + gap);
+
+  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
+
+  // X scale based on max efficiency
+  let xMax;
+  if (isAll) {
+    xMax = d3.max(teams, d => d3.max(activeTypes, et => d[et.key].efficiency));
+  } else {
+    xMax = d3.max(teams, d => d[activeTypes[0].key].efficiency);
+  }
+  xMax = Math.max(xMax * 1.15, 0.01);
+
+  const x = d3.scaleLinear().domain([0, xMax]).range([margin.left, width - margin.right]);
+  const y = d3.scaleBand()
+    .domain(teams.map(d => d.short))
+    .range([margin.top, height - margin.bottom])
+    .paddingInner(gap / (groupHeight + gap));
+
+  // Grid
+  svg.append("g").attr("class", "grid").attr("transform", `translate(0,${margin.top})`)
+    .call(d3.axisTop(x).ticks(8).tickSize(-(height - margin.top - margin.bottom)).tickFormat(""));
+
+  // Y axis
+  svg.append("g").attr("class", "axis").attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+
+  // X axis
+  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toFixed(3)));
+
+  svg.append("text")
+    .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
+    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#656d76")
+    .text(`xG per Action — ${filterLabel}`);
+
+  const tooltip = d3.select("#tooltip");
+  const barsG = svg.append("g");
+
+  if (isAll) {
+    // Grouped bars: one sub-bar per efficiency type within each team band
+    const subBarHeight = y.bandwidth() / activeTypes.length;
+
+    teams.forEach(team => {
+      activeTypes.forEach((etype, i) => {
+        const eff = team[etype.key].efficiency;
+        const barY = y(team.short) + i * subBarHeight;
+
+        barsG.append("rect")
+          .attr("x", x(0)).attr("y", barY)
+          .attr("width", Math.max(0, x(eff) - x(0)))
+          .attr("height", subBarHeight - 1).attr("rx", 2)
+          .attr("fill", etype.color).attr("opacity", 0.85)
+          .style("cursor", "pointer")
+          .on("mouseover", (event) => {
+            let html = `<div class="tt-team">${team.team}</div>`;
+            activeTypes.forEach(et => {
+              const d = team[et.key];
+              const bold = et.key === etype.key ? "font-weight:700" : "";
+              html += `<div class="tt-row" style="${bold}">
+                <span class="tt-label"><span style="color:${et.color}">&#9632;</span> ${et.label}</span>
+                <span class="tt-val">${d.efficiency.toFixed(4)} xG/${et.unit}</span>
+              </div>`;
+              html += `<div class="tt-row" style="font-size:11px;${bold}">
+                <span class="tt-label" style="padding-left:16px">${d.xG.toFixed(2)} xG from ${d.count} ${et.unit}s</span>
+                <span class="tt-val">${d.goals}g / ${d.shots}sh</span>
+              </div>`;
+            });
+            html += `<div class="tt-row tt-total" style="font-weight:700">
+              <span class="tt-label">Overall</span>
+              <span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/action (${team.totalCount} total)</span>
+            </div>`;
+            tooltip.html(html).style("opacity", 1);
+            moveTooltip(event);
+          })
+          .on("mousemove", moveTooltip)
+          .on("mouseout", hideTooltip);
+
+        // Value label for each sub-bar
+        barsG.append("text")
+          .attr("x", x(eff) + 4).attr("y", barY + (subBarHeight - 1) / 2)
+          .attr("dy", "0.35em").attr("font-size", 10).attr("font-weight", 600).attr("fill", etype.color)
+          .text(eff.toFixed(4));
+      });
+    });
+  } else {
+    // Single bar per team
+    const etype = activeTypes[0];
+    teams.forEach(team => {
+      const eff = team[etype.key].efficiency;
+
+      barsG.append("rect")
+        .attr("x", x(0)).attr("y", y(team.short))
+        .attr("width", Math.max(0, x(eff) - x(0)))
+        .attr("height", y.bandwidth()).attr("rx", 3)
+        .attr("fill", etype.color).attr("opacity", 0.85)
+        .style("cursor", "pointer")
+        .on("mouseover", (event) => {
+          const d = team[etype.key];
+          let html = `<div class="tt-team">${team.team}</div>`;
+          html += `<div class="tt-row"><span class="tt-label">${etype.label} taken</span><span class="tt-val">${d.count}</span></div>`;
+          html += `<div class="tt-row"><span class="tt-label">xG from ${etype.label.toLowerCase()}</span><span class="tt-val">${d.xG.toFixed(2)}</span></div>`;
+          html += `<div class="tt-row"><span class="tt-label">Goals / Shots</span><span class="tt-val">${d.goals} / ${d.shots}</span></div>`;
+          html += `<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">xG per ${etype.unit}</span><span class="tt-val" style="color:${etype.color}">${d.efficiency.toFixed(4)}</span></div>`;
+          tooltip.html(html).style("opacity", 1);
+          moveTooltip(event);
+        })
+        .on("mousemove", moveTooltip)
+        .on("mouseout", hideTooltip);
+
+      barsG.append("text")
+        .attr("x", x(eff) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
+        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#1f2328")
+        .text(eff.toFixed(4));
+    });
+  }
+
+  // Legend in top margin (grouped mode only)
+  if (isAll) {
+    const lg = svg.append("g").attr("transform", `translate(${margin.left}, 6)`);
+    let lx = 0;
+    activeTypes.forEach(et => {
+      lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
+      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#656d76").text(`${et.label} (xG/${et.unit})`);
+      lx += (et.label.length + et.unit.length + 6) * 6.5 + 30;
+    });
+  }
 }
 </script>
 </body>
