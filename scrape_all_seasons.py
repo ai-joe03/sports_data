@@ -1,5 +1,12 @@
-"""Scrape set piece xG for all EPL seasons available on Understat (2014-2024)."""
-import asyncio, json, sys
+"""Scrape set piece xG for all EPL seasons available on Understat (2014-2024).
+
+Usage:
+    pip install aiohttp understat
+    python scrape_all_seasons.py
+
+Output: data/all_seasons.json
+"""
+import asyncio, json, os, sys
 import aiohttp
 from understat import Understat
 
@@ -50,6 +57,9 @@ async def main():
             print(f"  Got {len(season_teams)} teams", file=sys.stderr)
             await asyncio.sleep(0.5)
 
-    print(json.dumps(results))
+    os.makedirs("data", exist_ok=True)
+    with open("data/all_seasons.json", "w") as f:
+        json.dump(results, f, indent=2)
+    print(f"Wrote {len(results)} seasons to data/all_seasons.json", file=sys.stderr)
 
 asyncio.run(main())
