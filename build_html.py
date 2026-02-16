@@ -127,7 +127,7 @@ html = r"""<!DOCTYPE html>
     }
     svg text { fill: var(--text); }
     .axis path, .axis line { stroke: var(--border); }
-    .axis text { fill: var(--text-muted); font-size: 12px; }
+    .axis text { fill: var(--text-muted); font-size: 14px; }
     .grid line { stroke: var(--border); stroke-opacity: 0.4; stroke-dasharray: 2,3; }
     .grid path { display: none; }
 
@@ -157,13 +157,13 @@ html = r"""<!DOCTYPE html>
       max-width: 1200px;
       margin: 40px auto 16px;
       font-family: 'Lora', Georgia, serif;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 600;
     }
     .section-subtitle {
       max-width: 1200px;
       margin: -10px auto 16px;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text-muted);
     }
 
@@ -331,23 +331,23 @@ const SHORT_NAMES = {
 
 // ── Category definitions ────────────────────────────────────────────
 const SITUATIONS = [
-  { key: "FromCorner",     label: "Corners",    color: "#9B9ECE" },
-  { key: "SetPiece",       label: "Set Piece",  color: "#1B149F" },
-  { key: "DirectFreekick", label: "Direct FK",  color: "#87BBA2" },
+  { key: "FromCorner",     label: "Corners",    color: "#6B6EAF" },
+  { key: "SetPiece",       label: "Set Piece",  color: "#3D35C1" },
+  { key: "DirectFreekick", label: "Direct FK",  color: "#4A9B6F" },
   { key: "Penalty",        label: "Penalties",  color: "#FF5A5F" },
 ];
 
 const SHOT_ZONES = [
-  { key: "shotOboxTotal",   label: "Outside Box",   color: "#9B9ECE" },
+  { key: "shotOboxTotal",   label: "Outside Box",   color: "#6B6EAF" },
   { key: "shotPenaltyArea", label: "Penalty Area",  color: "#FF5A5F" },
-  { key: "shotSixYardBox",  label: "Six-Yard Box",  color: "#87BBA2" },
+  { key: "shotSixYardBox",  label: "Six-Yard Box",  color: "#4A9B6F" },
 ];
 
 const ATTACK_SPEEDS = [
-  { key: "Normal",   label: "Normal",   color: "#9B9ECE" },
-  { key: "Standard", label: "Standard", color: "#87BBA2" },
+  { key: "Normal",   label: "Normal",   color: "#6B6EAF" },
+  { key: "Standard", label: "Standard", color: "#4A9B6F" },
   { key: "Fast",     label: "Fast",     color: "#FF5A5F" },
-  { key: "Slow",     label: "Slow",     color: "#FBB13D" },
+  { key: "Slow",     label: "Slow",     color: "#E59500" },
 ];
 
 // ── State ───────────────────────────────────────────────────────────
@@ -475,9 +475,9 @@ function drawSpTotal(teamsRaw, filter) {
         }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
       off += val;
     });
-    barsG.append("text").attr("x",x(off)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",12).attr("font-weight",600).attr("fill","#020202").text(off.toFixed(1));
+    barsG.append("text").attr("x",x(off)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",14).attr("font-weight",600).attr("fill","#020202").text(off.toFixed(1));
   });
-  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;SITUATIONS.forEach(s=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",s.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",11).attr("fill","#555555").text(s.label);lx+=s.label.length*7+24;});}
+  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;SITUATIONS.forEach(s=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",s.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",13).attr("fill","#555555").text(s.label);lx+=s.label.length*7+24;});}
 }
 
 // ── SP Chart 2: Net xG ──────────────────────────────────────────
@@ -520,7 +520,7 @@ function drawSpNet(teamsRaw, filter) {
         tooltip.html(h).style("opacity",1);moveTooltip(event);
       }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
     const lx=pos?x(team.net)+6:x(team.net)-6, anch=pos?"start":"end";
-    svg.append("text").attr("x",lx).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor",anch).attr("font-size",11).attr("font-weight",600).attr("fill",col).text((team.net>0?"+":"")+team.net.toFixed(2));
+    svg.append("text").attr("x",lx).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor",anch).attr("font-size",13).attr("font-weight",600).attr("fill",col).text((team.net>0?"+":"")+team.net.toFixed(2));
   });
 }
 
@@ -529,8 +529,8 @@ function drawSpPerAction(teamsRaw, filter) {
   const countsLookup = getCountsLookup();
   const hasCounts = Object.keys(countsLookup).length > 0;
   const ETYPE = [
-    {key:"FromCorner",countKey:"corners_taken",label:"Corners",color:"#9B9ECE",unit:"corner"},
-    {key:"DirectFreekick",countKey:"freekicks_won",label:"Free Kicks",color:"#87BBA2",unit:"FK won"},
+    {key:"FromCorner",countKey:"corners_taken",label:"Corners",color:"#6B6EAF",unit:"corner"},
+    {key:"DirectFreekick",countKey:"freekicks_won",label:"Free Kicks",color:"#4A9B6F",unit:"FK won"},
     {key:"Penalty",countKey:"penalties_won",label:"Penalties",color:"#FF5A5F",unit:"pen"},
   ];
   const isAll = filter === "all";
@@ -560,8 +560,8 @@ function drawSpAllowedPerAction(teamsRaw, filter) {
   const countsLookup = getCountsLookup();
   const hasCounts = Object.keys(countsLookup).length > 0;
   const DTYPE = [
-    {key:"FromCorner",countKey:"corners_conceded",label:"Corners",color:"#9B9ECE",unit:"corner"},
-    {key:"DirectFreekick",countKey:"freekicks_conceded",label:"Free Kicks",color:"#87BBA2",unit:"FK"},
+    {key:"FromCorner",countKey:"corners_conceded",label:"Corners",color:"#6B6EAF",unit:"corner"},
+    {key:"DirectFreekick",countKey:"freekicks_conceded",label:"Free Kicks",color:"#4A9B6F",unit:"FK"},
     {key:"Penalty",countKey:"penalties_conceded",label:"Penalties",color:"#FF5A5F",unit:"pen"},
   ];
   const isAll = filter === "all";
@@ -608,7 +608,7 @@ function drawGroupedBar(cfg) {
   svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(8).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
   svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
   svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(8).tickFormat(xFormat));
-  svg.append("text").attr("x",(margin.left+W-margin.right)/2).attr("y",H-4).attr("text-anchor","middle").attr("font-size",12).attr("fill","#555555").text(xLabel);
+  svg.append("text").attr("x",(margin.left+W-margin.right)/2).attr("y",H-4).attr("text-anchor","middle").attr("font-size",14).attr("fill","#555555").text(xLabel);
 
   const tooltip=d3.select("#tooltip"), barsG=svg.append("g");
   if(isAll){
@@ -617,7 +617,7 @@ function drawGroupedBar(cfg) {
       const eff=team[et.key].efficiency, barY=y(team.short)+i*subH;
       barsG.append("rect").attr("x",x(0)).attr("y",barY).attr("width",Math.max(0,x(eff)-x(0))).attr("height",subH-1).attr("rx",2).attr("fill",et.color).attr("opacity",0.85).style("cursor","pointer")
         .on("mouseover",event=>{tooltip.html(tooltipFn(team,et)).style("opacity",1);moveTooltip(event);}).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
-      barsG.append("text").attr("x",x(eff)+4).attr("y",barY+(subH-1)/2).attr("dy","0.35em").attr("font-size",10).attr("font-weight",600).attr("fill",et.color).text(eff.toFixed(4));
+      barsG.append("text").attr("x",x(eff)+4).attr("y",barY+(subH-1)/2).attr("dy","0.35em").attr("font-size",13).attr("font-weight",600).attr("fill",et.color).text(eff.toFixed(4));
     });});
   } else {
     const et=activeTypes[0];
@@ -625,10 +625,10 @@ function drawGroupedBar(cfg) {
       const eff=team[et.key].efficiency;
       barsG.append("rect").attr("x",x(0)).attr("y",y(team.short)).attr("width",Math.max(0,x(eff)-x(0))).attr("height",y.bandwidth()).attr("rx",3).attr("fill",et.color).attr("opacity",0.85).style("cursor","pointer")
         .on("mouseover",event=>{tooltip.html(tooltipFn(team,et)).style("opacity",1);moveTooltip(event);}).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
-      barsG.append("text").attr("x",x(eff)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",11).attr("font-weight",600).attr("fill","#020202").text(eff.toFixed(4));
+      barsG.append("text").attr("x",x(eff)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",13).attr("font-weight",600).attr("fill","#020202").text(eff.toFixed(4));
     });
   }
-  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;activeTypes.forEach(et=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",et.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",11).attr("fill","#555555").text(`${et.label} (${legendSuffix(et)})`);lx+=(et.label.length+legendSuffix(et).length+3)*6.5+30;});}
+  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;activeTypes.forEach(et=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",et.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",13).attr("fill","#555555").text(`${et.label} (${legendSuffix(et)})`);lx+=(et.label.length+legendSuffix(et).length+3)*6.5+30;});}
 }
 
 // ╔══════════════════════════════════════════════════════════════════╗
@@ -708,9 +708,9 @@ function drawCatTotal(prefix, teamsRaw, allCats, filter, dataKey, tabLabel) {
         }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
       off+=val;
     });
-    barsG.append("text").attr("x",x(off)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",12).attr("font-weight",600).attr("fill","#020202").text(off.toFixed(1));
+    barsG.append("text").attr("x",x(off)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",14).attr("font-weight",600).attr("fill","#020202").text(off.toFixed(1));
   });
-  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;allCats.forEach(c=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",c.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",11).attr("fill","#555555").text(c.label);lx+=c.label.length*7+24;});}
+  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;allCats.forEach(c=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",c.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",13).attr("fill","#555555").text(c.label);lx+=c.label.length*7+24;});}
 }
 
 // ── Generic Net xG ──────────────────────────────────────────────
@@ -753,7 +753,7 @@ function drawCatNet(prefix, teamsRaw, allCats, filter, dataKey, tabLabel) {
         tooltip.html(h).style("opacity",1);moveTooltip(event);
       }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
     const lx=pos?x(team.net)+6:x(team.net)-6;
-    svg.append("text").attr("x",lx).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor",pos?"start":"end").attr("font-size",11).attr("font-weight",600).attr("fill",col).text((team.net>0?"+":"")+team.net.toFixed(2));
+    svg.append("text").attr("x",lx).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor",pos?"start":"end").attr("font-size",13).attr("font-weight",600).attr("fill",col).text((team.net>0?"+":"")+team.net.toFixed(2));
   });
 }
 
