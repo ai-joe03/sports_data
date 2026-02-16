@@ -86,6 +86,35 @@ html = r"""<!DOCTYPE html>
       background: var(--border);
     }
 
+    /* Tab bar */
+    .tab-bar {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+    }
+    .tab-bar button {
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      padding: 10px 24px;
+      font-family: 'Lora', Georgia, serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-bar button:hover { color: var(--text); }
+    .tab-bar button.active {
+      color: var(--accent-deep);
+      border-bottom-color: var(--accent-deep);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     /* Chart container */
     .chart-container {
       max-width: 1200px;
@@ -138,6 +167,22 @@ html = r"""<!DOCTYPE html>
       color: var(--text-muted);
     }
 
+    .no-data-msg {
+      max-width: 1200px;
+      margin: 60px auto;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    .no-data-msg code {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
     footer {
       max-width: 1200px;
       margin: 40px auto 0;
@@ -159,45 +204,101 @@ html = r"""<!DOCTYPE html>
      set piece counts from the <a href="https://www.premierleague.com" style="color:var(--accent-deep)">Premier League</a>.</p>
 </header>
 
-<!-- Controls -->
+<!-- Global: Season selector -->
 <div class="controls" id="controls">
   <span class="label">Season:</span>
   <select id="season-select"></select>
-  <div class="separator"></div>
-  <span class="label">Show:</span>
-  <button class="active" data-filter="all">All Set Pieces</button>
-  <button data-filter="FromCorner">Corners</button>
-  <button data-filter="SetPiece">Set Piece</button>
-  <button data-filter="DirectFreekick">Direct FK</button>
-  <button data-filter="Penalty">Penalties</button>
 </div>
 
-<!-- Chart 1: Total xG created -->
-<h2 class="section-title" id="chart1-title">Total Set Piece xG Created</h2>
-<p class="section-subtitle" id="chart1-subtitle">Total expected goals created from set pieces per team, sorted highest to lowest</p>
-<div class="chart-container" id="chart1-container">
-  <svg id="chart1"></svg>
+<!-- Tab bar -->
+<div class="tab-bar" id="tab-bar">
+  <button class="active" data-tab="setpieces">Set Pieces</button>
+  <button data-tab="shotzones">Shot Zones</button>
+  <button data-tab="attackspeed">Attack Speed</button>
 </div>
 
-<!-- Chart 2: Efficiency (for - against) -->
-<h2 class="section-title" id="chart2-title">Set Piece Efficiency: xG Created &#8722; Conceded</h2>
-<p class="section-subtitle" id="chart2-subtitle">Net set piece xG (positive = create more than they concede from set pieces)</p>
-<div class="chart-container" id="chart2-container">
-  <svg id="chart2"></svg>
+<!-- ═══════════ TAB: Set Pieces ═══════════ -->
+<div class="tab-content active" id="tab-setpieces">
+  <div class="controls" id="sp-filters">
+    <span class="label">Show:</span>
+    <button class="active" data-filter="all">All Set Pieces</button>
+    <button data-filter="FromCorner">Corners</button>
+    <button data-filter="SetPiece">Set Piece</button>
+    <button data-filter="DirectFreekick">Direct FK</button>
+    <button data-filter="Penalty">Penalties</button>
+  </div>
+  <h2 class="section-title" id="sp-c1-title">Total Set Piece xG Created</h2>
+  <p class="section-subtitle" id="sp-c1-sub">Total expected goals created from set pieces per team</p>
+  <div class="chart-container"><svg id="sp-c1"></svg></div>
+
+  <h2 class="section-title" id="sp-c2-title">Net Set Piece xG</h2>
+  <p class="section-subtitle" id="sp-c2-sub">Net xG (created − conceded)</p>
+  <div class="chart-container"><svg id="sp-c2"></svg></div>
+
+  <h2 class="section-title" id="sp-c3-title">xG per Action</h2>
+  <p class="section-subtitle" id="sp-c3-sub">Expected goals generated per set piece taken</p>
+  <div class="chart-container"><svg id="sp-c3"></svg></div>
+
+  <h2 class="section-title" id="sp-c4-title">xG Allowed per Action</h2>
+  <p class="section-subtitle" id="sp-c4-sub">Expected goals conceded per set piece faced</p>
+  <div class="chart-container"><svg id="sp-c4"></svg></div>
 </div>
 
-<!-- Chart 3: xG per Action (efficiency) -->
-<h2 class="section-title" id="chart3-title">Set Piece Conversion Efficiency: xG per Action</h2>
-<p class="section-subtitle" id="chart3-subtitle">Expected goals generated per set piece taken. Higher = more dangerous from each opportunity.</p>
-<div class="chart-container" id="chart3-container">
-  <svg id="chart3"></svg>
+<!-- ═══════════ TAB: Shot Zones ═══════════ -->
+<div class="tab-content" id="tab-shotzones">
+  <div class="controls" id="sz-filters">
+    <span class="label">Show:</span>
+    <button class="active" data-filter="all">All Zones</button>
+    <button data-filter="shotOboxTotal">Outside Box</button>
+    <button data-filter="shotPenaltyArea">Penalty Area</button>
+    <button data-filter="shotSixYardBox">Six-Yard Box</button>
+  </div>
+  <div id="sz-no-data" class="no-data-msg" style="display:none">
+    <p>Shot zone data is not yet available for this season.</p>
+    <p>Re-run <code>python scrape_all_seasons.py</code> to fetch shot zone breakdowns from Understat.</p>
+  </div>
+  <div id="sz-charts">
+    <h2 class="section-title" id="sz-c1-title">Total xG Created by Shot Zone</h2>
+    <p class="section-subtitle" id="sz-c1-sub">Expected goals by pitch zone</p>
+    <div class="chart-container"><svg id="sz-c1"></svg></div>
+
+    <h2 class="section-title" id="sz-c2-title">Net xG by Shot Zone</h2>
+    <p class="section-subtitle" id="sz-c2-sub">Net xG (created − conceded) by zone</p>
+    <div class="chart-container"><svg id="sz-c2"></svg></div>
+
+    <h2 class="section-title" id="sz-c3-title">xG per Shot by Zone</h2>
+    <p class="section-subtitle" id="sz-c3-sub">Shot quality — xG per shot taken from each zone</p>
+    <div class="chart-container"><svg id="sz-c3"></svg></div>
+  </div>
 </div>
 
-<!-- Chart 4: xG Allowed per Action -->
-<h2 class="section-title" id="chart4-title">Defensive Set Piece Vulnerability: xG Allowed per Action</h2>
-<p class="section-subtitle" id="chart4-subtitle">Expected goals conceded per set piece faced. Higher = more vulnerable from each opponent opportunity.</p>
-<div class="chart-container" id="chart4-container">
-  <svg id="chart4"></svg>
+<!-- ═══════════ TAB: Attack Speed ═══════════ -->
+<div class="tab-content" id="tab-attackspeed">
+  <div class="controls" id="as-filters">
+    <span class="label">Show:</span>
+    <button class="active" data-filter="all">All Speeds</button>
+    <button data-filter="Normal">Normal</button>
+    <button data-filter="Standard">Standard</button>
+    <button data-filter="Fast">Fast</button>
+    <button data-filter="Slow">Slow</button>
+  </div>
+  <div id="as-no-data" class="no-data-msg" style="display:none">
+    <p>Attack speed data is not yet available for this season.</p>
+    <p>Re-run <code>python scrape_all_seasons.py</code> to fetch attack speed breakdowns from Understat.</p>
+  </div>
+  <div id="as-charts">
+    <h2 class="section-title" id="as-c1-title">Total xG Created by Attack Speed</h2>
+    <p class="section-subtitle" id="as-c1-sub">Expected goals by attack tempo</p>
+    <div class="chart-container"><svg id="as-c1"></svg></div>
+
+    <h2 class="section-title" id="as-c2-title">Net xG by Attack Speed</h2>
+    <p class="section-subtitle" id="as-c2-sub">Net xG (created − conceded) by tempo</p>
+    <div class="chart-container"><svg id="as-c2"></svg></div>
+
+    <h2 class="section-title" id="as-c3-title">xG per Shot by Attack Speed</h2>
+    <p class="section-subtitle" id="as-c3-sub">Shot quality — xG per shot from each attack tempo</p>
+    <div class="chart-container"><svg id="as-c3"></svg></div>
+  </div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
@@ -212,20 +313,6 @@ html = r"""<!DOCTYPE html>
 // ── Data ────────────────────────────────────────────────────────────
 const ALL_DATA = """ + data_js + r""";
 const PL_COUNTS = """ + counts_js + r""";
-
-const SITUATIONS = [
-  { key: "FromCorner",     label: "Corners",    color: "#9B9ECE" },
-  { key: "SetPiece",       label: "Set Piece",  color: "#1B149F" },
-  { key: "DirectFreekick", label: "Direct FK",  color: "#87BBA2" },
-  { key: "Penalty",        label: "Penalties",  color: "#FF5A5F" },
-];
-
-// Maps Understat situation keys to PL API count field names
-const SITUATION_TO_COUNT = {
-  "FromCorner": "corners_taken",
-  "DirectFreekick": "freekicks_won",
-  "Penalty": "penalties_won",
-};
 
 const SHORT_NAMES = {
   "Wolverhampton Wanderers": "Wolves",
@@ -242,15 +329,36 @@ const SHORT_NAMES = {
   "West Brom": "West Brom",
 };
 
-let activeFilter = "all";
+// ── Category definitions ────────────────────────────────────────────
+const SITUATIONS = [
+  { key: "FromCorner",     label: "Corners",    color: "#9B9ECE" },
+  { key: "SetPiece",       label: "Set Piece",  color: "#1B149F" },
+  { key: "DirectFreekick", label: "Direct FK",  color: "#87BBA2" },
+  { key: "Penalty",        label: "Penalties",  color: "#FF5A5F" },
+];
+
+const SHOT_ZONES = [
+  { key: "shotOboxTotal",   label: "Outside Box",   color: "#9B9ECE" },
+  { key: "shotPenaltyArea", label: "Penalty Area",  color: "#FF5A5F" },
+  { key: "shotSixYardBox",  label: "Six-Yard Box",  color: "#87BBA2" },
+];
+
+const ATTACK_SPEEDS = [
+  { key: "Normal",   label: "Normal",   color: "#9B9ECE" },
+  { key: "Standard", label: "Standard", color: "#87BBA2" },
+  { key: "Fast",     label: "Fast",     color: "#FF5A5F" },
+  { key: "Slow",     label: "Slow",     color: "#FBB13D" },
+];
+
+// ── State ───────────────────────────────────────────────────────────
 let activeSeason = "2024";
+let activeTab = "setpieces";
+const tabFilters = { setpieces: "all", shotzones: "all", attackspeed: "all" };
 
 // ── Season dropdown ─────────────────────────────────────────────────
 const seasonSelect = d3.select("#season-select");
 Object.keys(ALL_DATA).sort((a, b) => +b - +a).forEach(key => {
-  seasonSelect.append("option")
-    .attr("value", key)
-    .text(ALL_DATA[key].season);
+  seasonSelect.append("option").attr("value", key).text(ALL_DATA[key].season);
 });
 seasonSelect.property("value", activeSeason);
 
@@ -261,42 +369,52 @@ function getTeams() {
   }));
 }
 
-// Build a lookup of PL counts by team name for current season
 function getCountsLookup() {
   const seasonCounts = PL_COUNTS[activeSeason];
   if (!seasonCounts) return {};
   const lookup = {};
-  seasonCounts.teams.forEach(t => {
-    lookup[t.team] = t;
-  });
+  seasonCounts.teams.forEach(t => { lookup[t.team] = t; });
   return lookup;
 }
 
-function redrawAll() {
-  const teams = getTeams();
-  const seasonLabel = ALL_DATA[activeSeason].season;
-  d3.select("header h1").html(`EPL Set Piece <span>xG</span> — ${seasonLabel}`);
-  drawBarChart(teams);
-  drawEfficiency(teams);
-  drawXgPerAction(teams);
-  drawXgAllowedPerAction(teams);
-}
+function seasonLabel() { return ALL_DATA[activeSeason].season; }
+
+// ── Tab switching ───────────────────────────────────────────────────
+d3.selectAll("#tab-bar button").on("click", function () {
+  d3.selectAll("#tab-bar button").classed("active", false);
+  d3.select(this).classed("active", true);
+  activeTab = d3.select(this).attr("data-tab");
+  d3.selectAll(".tab-content").classed("active", false);
+  d3.select("#tab-" + activeTab).classed("active", true);
+  redrawActiveTab();
+});
+
+// Per-tab filter wiring
+["sp", "sz", "as"].forEach((prefix, idx) => {
+  const tabKey = ["setpieces", "shotzones", "attackspeed"][idx];
+  d3.selectAll(`#${prefix}-filters button[data-filter]`).on("click", function () {
+    d3.selectAll(`#${prefix}-filters button[data-filter]`).classed("active", false);
+    d3.select(this).classed("active", true);
+    tabFilters[tabKey] = d3.select(this).attr("data-filter");
+    redrawActiveTab();
+  });
+});
 
 seasonSelect.on("change", function () {
   activeSeason = this.value;
-  redrawAll();
+  d3.select("header h1").html(`EPL <span>xG</span> — ${seasonLabel()}`);
+  redrawActiveTab();
 });
 
-d3.selectAll("#controls button[data-filter]").on("click", function () {
-  d3.selectAll("#controls button[data-filter]").classed("active", false);
-  d3.select(this).classed("active", true);
-  activeFilter = d3.select(this).attr("data-filter");
-  redrawAll();
-});
+function redrawActiveTab() {
+  const teams = getTeams();
+  d3.select("header h1").html(`EPL <span>xG</span> — ${seasonLabel()}`);
+  if (activeTab === "setpieces") redrawSetPieces(teams);
+  else if (activeTab === "shotzones") redrawShotZones(teams);
+  else if (activeTab === "attackspeed") redrawAttackSpeed(teams);
+}
 
-redrawAll();
-
-// ── Shared tooltip helper ───────────────────────────────────────────
+// ── Shared tooltip helpers ──────────────────────────────────────────
 function moveTooltip(event) {
   const tooltip = d3.select("#tooltip");
   const pad = 16;
@@ -308,659 +426,372 @@ function moveTooltip(event) {
 }
 function hideTooltip() { d3.select("#tooltip").style("opacity", 0); }
 
-// ── Chart 1: Total xG Created (stacked bar) ────────────────────────
-function drawBarChart(teamsRaw) {
-  const svg = d3.select("#chart1");
-  svg.selectAll("*").remove();
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  SET PIECES TAB                                                  ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function redrawSetPieces(teams) {
+  const f = tabFilters.setpieces;
+  drawSpTotal(teams, f);
+  drawSpNet(teams, f);
+  drawSpPerAction(teams, f);
+  drawSpAllowedPerAction(teams, f);
+}
 
-  const isAll = activeFilter === "all";
-  const activeSituations = isAll ? SITUATIONS : SITUATIONS.filter(s => s.key === activeFilter);
-  const filterLabel = isAll ? "All Set Pieces" : activeSituations[0].label;
-
-  d3.select("#chart1-title").text(`Total Set Piece xG Created — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
+// ── SP Chart 1: Total xG Created ─────────────────────────────────
+function drawSpTotal(teamsRaw, filter) {
+  const svg = d3.select("#sp-c1"); svg.selectAll("*").remove();
+  const isAll = filter === "all";
+  const cats = isAll ? SITUATIONS : SITUATIONS.filter(s => s.key === filter);
+  const lbl = isAll ? "All Set Pieces" : cats[0].label;
+  d3.select("#sp-c1-title").text(`Total Set Piece xG Created — ${lbl} — ${seasonLabel()}`);
+  d3.select("#sp-c1-sub").text(`Total expected goals created from set pieces per team, sorted highest to lowest.`);
 
   const teams = [...teamsRaw].sort((a, b) => {
-    const aVal = activeSituations.reduce((s, sit) => s + a[sit.key].xG, 0);
-    const bVal = activeSituations.reduce((s, sit) => s + b[sit.key].xG, 0);
-    return bVal - aVal;
+    return cats.reduce((s, c) => s + b[c.key].xG, 0) - cats.reduce((s, c) => s + a[c.key].xG, 0);
   });
 
-  const margin = { top: 32, right: 60, bottom: 40, left: 110 };
-  const barHeight = 28;
-  const gap = 6;
-  const width = 1160;
-  const height = margin.top + margin.bottom + teams.length * (barHeight + gap);
+  const margin = {top:32,right:60,bottom:40,left:110}, barH=28, gap=6, W=1160;
+  const H = margin.top + margin.bottom + teams.length*(barH+gap);
+  svg.attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%");
+  const xMax = d3.max(teams, d => cats.reduce((s,c) => s+d[c.key].xG, 0));
+  const x = d3.scaleLinear().domain([0,xMax*1.12]).range([margin.left,W-margin.right]);
+  const y = d3.scaleBand().domain(teams.map(d=>d.short)).range([margin.top,H-margin.bottom]).paddingInner(gap/(barH+gap));
 
-  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(8).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
+  svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(8).tickFormat(d=>d.toFixed(1)));
 
-  const xMax = d3.max(teams, d => activeSituations.reduce((s, sit) => s + d[sit.key].xG, 0));
-  const x = d3.scaleLinear().domain([0, xMax * 1.12]).range([margin.left, width - margin.right]);
-  const y = d3.scaleBand()
-    .domain(teams.map(d => d.short))
-    .range([margin.top, height - margin.bottom])
-    .paddingInner(gap / (barHeight + gap));
-
-  svg.append("g").attr("class", "grid").attr("transform", `translate(0,${margin.top})`)
-    .call(d3.axisTop(x).ticks(8).tickSize(-(height - margin.top - margin.bottom)).tickFormat(""));
-
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
-
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toFixed(1)));
-
-  svg.append("text")
-    .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
-    .text(`Expected Goals (xG) — ${filterLabel}`);
-
-  const tooltip = d3.select("#tooltip");
-  const barsG = svg.append("g");
-
+  const tooltip = d3.select("#tooltip"), barsG = svg.append("g");
   teams.forEach(team => {
-    let offset = 0;
-    activeSituations.forEach(sit => {
+    let off = 0;
+    cats.forEach(sit => {
       const val = team[sit.key].xG;
-      barsG.append("rect")
-        .attr("x", x(offset)).attr("y", y(team.short))
-        .attr("width", Math.max(0, x(offset + val) - x(offset)))
-        .attr("height", y.bandwidth()).attr("rx", 3)
-        .attr("fill", sit.color).attr("opacity", 0.85)
-        .on("mouseover", (event) => {
-          let html = `<div class="tt-team">${team.team}</div>`;
-          activeSituations.forEach(s => {
-            const bold = s.key === sit.key ? "font-weight:700" : "";
-            html += `<div class="tt-row" style="${bold}">
-              <span class="tt-label"><span style="color:${s.color}">&#9632;</span> ${s.label}</span>
-              <span class="tt-val">${team[s.key].xG.toFixed(2)} xG (${team[s.key].goals}g / ${team[s.key].shots}sh)</span>
-            </div>`;
-          });
-          if (isAll) {
-            const total = activeSituations.reduce((s, sit) => s + team[sit.key].xG, 0);
-            html += `<div class="tt-row tt-total"><span class="tt-label">Total</span><span class="tt-val">${total.toFixed(2)} xG</span></div>`;
-          }
-          tooltip.html(html).style("opacity", 1);
-          moveTooltip(event);
-        })
-        .on("mousemove", moveTooltip)
-        .on("mouseout", hideTooltip);
-      offset += val;
+      barsG.append("rect").attr("x",x(off)).attr("y",y(team.short)).attr("width",Math.max(0,x(off+val)-x(off))).attr("height",y.bandwidth()).attr("rx",3).attr("fill",sit.color).attr("opacity",0.85)
+        .on("mouseover",(event)=>{
+          let h=`<div class="tt-team">${team.team}</div>`;
+          cats.forEach(s=>{const b=s.key===sit.key?"font-weight:700":"";h+=`<div class="tt-row" style="${b}"><span class="tt-label"><span style="color:${s.color}">&#9632;</span> ${s.label}</span><span class="tt-val">${team[s.key].xG.toFixed(2)} xG (${team[s.key].goals}g / ${team[s.key].shots}sh)</span></div>`;});
+          if(isAll){const t=cats.reduce((s,c)=>s+team[c.key].xG,0);h+=`<div class="tt-row tt-total"><span class="tt-label">Total</span><span class="tt-val">${t.toFixed(2)} xG</span></div>`;}
+          tooltip.html(h).style("opacity",1);moveTooltip(event);
+        }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+      off += val;
     });
-    barsG.append("text")
-      .attr("x", x(offset) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-      .attr("dy", "0.35em").attr("font-size", 12).attr("font-weight", 600).attr("fill", "#020202")
-      .text(offset.toFixed(1));
+    barsG.append("text").attr("x",x(off)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",12).attr("font-weight",600).attr("fill","#020202").text(off.toFixed(1));
   });
-
-  // Legend in top margin
-  if (isAll) {
-    const lg = svg.append("g").attr("transform", `translate(${margin.left}, 6)`);
-    let lx = 0;
-    SITUATIONS.forEach(s => {
-      lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", s.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(s.label);
-      lx += s.label.length * 7 + 24;
-    });
-  }
+  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;SITUATIONS.forEach(s=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",s.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",11).attr("fill","#555555").text(s.label);lx+=s.label.length*7+24;});}
 }
 
-// ── Chart 2: Efficiency (for − against) centered on zero ────────────
-function drawEfficiency(teamsRaw) {
-  const isAll = activeFilter === "all";
-  const activeSituations = isAll ? SITUATIONS : SITUATIONS.filter(s => s.key === activeFilter);
-  const filterLabel = isAll ? "All Set Pieces" : activeSituations[0].label;
-
-  d3.select("#chart2-title").text(`Net Set Piece xG — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
-  d3.select("#chart2-subtitle").text(`Net xG (created − conceded). Green = positive balance, red = conceding more than creating.`);
+// ── SP Chart 2: Net xG ──────────────────────────────────────────
+function drawSpNet(teamsRaw, filter) {
+  const svg = d3.select("#sp-c2"); svg.selectAll("*").remove();
+  const isAll = filter === "all";
+  const cats = isAll ? SITUATIONS : SITUATIONS.filter(s => s.key === filter);
+  const lbl = isAll ? "All Set Pieces" : cats[0].label;
+  d3.select("#sp-c2-title").text(`Net Set Piece xG — ${lbl} — ${seasonLabel()}`);
+  d3.select("#sp-c2-sub").text(`Net xG (created − conceded). Green = positive balance, red = conceding more than creating.`);
 
   const teams = [...teamsRaw].map(t => {
-    const forXG = activeSituations.reduce((s, sit) => s + t[sit.key].xG, 0);
-    const againstXG = activeSituations.reduce((s, sit) => s + t[sit.key].against_xG, 0);
-    return {
-      ...t,
-      short: SHORT_NAMES[t.team] || t.team,
-      forXG, againstXG,
-      net: +(forXG - againstXG).toFixed(2),
-    };
-  }).sort((a, b) => b.net - a.net);
+    const forXG = cats.reduce((s,c) => s+t[c.key].xG,0);
+    const againstXG = cats.reduce((s,c) => s+t[c.key].against_xG,0);
+    return {...t,forXG,againstXG,net:+(forXG-againstXG).toFixed(2)};
+  }).sort((a,b)=>b.net-a.net);
 
-  const svg = d3.select("#chart2");
-  svg.selectAll("*").remove();
+  const margin={top:12,right:60,bottom:40,left:110}, rowH=30, W=1160;
+  const H=margin.top+margin.bottom+teams.length*rowH;
+  svg.attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%");
+  const absMax=d3.max(teams,d=>Math.abs(d.net))*1.2;
+  const x=d3.scaleLinear().domain([-absMax,absMax]).range([margin.left,W-margin.right]);
+  const y=d3.scaleBand().domain(teams.map(d=>d.short)).range([margin.top,H-margin.bottom]).paddingInner(0.25);
 
-  const margin = { top: 12, right: 60, bottom: 40, left: 110 };
-  const rowH = 30;
-  const width = 1160;
-  const height = margin.top + margin.bottom + teams.length * rowH;
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(10).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
+  svg.append("line").attr("x1",x(0)).attr("x2",x(0)).attr("y1",margin.top).attr("y2",H-margin.bottom).attr("stroke","#020202").attr("stroke-width",1).attr("stroke-opacity",0.25);
+  svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(10).tickFormat(d=>(d>0?"+":"")+d.toFixed(1)));
 
-  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
-
-  const absMax = d3.max(teams, d => Math.abs(d.net)) * 1.2;
-  const x = d3.scaleLinear().domain([-absMax, absMax]).range([margin.left, width - margin.right]);
-  const y = d3.scaleBand()
-    .domain(teams.map(d => d.short))
-    .range([margin.top, height - margin.bottom])
-    .paddingInner(0.25);
-
-  // Grid
-  svg.append("g").attr("class", "grid").attr("transform", `translate(0,${margin.top})`)
-    .call(d3.axisTop(x).ticks(10).tickSize(-(height - margin.top - margin.bottom)).tickFormat(""));
-
-  // Zero line
-  svg.append("line")
-    .attr("x1", x(0)).attr("x2", x(0))
-    .attr("y1", margin.top).attr("y2", height - margin.bottom)
-    .attr("stroke", "#020202").attr("stroke-width", 1).attr("stroke-opacity", 0.25);
-
-  // Y axis
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
-
-  // X axis
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(10).tickFormat(d => (d > 0 ? "+" : "") + d.toFixed(1)));
-
-  svg.append("text")
-    .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
-    .text(`Net Set Piece xG (Created − Conceded) — ${filterLabel}`);
-
-  const tooltip = d3.select("#tooltip");
-
-  teams.forEach(team => {
-    const midY = y(team.short) + y.bandwidth() / 2;
-    const positive = team.net >= 0;
-    const col = positive ? "#16a34a" : "#dc2626";
-    const barX = positive ? x(0) : x(team.net);
-    const barW = Math.abs(x(team.net) - x(0));
-
-    // Bar
-    svg.append("rect")
-      .attr("x", barX).attr("y", y(team.short))
-      .attr("width", barW).attr("height", y.bandwidth())
-      .attr("rx", 3).attr("fill", col).attr("opacity", 0.75)
-      .style("cursor", "pointer")
-      .on("mouseover", (event) => {
-        let html = `<div class="tt-team">${team.team}</div>`;
-        activeSituations.forEach(sit => {
-          html += `<div class="tt-row">
-            <span class="tt-label"><span style="color:${sit.color}">&#9632;</span> ${sit.label}</span>
-            <span class="tt-val">+${team[sit.key].xG.toFixed(2)} / −${team[sit.key].against_xG.toFixed(2)}</span>
-          </div>`;
-        });
-        html += `<div class="tt-row tt-total"><span class="tt-label">xG Created</span><span class="tt-val">${team.forXG.toFixed(2)}</span></div>`;
-        html += `<div class="tt-row"><span class="tt-label">xG Conceded</span><span class="tt-val">${team.againstXG.toFixed(2)}</span></div>`;
-        html += `<div class="tt-row" style="font-weight:700"><span class="tt-label">Net</span><span class="tt-val" style="color:${col}">${(team.net > 0 ? "+" : "") + team.net.toFixed(2)}</span></div>`;
-        tooltip.html(html).style("opacity", 1);
-        moveTooltip(event);
-      })
-      .on("mousemove", moveTooltip)
-      .on("mouseout", hideTooltip);
-
-    // Value label
-    const labelX = positive ? x(team.net) + 6 : x(team.net) - 6;
-    const anchor = positive ? "start" : "end";
-    svg.append("text")
-      .attr("x", labelX).attr("y", midY).attr("dy", "0.35em")
-      .attr("text-anchor", anchor).attr("font-size", 11).attr("font-weight", 600).attr("fill", col)
-      .text((team.net > 0 ? "+" : "") + team.net.toFixed(2));
+  const tooltip=d3.select("#tooltip");
+  teams.forEach(team=>{
+    const pos=team.net>=0, col=pos?"#16a34a":"#dc2626";
+    svg.append("rect").attr("x",pos?x(0):x(team.net)).attr("y",y(team.short)).attr("width",Math.abs(x(team.net)-x(0))).attr("height",y.bandwidth()).attr("rx",3).attr("fill",col).attr("opacity",0.75).style("cursor","pointer")
+      .on("mouseover",(event)=>{
+        let h=`<div class="tt-team">${team.team}</div>`;
+        cats.forEach(s=>{h+=`<div class="tt-row"><span class="tt-label"><span style="color:${s.color}">&#9632;</span> ${s.label}</span><span class="tt-val">+${team[s.key].xG.toFixed(2)} / −${team[s.key].against_xG.toFixed(2)}</span></div>`;});
+        h+=`<div class="tt-row tt-total"><span class="tt-label">xG Created</span><span class="tt-val">${team.forXG.toFixed(2)}</span></div>`;
+        h+=`<div class="tt-row"><span class="tt-label">xG Conceded</span><span class="tt-val">${team.againstXG.toFixed(2)}</span></div>`;
+        h+=`<div class="tt-row" style="font-weight:700"><span class="tt-label">Net</span><span class="tt-val" style="color:${col}">${(team.net>0?"+":"")+team.net.toFixed(2)}</span></div>`;
+        tooltip.html(h).style("opacity",1);moveTooltip(event);
+      }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+    const lx=pos?x(team.net)+6:x(team.net)-6, anch=pos?"start":"end";
+    svg.append("text").attr("x",lx).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor",anch).attr("font-size",11).attr("font-weight",600).attr("fill",col).text((team.net>0?"+":"")+team.net.toFixed(2));
   });
 }
 
-// ── Chart 3: xG per Action (efficiency per set piece taken) ─────────
-function drawXgPerAction(teamsRaw) {
+// ── SP Chart 3: xG per Action ───────────────────────────────────
+function drawSpPerAction(teamsRaw, filter) {
   const countsLookup = getCountsLookup();
   const hasCounts = Object.keys(countsLookup).length > 0;
-
-  // Determine which efficiency metrics to show based on active filter
-  // "SetPiece" from Understat has no direct PL count equivalent, so we exclude it
-  // when a specific filter is chosen and it's "SetPiece"
-  const EFFICIENCY_TYPES = [
-    { key: "FromCorner",     countKey: "corners_taken",   label: "Corners",     color: "#9B9ECE", unit: "corner" },
-    { key: "DirectFreekick", countKey: "freekicks_won",   label: "Free Kicks",  color: "#87BBA2", unit: "FK won" },
-    { key: "Penalty",        countKey: "penalties_won",    label: "Penalties",   color: "#FF5A5F", unit: "pen" },
+  const ETYPE = [
+    {key:"FromCorner",countKey:"corners_taken",label:"Corners",color:"#9B9ECE",unit:"corner"},
+    {key:"DirectFreekick",countKey:"freekicks_won",label:"Free Kicks",color:"#87BBA2",unit:"FK won"},
+    {key:"Penalty",countKey:"penalties_won",label:"Penalties",color:"#FF5A5F",unit:"pen"},
   ];
+  const isAll = filter === "all";
+  if(!isAll && filter==="SetPiece"){const svg=d3.select("#sp-c3");svg.selectAll("*").remove();d3.select("#sp-c3-title").text("xG per Action");d3.select("#sp-c3-sub").text("No raw count data available for indirect set pieces.");svg.attr("viewBox","0 0 1160 60").attr("width","100%");svg.append("text").attr("x",580).attr("y",35).attr("text-anchor","middle").attr("font-size",14).attr("fill","#555555").text("Select a different filter to see xG per action.");return;}
+  const activeTypes = isAll ? ETYPE : ETYPE.filter(e => e.key === filter);
+  const lbl = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
+  d3.select("#sp-c3-title").text(`xG per Action — ${lbl} — ${seasonLabel()}`);
+  d3.select("#sp-c3-sub").text(isAll?"xG generated per set piece taken (corners, free kicks, penalties). Grouped bars show efficiency by type.":`xG generated per ${activeTypes[0].unit} — higher = more dangerous from each opportunity.`);
+  if(!hasCounts){const svg=d3.select("#sp-c3");svg.selectAll("*").remove();svg.attr("viewBox","0 0 1160 60").attr("width","100%");svg.append("text").attr("x",580).attr("y",35).attr("text-anchor","middle").attr("font-size",14).attr("fill","#555555").text("No Premier League count data available for this season.");return;}
 
-  const isAll = activeFilter === "all";
+  const teams = teamsRaw.map(t=>{const c=countsLookup[t.team];if(!c)return null;const e={team:t.team,short:SHORT_NAMES[t.team]||t.team};let txg=0,tc=0;
+    activeTypes.forEach(et=>{const xg=t[et.key]?t[et.key].xG:0,cnt=c[et.countKey]||0,eff=cnt>0?xg/cnt:0;e[et.key]={xG:xg,count:cnt,efficiency:eff,goals:t[et.key]?t[et.key].goals:0,shots:t[et.key]?t[et.key].shots:0};txg+=xg;tc+=cnt;});
+    e.totalEfficiency=tc>0?txg/tc:0;e.totalXG=txg;e.totalCount=tc;return e;}).filter(Boolean);
+  if(isAll)teams.sort((a,b)=>b.totalEfficiency-a.totalEfficiency);else{const k=activeTypes[0].key;teams.sort((a,b)=>b[k].efficiency-a[k].efficiency);}
 
-  // For "SetPiece" filter there's no PL count, show a notice
-  if (!isAll && activeFilter === "SetPiece") {
-    const svg = d3.select("#chart3");
-    svg.selectAll("*").remove();
-    d3.select("#chart3-title").text("Set Piece Conversion Efficiency: xG per Action");
-    d3.select("#chart3-subtitle").text(
-      "No raw count data available for indirect set pieces. Select Corners, Direct FK, Penalties, or All."
-    );
-    svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
-    svg.append("text")
-      .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#555555")
-      .text("Select a different filter to see xG per action.");
-    return;
-  }
-
-  const activeTypes = isAll ? EFFICIENCY_TYPES : EFFICIENCY_TYPES.filter(e => e.key === activeFilter);
-  const filterLabel = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
-
-  d3.select("#chart3-title").text(`xG per Action — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
-  d3.select("#chart3-subtitle").text(
-    isAll
-      ? "xG generated per set piece taken (corners, free kicks, penalties). Grouped bars show efficiency by type."
-      : `xG generated per ${activeTypes[0].unit} — higher = more dangerous from each opportunity.`
-  );
-
-  if (!hasCounts) {
-    const svg = d3.select("#chart3");
-    svg.selectAll("*").remove();
-    svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
-    svg.append("text")
-      .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#555555")
-      .text("No Premier League count data available for this season.");
-    return;
-  }
-
-  // Build team data with efficiency values
-  const teams = teamsRaw.map(t => {
-    const counts = countsLookup[t.team];
-    if (!counts) return null;
-
-    const entry = {
-      team: t.team,
-      short: SHORT_NAMES[t.team] || t.team,
-    };
-
-    let totalXG = 0;
-    let totalCount = 0;
-
-    activeTypes.forEach(etype => {
-      const xg = t[etype.key] ? t[etype.key].xG : 0;
-      const count = counts[etype.countKey] || 0;
-      const efficiency = count > 0 ? xg / count : 0;
-      entry[etype.key] = {
-        xG: xg,
-        count: count,
-        efficiency: efficiency,
-        goals: t[etype.key] ? t[etype.key].goals : 0,
-        shots: t[etype.key] ? t[etype.key].shots : 0,
-      };
-      totalXG += xg;
-      totalCount += count;
-    });
-
-    entry.totalEfficiency = totalCount > 0 ? totalXG / totalCount : 0;
-    entry.totalXG = totalXG;
-    entry.totalCount = totalCount;
-
-    return entry;
-  }).filter(Boolean);
-
-  // Sort by overall efficiency for "all", or by the single type's efficiency
-  if (isAll) {
-    teams.sort((a, b) => b.totalEfficiency - a.totalEfficiency);
-  } else {
-    const k = activeTypes[0].key;
-    teams.sort((a, b) => b[k].efficiency - a[k].efficiency);
-  }
-
-  const svg = d3.select("#chart3");
-  svg.selectAll("*").remove();
-
-  const margin = { top: 32, right: 80, bottom: 40, left: 110 };
-  const groupHeight = isAll ? 50 : 28;
-  const gap = isAll ? 10 : 6;
-  const width = 1160;
-  const height = margin.top + margin.bottom + teams.length * (groupHeight + gap);
-
-  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
-
-  // X scale based on max efficiency
-  let xMax;
-  if (isAll) {
-    xMax = d3.max(teams, d => d3.max(activeTypes, et => d[et.key].efficiency));
-  } else {
-    xMax = d3.max(teams, d => d[activeTypes[0].key].efficiency);
-  }
-  xMax = Math.max(xMax * 1.15, 0.01);
-
-  const x = d3.scaleLinear().domain([0, xMax]).range([margin.left, width - margin.right]);
-  const y = d3.scaleBand()
-    .domain(teams.map(d => d.short))
-    .range([margin.top, height - margin.bottom])
-    .paddingInner(gap / (groupHeight + gap));
-
-  // Grid
-  svg.append("g").attr("class", "grid").attr("transform", `translate(0,${margin.top})`)
-    .call(d3.axisTop(x).ticks(8).tickSize(-(height - margin.top - margin.bottom)).tickFormat(""));
-
-  // Y axis
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
-
-  // X axis
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toFixed(3)));
-
-  svg.append("text")
-    .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
-    .text(`xG per Action — ${filterLabel}`);
-
-  const tooltip = d3.select("#tooltip");
-  const barsG = svg.append("g");
-
-  if (isAll) {
-    // Grouped bars: one sub-bar per efficiency type within each team band
-    const subBarHeight = y.bandwidth() / activeTypes.length;
-
-    teams.forEach(team => {
-      activeTypes.forEach((etype, i) => {
-        const eff = team[etype.key].efficiency;
-        const barY = y(team.short) + i * subBarHeight;
-
-        barsG.append("rect")
-          .attr("x", x(0)).attr("y", barY)
-          .attr("width", Math.max(0, x(eff) - x(0)))
-          .attr("height", subBarHeight - 1).attr("rx", 2)
-          .attr("fill", etype.color).attr("opacity", 0.85)
-          .style("cursor", "pointer")
-          .on("mouseover", (event) => {
-            let html = `<div class="tt-team">${team.team}</div>`;
-            activeTypes.forEach(et => {
-              const d = team[et.key];
-              const bold = et.key === etype.key ? "font-weight:700" : "";
-              html += `<div class="tt-row" style="${bold}">
-                <span class="tt-label"><span style="color:${et.color}">&#9632;</span> ${et.label}</span>
-                <span class="tt-val">${d.efficiency.toFixed(4)} xG/${et.unit}</span>
-              </div>`;
-              html += `<div class="tt-row" style="font-size:11px;${bold}">
-                <span class="tt-label" style="padding-left:16px">${d.xG.toFixed(2)} xG from ${d.count} ${et.unit}s</span>
-                <span class="tt-val">${d.goals}g / ${d.shots}sh</span>
-              </div>`;
-            });
-            html += `<div class="tt-row tt-total" style="font-weight:700">
-              <span class="tt-label">Overall</span>
-              <span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/action (${team.totalCount} total)</span>
-            </div>`;
-            tooltip.html(html).style("opacity", 1);
-            moveTooltip(event);
-          })
-          .on("mousemove", moveTooltip)
-          .on("mouseout", hideTooltip);
-
-        // Value label for each sub-bar
-        barsG.append("text")
-          .attr("x", x(eff) + 4).attr("y", barY + (subBarHeight - 1) / 2)
-          .attr("dy", "0.35em").attr("font-size", 10).attr("font-weight", 600).attr("fill", etype.color)
-          .text(eff.toFixed(4));
-      });
-    });
-  } else {
-    // Single bar per team
-    const etype = activeTypes[0];
-    teams.forEach(team => {
-      const eff = team[etype.key].efficiency;
-
-      barsG.append("rect")
-        .attr("x", x(0)).attr("y", y(team.short))
-        .attr("width", Math.max(0, x(eff) - x(0)))
-        .attr("height", y.bandwidth()).attr("rx", 3)
-        .attr("fill", etype.color).attr("opacity", 0.85)
-        .style("cursor", "pointer")
-        .on("mouseover", (event) => {
-          const d = team[etype.key];
-          let html = `<div class="tt-team">${team.team}</div>`;
-          html += `<div class="tt-row"><span class="tt-label">${etype.label} taken</span><span class="tt-val">${d.count}</span></div>`;
-          html += `<div class="tt-row"><span class="tt-label">xG from ${etype.label.toLowerCase()}</span><span class="tt-val">${d.xG.toFixed(2)}</span></div>`;
-          html += `<div class="tt-row"><span class="tt-label">Goals / Shots</span><span class="tt-val">${d.goals} / ${d.shots}</span></div>`;
-          html += `<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">xG per ${etype.unit}</span><span class="tt-val" style="color:${etype.color}">${d.efficiency.toFixed(4)}</span></div>`;
-          tooltip.html(html).style("opacity", 1);
-          moveTooltip(event);
-        })
-        .on("mousemove", moveTooltip)
-        .on("mouseout", hideTooltip);
-
-      barsG.append("text")
-        .attr("x", x(eff) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#020202")
-        .text(eff.toFixed(4));
-    });
-  }
-
-  // Legend in top margin (grouped mode only)
-  if (isAll) {
-    const lg = svg.append("g").attr("transform", `translate(${margin.left}, 6)`);
-    let lx = 0;
-    activeTypes.forEach(et => {
-      lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(`${et.label} (xG/${et.unit})`);
-      lx += (et.label.length + et.unit.length + 6) * 6.5 + 30;
-    });
-  }
+  drawGroupedBar({svgId:"#sp-c3",teams,activeTypes,isAll,xAccessor:et=>"efficiency",xLabel:`xG per Action — ${lbl}`,xFormat:d=>d.toFixed(3),
+    tooltipFn:(team,etype)=>{
+      let h=`<div class="tt-team">${team.team}</div>`;
+      activeTypes.forEach(et=>{const d=team[et.key],b=et.key===etype.key?"font-weight:700":"";h+=`<div class="tt-row" style="${b}"><span class="tt-label"><span style="color:${et.color}">&#9632;</span> ${et.label}</span><span class="tt-val">${d.efficiency.toFixed(4)} xG/${et.unit}</span></div>`;h+=`<div class="tt-row" style="font-size:11px;${b}"><span class="tt-label" style="padding-left:16px">${d.xG.toFixed(2)} xG from ${d.count} ${et.unit}s</span><span class="tt-val">${d.goals}g / ${d.shots}sh</span></div>`;});
+      if(isAll)h+=`<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">Overall</span><span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/action (${team.totalCount} total)</span></div>`;
+      return h;
+    },legendSuffix:et=>`xG/${et.unit}`});
 }
 
-// ── Chart 4: xG Allowed per Action (defensive vulnerability) ────────
-function drawXgAllowedPerAction(teamsRaw) {
+// ── SP Chart 4: xG Allowed per Action ───────────────────────────
+function drawSpAllowedPerAction(teamsRaw, filter) {
   const countsLookup = getCountsLookup();
   const hasCounts = Object.keys(countsLookup).length > 0;
-
-  const DEFENSE_TYPES = [
-    { key: "FromCorner",     countKey: "corners_conceded",   label: "Corners",     color: "#9B9ECE", unit: "corner" },
-    { key: "DirectFreekick", countKey: "freekicks_conceded", label: "Free Kicks",  color: "#87BBA2", unit: "FK" },
-    { key: "Penalty",        countKey: "penalties_conceded",  label: "Penalties",   color: "#FF5A5F", unit: "pen" },
+  const DTYPE = [
+    {key:"FromCorner",countKey:"corners_conceded",label:"Corners",color:"#9B9ECE",unit:"corner"},
+    {key:"DirectFreekick",countKey:"freekicks_conceded",label:"Free Kicks",color:"#87BBA2",unit:"FK"},
+    {key:"Penalty",countKey:"penalties_conceded",label:"Penalties",color:"#FF5A5F",unit:"pen"},
   ];
+  const isAll = filter === "all";
+  if(!isAll && filter==="SetPiece"){const svg=d3.select("#sp-c4");svg.selectAll("*").remove();d3.select("#sp-c4-title").text("xG Allowed per Action");d3.select("#sp-c4-sub").text("No raw count data available for indirect set pieces.");svg.attr("viewBox","0 0 1160 60").attr("width","100%");svg.append("text").attr("x",580).attr("y",35).attr("text-anchor","middle").attr("font-size",14).attr("fill","#555555").text("Select a different filter to see xG allowed per action.");return;}
+  const activeTypes = isAll ? DTYPE : DTYPE.filter(e => e.key === filter);
+  const lbl = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
+  d3.select("#sp-c4-title").text(`xG Allowed per Action — ${lbl} — ${seasonLabel()}`);
+  d3.select("#sp-c4-sub").text(isAll?"xG conceded per set piece faced (corners, free kicks, penalties). Higher = more vulnerable defensively.":`xG conceded per ${activeTypes[0].unit} faced — higher = more vulnerable from each opponent opportunity.`);
+  if(!hasCounts){const svg=d3.select("#sp-c4");svg.selectAll("*").remove();svg.attr("viewBox","0 0 1160 60").attr("width","100%");svg.append("text").attr("x",580).attr("y",35).attr("text-anchor","middle").attr("font-size",14).attr("fill","#555555").text("No Premier League count data available for this season.");return;}
 
-  const isAll = activeFilter === "all";
+  const teams = teamsRaw.map(t=>{const c=countsLookup[t.team];if(!c)return null;const e={team:t.team,short:SHORT_NAMES[t.team]||t.team};let txg=0,tc=0;
+    activeTypes.forEach(et=>{const axg=t[et.key]?t[et.key].against_xG:0,cnt=c[et.countKey]||0,eff=cnt>0?axg/cnt:0;e[et.key]={against_xG:axg,conceded:cnt,efficiency:eff,against_goals:t[et.key]?t[et.key].against_goals:0,against_shots:t[et.key]?t[et.key].against_shots:0};txg+=axg;tc+=cnt;});
+    e.totalEfficiency=tc>0?txg/tc:0;e.totalAgainstXG=txg;e.totalConcededCount=tc;return e;}).filter(Boolean);
+  if(isAll)teams.sort((a,b)=>b.totalEfficiency-a.totalEfficiency);else{const k=activeTypes[0].key;teams.sort((a,b)=>b[k].efficiency-a[k].efficiency);}
 
-  if (!isAll && activeFilter === "SetPiece") {
-    const svg = d3.select("#chart4");
-    svg.selectAll("*").remove();
-    d3.select("#chart4-title").text("Defensive Set Piece Vulnerability: xG Allowed per Action");
-    d3.select("#chart4-subtitle").text(
-      "No raw count data available for indirect set pieces. Select Corners, Direct FK, Penalties, or All."
-    );
-    svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
-    svg.append("text")
-      .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#555555")
-      .text("Select a different filter to see xG allowed per action.");
-    return;
-  }
+  drawGroupedBar({svgId:"#sp-c4",teams,activeTypes,isAll,xAccessor:et=>"efficiency",xLabel:`xG Allowed per Action — ${lbl}`,xFormat:d=>d.toFixed(3),
+    tooltipFn:(team,etype)=>{
+      let h=`<div class="tt-team">${team.team}</div>`;
+      activeTypes.forEach(et=>{const d=team[et.key],b=et.key===etype.key?"font-weight:700":"";h+=`<div class="tt-row" style="${b}"><span class="tt-label"><span style="color:${et.color}">&#9632;</span> ${et.label}</span><span class="tt-val">${d.efficiency.toFixed(4)} xG/${et.unit}</span></div>`;h+=`<div class="tt-row" style="font-size:11px;${b}"><span class="tt-label" style="padding-left:16px">${d.against_xG.toFixed(2)} xG from ${d.conceded} ${et.unit}s faced</span><span class="tt-val">${d.against_goals}g / ${d.against_shots}sh</span></div>`;});
+      if(isAll)h+=`<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">Overall</span><span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/action (${team.totalConcededCount} faced)</span></div>`;
+      return h;
+    },legendSuffix:et=>`xG/${et.unit} faced`});
+}
 
-  const activeTypes = isAll ? DEFENSE_TYPES : DEFENSE_TYPES.filter(e => e.key === activeFilter);
-  const filterLabel = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
-
-  d3.select("#chart4-title").text(`xG Allowed per Action — ${filterLabel} — ${ALL_DATA[activeSeason].season}`);
-  d3.select("#chart4-subtitle").text(
-    isAll
-      ? "xG conceded per set piece faced (corners, free kicks, penalties). Higher = more vulnerable defensively."
-      : `xG conceded per ${activeTypes[0].unit} faced — higher = more vulnerable from each opponent opportunity.`
-  );
-
-  if (!hasCounts) {
-    const svg = d3.select("#chart4");
-    svg.selectAll("*").remove();
-    svg.attr("viewBox", "0 0 1160 60").attr("width", "100%");
-    svg.append("text")
-      .attr("x", 580).attr("y", 35).attr("text-anchor", "middle")
-      .attr("font-size", 14).attr("fill", "#555555")
-      .text("No Premier League count data available for this season.");
-    return;
-  }
-
-  // Build team data with defensive efficiency values
-  const teams = teamsRaw.map(t => {
-    const counts = countsLookup[t.team];
-    if (!counts) return null;
-
-    const entry = {
-      team: t.team,
-      short: SHORT_NAMES[t.team] || t.team,
-    };
-
-    let totalAgainstXG = 0;
-    let totalConcededCount = 0;
-
-    activeTypes.forEach(etype => {
-      const againstXG = t[etype.key] ? t[etype.key].against_xG : 0;
-      const conceded = counts[etype.countKey] || 0;
-      const efficiency = conceded > 0 ? againstXG / conceded : 0;
-      entry[etype.key] = {
-        against_xG: againstXG,
-        conceded: conceded,
-        efficiency: efficiency,
-        against_goals: t[etype.key] ? t[etype.key].against_goals : 0,
-        against_shots: t[etype.key] ? t[etype.key].against_shots : 0,
-      };
-      totalAgainstXG += againstXG;
-      totalConcededCount += conceded;
-    });
-
-    entry.totalEfficiency = totalConcededCount > 0 ? totalAgainstXG / totalConcededCount : 0;
-    entry.totalAgainstXG = totalAgainstXG;
-    entry.totalConcededCount = totalConcededCount;
-
-    return entry;
-  }).filter(Boolean);
-
-  // Sort by worst (highest) defensive vulnerability first
-  if (isAll) {
-    teams.sort((a, b) => b.totalEfficiency - a.totalEfficiency);
-  } else {
-    const k = activeTypes[0].key;
-    teams.sort((a, b) => b[k].efficiency - a[k].efficiency);
-  }
-
-  const svg = d3.select("#chart4");
-  svg.selectAll("*").remove();
-
-  const margin = { top: 32, right: 80, bottom: 40, left: 110 };
-  const groupHeight = isAll ? 50 : 28;
-  const gap = isAll ? 10 : 6;
-  const width = 1160;
-  const height = margin.top + margin.bottom + teams.length * (groupHeight + gap);
-
-  svg.attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%");
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  GENERIC GROUPED BAR (used by SP charts 3 & 4)                  ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function drawGroupedBar(cfg) {
+  const {svgId,teams,activeTypes,isAll,xLabel,xFormat,tooltipFn,legendSuffix} = cfg;
+  const svg = d3.select(svgId); svg.selectAll("*").remove();
+  const margin={top:32,right:80,bottom:40,left:110};
+  const groupH=isAll?50:28, gap=isAll?10:6, W=1160;
+  const H=margin.top+margin.bottom+teams.length*(groupH+gap);
+  svg.attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%");
 
   let xMax;
-  if (isAll) {
-    xMax = d3.max(teams, d => d3.max(activeTypes, et => d[et.key].efficiency));
+  if(isAll)xMax=d3.max(teams,d=>d3.max(activeTypes,et=>d[et.key].efficiency));
+  else xMax=d3.max(teams,d=>d[activeTypes[0].key].efficiency);
+  xMax=Math.max((xMax||0.01)*1.15,0.01);
+
+  const x=d3.scaleLinear().domain([0,xMax]).range([margin.left,W-margin.right]);
+  const y=d3.scaleBand().domain(teams.map(d=>d.short)).range([margin.top,H-margin.bottom]).paddingInner(gap/(groupH+gap));
+
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(8).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
+  svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(8).tickFormat(xFormat));
+  svg.append("text").attr("x",(margin.left+W-margin.right)/2).attr("y",H-4).attr("text-anchor","middle").attr("font-size",12).attr("fill","#555555").text(xLabel);
+
+  const tooltip=d3.select("#tooltip"), barsG=svg.append("g");
+  if(isAll){
+    const subH=y.bandwidth()/activeTypes.length;
+    teams.forEach(team=>{activeTypes.forEach((et,i)=>{
+      const eff=team[et.key].efficiency, barY=y(team.short)+i*subH;
+      barsG.append("rect").attr("x",x(0)).attr("y",barY).attr("width",Math.max(0,x(eff)-x(0))).attr("height",subH-1).attr("rx",2).attr("fill",et.color).attr("opacity",0.85).style("cursor","pointer")
+        .on("mouseover",event=>{tooltip.html(tooltipFn(team,et)).style("opacity",1);moveTooltip(event);}).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+      barsG.append("text").attr("x",x(eff)+4).attr("y",barY+(subH-1)/2).attr("dy","0.35em").attr("font-size",10).attr("font-weight",600).attr("fill",et.color).text(eff.toFixed(4));
+    });});
   } else {
-    xMax = d3.max(teams, d => d[activeTypes[0].key].efficiency);
-  }
-  xMax = Math.max(xMax * 1.15, 0.01);
-
-  const x = d3.scaleLinear().domain([0, xMax]).range([margin.left, width - margin.right]);
-  const y = d3.scaleBand()
-    .domain(teams.map(d => d.short))
-    .range([margin.top, height - margin.bottom])
-    .paddingInner(gap / (groupHeight + gap));
-
-  // Grid
-  svg.append("g").attr("class", "grid").attr("transform", `translate(0,${margin.top})`)
-    .call(d3.axisTop(x).ticks(8).tickSize(-(height - margin.top - margin.bottom)).tickFormat(""));
-
-  // Y axis
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
-
-  // X axis
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toFixed(3)));
-
-  svg.append("text")
-    .attr("x", (margin.left + width - margin.right) / 2).attr("y", height - 4)
-    .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "#555555")
-    .text(`xG Allowed per Action — ${filterLabel}`);
-
-  const tooltip = d3.select("#tooltip");
-  const barsG = svg.append("g");
-
-  if (isAll) {
-    const subBarHeight = y.bandwidth() / activeTypes.length;
-
-    teams.forEach(team => {
-      activeTypes.forEach((etype, i) => {
-        const eff = team[etype.key].efficiency;
-        const barY = y(team.short) + i * subBarHeight;
-
-        barsG.append("rect")
-          .attr("x", x(0)).attr("y", barY)
-          .attr("width", Math.max(0, x(eff) - x(0)))
-          .attr("height", subBarHeight - 1).attr("rx", 2)
-          .attr("fill", etype.color).attr("opacity", 0.85)
-          .style("cursor", "pointer")
-          .on("mouseover", (event) => {
-            let html = `<div class="tt-team">${team.team}</div>`;
-            activeTypes.forEach(et => {
-              const d = team[et.key];
-              const bold = et.key === etype.key ? "font-weight:700" : "";
-              html += `<div class="tt-row" style="${bold}">
-                <span class="tt-label"><span style="color:${et.color}">&#9632;</span> ${et.label}</span>
-                <span class="tt-val">${d.efficiency.toFixed(4)} xG/${et.unit}</span>
-              </div>`;
-              html += `<div class="tt-row" style="font-size:11px;${bold}">
-                <span class="tt-label" style="padding-left:16px">${d.against_xG.toFixed(2)} xG from ${d.conceded} ${et.unit}s faced</span>
-                <span class="tt-val">${d.against_goals}g / ${d.against_shots}sh</span>
-              </div>`;
-            });
-            html += `<div class="tt-row tt-total" style="font-weight:700">
-              <span class="tt-label">Overall</span>
-              <span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/action (${team.totalConcededCount} faced)</span>
-            </div>`;
-            tooltip.html(html).style("opacity", 1);
-            moveTooltip(event);
-          })
-          .on("mousemove", moveTooltip)
-          .on("mouseout", hideTooltip);
-
-        barsG.append("text")
-          .attr("x", x(eff) + 4).attr("y", barY + (subBarHeight - 1) / 2)
-          .attr("dy", "0.35em").attr("font-size", 10).attr("font-weight", 600).attr("fill", etype.color)
-          .text(eff.toFixed(4));
-      });
-    });
-  } else {
-    const etype = activeTypes[0];
-    teams.forEach(team => {
-      const eff = team[etype.key].efficiency;
-
-      barsG.append("rect")
-        .attr("x", x(0)).attr("y", y(team.short))
-        .attr("width", Math.max(0, x(eff) - x(0)))
-        .attr("height", y.bandwidth()).attr("rx", 3)
-        .attr("fill", etype.color).attr("opacity", 0.85)
-        .style("cursor", "pointer")
-        .on("mouseover", (event) => {
-          const d = team[etype.key];
-          let html = `<div class="tt-team">${team.team}</div>`;
-          html += `<div class="tt-row"><span class="tt-label">${etype.label} faced</span><span class="tt-val">${d.conceded}</span></div>`;
-          html += `<div class="tt-row"><span class="tt-label">xG conceded from ${etype.label.toLowerCase()}</span><span class="tt-val">${d.against_xG.toFixed(2)}</span></div>`;
-          html += `<div class="tt-row"><span class="tt-label">Goals / Shots against</span><span class="tt-val">${d.against_goals} / ${d.against_shots}</span></div>`;
-          html += `<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">xG per ${etype.unit} faced</span><span class="tt-val" style="color:${etype.color}">${d.efficiency.toFixed(4)}</span></div>`;
-          tooltip.html(html).style("opacity", 1);
-          moveTooltip(event);
-        })
-        .on("mousemove", moveTooltip)
-        .on("mouseout", hideTooltip);
-
-      barsG.append("text")
-        .attr("x", x(eff) + 6).attr("y", y(team.short) + y.bandwidth() / 2)
-        .attr("dy", "0.35em").attr("font-size", 11).attr("font-weight", 600).attr("fill", "#020202")
-        .text(eff.toFixed(4));
+    const et=activeTypes[0];
+    teams.forEach(team=>{
+      const eff=team[et.key].efficiency;
+      barsG.append("rect").attr("x",x(0)).attr("y",y(team.short)).attr("width",Math.max(0,x(eff)-x(0))).attr("height",y.bandwidth()).attr("rx",3).attr("fill",et.color).attr("opacity",0.85).style("cursor","pointer")
+        .on("mouseover",event=>{tooltip.html(tooltipFn(team,et)).style("opacity",1);moveTooltip(event);}).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+      barsG.append("text").attr("x",x(eff)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",11).attr("font-weight",600).attr("fill","#020202").text(eff.toFixed(4));
     });
   }
-
-  // Legend
-  if (isAll) {
-    const lg = svg.append("g").attr("transform", `translate(${margin.left}, 6)`);
-    let lx = 0;
-    activeTypes.forEach(et => {
-      lg.append("rect").attr("x", lx).attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", et.color).attr("opacity", 0.85);
-      lg.append("text").attr("x", lx + 14).attr("y", 9).attr("font-size", 11).attr("fill", "#555555").text(`${et.label} (xG/${et.unit} faced)`);
-      lx += (et.label.length + et.unit.length + 12) * 6.5 + 30;
-    });
-  }
+  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;activeTypes.forEach(et=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",et.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",11).attr("fill","#555555").text(`${et.label} (${legendSuffix(et)})`);lx+=(et.label.length+legendSuffix(et).length+3)*6.5+30;});}
 }
+
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  SHOT ZONES TAB                                                  ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function redrawShotZones(teams) {
+  const hasData = teams.length > 0 && teams[0].shotZone && Object.keys(teams[0].shotZone).length > 0;
+  d3.select("#sz-no-data").style("display", hasData ? "none" : "block");
+  d3.select("#sz-charts").style("display", hasData ? "block" : "none");
+  if (!hasData) return;
+  const f = tabFilters.shotzones;
+  drawCatTotal("sz", teams, SHOT_ZONES, f, "shotZone", "Shot Zone");
+  drawCatNet("sz", teams, SHOT_ZONES, f, "shotZone", "Shot Zone");
+  drawCatPerShot("sz", teams, SHOT_ZONES, f, "shotZone", "Shot Zone");
+}
+
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  ATTACK SPEED TAB                                                ║
+// ╚══════════════════════════════════════════════════════════════════╝
+function redrawAttackSpeed(teams) {
+  const hasData = teams.length > 0 && teams[0].attackSpeed && Object.keys(teams[0].attackSpeed).length > 0;
+  d3.select("#as-no-data").style("display", hasData ? "none" : "block");
+  d3.select("#as-charts").style("display", hasData ? "block" : "none");
+  if (!hasData) return;
+  const f = tabFilters.attackspeed;
+  drawCatTotal("as", teams, ATTACK_SPEEDS, f, "attackSpeed", "Attack Speed");
+  drawCatNet("as", teams, ATTACK_SPEEDS, f, "attackSpeed", "Attack Speed");
+  drawCatPerShot("as", teams, ATTACK_SPEEDS, f, "attackSpeed", "Attack Speed");
+}
+
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  GENERIC CATEGORY CHARTS (Shot Zones + Attack Speed)             ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+// Helper: get data for a category from a team object
+function catData(team, dataKey, catKey) {
+  const group = team[dataKey];
+  if (!group || !group[catKey]) return { xG:0, goals:0, shots:0, against_xG:0, against_goals:0, against_shots:0 };
+  return group[catKey];
+}
+
+// ── Generic Total xG ────────────────────────────────────────────
+function drawCatTotal(prefix, teamsRaw, allCats, filter, dataKey, tabLabel) {
+  const svg = d3.select(`#${prefix}-c1`); svg.selectAll("*").remove();
+  const isAll = filter === "all";
+  const cats = isAll ? allCats : allCats.filter(c => c.key === filter);
+  const lbl = isAll ? `All ${tabLabel}s` : cats[0].label;
+  d3.select(`#${prefix}-c1-title`).text(`Total xG Created — ${lbl} — ${seasonLabel()}`);
+  d3.select(`#${prefix}-c1-sub`).text(`Total expected goals created, grouped by ${tabLabel.toLowerCase()}.`);
+
+  const teams = [...teamsRaw].sort((a,b) => {
+    return cats.reduce((s,c)=>s+catData(b,dataKey,c.key).xG,0) - cats.reduce((s,c)=>s+catData(a,dataKey,c.key).xG,0);
+  });
+
+  const margin={top:32,right:60,bottom:40,left:110}, barH=28, gap=6, W=1160;
+  const H=margin.top+margin.bottom+teams.length*(barH+gap);
+  svg.attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%");
+  const xMax=d3.max(teams,d=>cats.reduce((s,c)=>s+catData(d,dataKey,c.key).xG,0));
+  const x=d3.scaleLinear().domain([0,(xMax||1)*1.12]).range([margin.left,W-margin.right]);
+  const y=d3.scaleBand().domain(teams.map(d=>d.short)).range([margin.top,H-margin.bottom]).paddingInner(gap/(barH+gap));
+
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(8).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
+  svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(8).tickFormat(d=>d.toFixed(1)));
+
+  const tooltip=d3.select("#tooltip"), barsG=svg.append("g");
+  teams.forEach(team=>{
+    let off=0;
+    cats.forEach(cat=>{
+      const d=catData(team,dataKey,cat.key), val=d.xG;
+      barsG.append("rect").attr("x",x(off)).attr("y",y(team.short)).attr("width",Math.max(0,x(off+val)-x(off))).attr("height",y.bandwidth()).attr("rx",3).attr("fill",cat.color).attr("opacity",0.85)
+        .on("mouseover",(event)=>{
+          let h=`<div class="tt-team">${team.team}</div>`;
+          cats.forEach(c=>{const dd=catData(team,dataKey,c.key),b=c.key===cat.key?"font-weight:700":"";h+=`<div class="tt-row" style="${b}"><span class="tt-label"><span style="color:${c.color}">&#9632;</span> ${c.label}</span><span class="tt-val">${dd.xG.toFixed(2)} xG (${dd.goals}g / ${dd.shots}sh)</span></div>`;});
+          if(isAll){const t=cats.reduce((s,c)=>s+catData(team,dataKey,c.key).xG,0);h+=`<div class="tt-row tt-total"><span class="tt-label">Total</span><span class="tt-val">${t.toFixed(2)} xG</span></div>`;}
+          tooltip.html(h).style("opacity",1);moveTooltip(event);
+        }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+      off+=val;
+    });
+    barsG.append("text").attr("x",x(off)+6).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("font-size",12).attr("font-weight",600).attr("fill","#020202").text(off.toFixed(1));
+  });
+  if(isAll){const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);let lx=0;allCats.forEach(c=>{lg.append("rect").attr("x",lx).attr("width",10).attr("height",10).attr("rx",2).attr("fill",c.color).attr("opacity",0.85);lg.append("text").attr("x",lx+14).attr("y",9).attr("font-size",11).attr("fill","#555555").text(c.label);lx+=c.label.length*7+24;});}
+}
+
+// ── Generic Net xG ──────────────────────────────────────────────
+function drawCatNet(prefix, teamsRaw, allCats, filter, dataKey, tabLabel) {
+  const svg = d3.select(`#${prefix}-c2`); svg.selectAll("*").remove();
+  const isAll = filter === "all";
+  const cats = isAll ? allCats : allCats.filter(c => c.key === filter);
+  const lbl = isAll ? `All ${tabLabel}s` : cats[0].label;
+  d3.select(`#${prefix}-c2-title`).text(`Net xG — ${lbl} — ${seasonLabel()}`);
+  d3.select(`#${prefix}-c2-sub`).text(`Net xG (created − conceded). Green = positive, red = negative.`);
+
+  const teams = [...teamsRaw].map(t=>{
+    const forXG=cats.reduce((s,c)=>s+catData(t,dataKey,c.key).xG,0);
+    const againstXG=cats.reduce((s,c)=>s+catData(t,dataKey,c.key).against_xG,0);
+    return {...t,forXG,againstXG,net:+(forXG-againstXG).toFixed(2)};
+  }).sort((a,b)=>b.net-a.net);
+
+  const margin={top:12,right:60,bottom:40,left:110}, rowH=30, W=1160;
+  const H=margin.top+margin.bottom+teams.length*rowH;
+  svg.attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%");
+  const absMax=d3.max(teams,d=>Math.abs(d.net))*1.2||1;
+  const x=d3.scaleLinear().domain([-absMax,absMax]).range([margin.left,W-margin.right]);
+  const y=d3.scaleBand().domain(teams.map(d=>d.short)).range([margin.top,H-margin.bottom]).paddingInner(0.25);
+
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(10).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
+  svg.append("line").attr("x1",x(0)).attr("x2",x(0)).attr("y1",margin.top).attr("y2",H-margin.bottom).attr("stroke","#020202").attr("stroke-width",1).attr("stroke-opacity",0.25);
+  svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(10).tickFormat(d=>(d>0?"+":"")+d.toFixed(1)));
+
+  const tooltip=d3.select("#tooltip");
+  teams.forEach(team=>{
+    const pos=team.net>=0, col=pos?"#16a34a":"#dc2626";
+    svg.append("rect").attr("x",pos?x(0):x(team.net)).attr("y",y(team.short)).attr("width",Math.abs(x(team.net)-x(0))).attr("height",y.bandwidth()).attr("rx",3).attr("fill",col).attr("opacity",0.75).style("cursor","pointer")
+      .on("mouseover",(event)=>{
+        let h=`<div class="tt-team">${team.team}</div>`;
+        cats.forEach(c=>{const d=catData(team,dataKey,c.key);h+=`<div class="tt-row"><span class="tt-label"><span style="color:${c.color}">&#9632;</span> ${c.label}</span><span class="tt-val">+${d.xG.toFixed(2)} / −${d.against_xG.toFixed(2)}</span></div>`;});
+        h+=`<div class="tt-row tt-total"><span class="tt-label">xG Created</span><span class="tt-val">${team.forXG.toFixed(2)}</span></div>`;
+        h+=`<div class="tt-row"><span class="tt-label">xG Conceded</span><span class="tt-val">${team.againstXG.toFixed(2)}</span></div>`;
+        h+=`<div class="tt-row" style="font-weight:700"><span class="tt-label">Net</span><span class="tt-val" style="color:${col}">${(team.net>0?"+":"")+team.net.toFixed(2)}</span></div>`;
+        tooltip.html(h).style("opacity",1);moveTooltip(event);
+      }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+    const lx=pos?x(team.net)+6:x(team.net)-6;
+    svg.append("text").attr("x",lx).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor",pos?"start":"end").attr("font-size",11).attr("font-weight",600).attr("fill",col).text((team.net>0?"+":"")+team.net.toFixed(2));
+  });
+}
+
+// ── Generic xG per Shot ─────────────────────────────────────────
+function drawCatPerShot(prefix, teamsRaw, allCats, filter, dataKey, tabLabel) {
+  const svg = d3.select(`#${prefix}-c3`); svg.selectAll("*").remove();
+  const isAll = filter === "all";
+  const cats = isAll ? allCats : allCats.filter(c => c.key === filter);
+  const lbl = isAll ? `All ${tabLabel}s` : cats[0].label;
+  d3.select(`#${prefix}-c3-title`).text(`xG per Shot — ${lbl} — ${seasonLabel()}`);
+  d3.select(`#${prefix}-c3-sub`).text(`Shot quality: xG per shot taken. Higher = better quality chances from this ${tabLabel.toLowerCase()}.`);
+
+  // Build team data with per-shot efficiency
+  const teams = teamsRaw.map(t=>{
+    const e={team:t.team,short:SHORT_NAMES[t.team]||t.team};let txg=0,tsh=0;
+    cats.forEach(cat=>{
+      const d=catData(t,dataKey,cat.key);
+      const eff=d.shots>0?d.xG/d.shots:0;
+      e[cat.key]={xG:d.xG,shots:d.shots,goals:d.goals,efficiency:eff};
+      txg+=d.xG;tsh+=d.shots;
+    });
+    e.totalEfficiency=tsh>0?txg/tsh:0;e.totalXG=txg;e.totalShots=tsh;
+    return e;
+  });
+  if(isAll)teams.sort((a,b)=>b.totalEfficiency-a.totalEfficiency);
+  else{const k=cats[0].key;teams.sort((a,b)=>b[k].efficiency-a[k].efficiency);}
+
+  drawGroupedBar({svgId:`#${prefix}-c3`,teams,activeTypes:cats,isAll,xLabel:`xG per Shot — ${lbl}`,xFormat:d=>d.toFixed(3),
+    tooltipFn:(team,etype)=>{
+      let h=`<div class="tt-team">${team.team}</div>`;
+      cats.forEach(c=>{const d=team[c.key],b=c.key===etype.key?"font-weight:700":"";h+=`<div class="tt-row" style="${b}"><span class="tt-label"><span style="color:${c.color}">&#9632;</span> ${c.label}</span><span class="tt-val">${d.efficiency.toFixed(4)} xG/shot</span></div>`;h+=`<div class="tt-row" style="font-size:11px;${b}"><span class="tt-label" style="padding-left:16px">${d.xG.toFixed(2)} xG from ${d.shots} shots</span><span class="tt-val">${d.goals}g</span></div>`;});
+      if(isAll)h+=`<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">Overall</span><span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/shot (${team.totalShots} shots)</span></div>`;
+      return h;
+    },legendSuffix:()=>"xG/shot"});
+}
+
+// ── Init ────────────────────────────────────────────────────────
+redrawActiveTab();
 </script>
 </body>
 </html>"""

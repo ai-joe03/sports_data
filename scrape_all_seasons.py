@@ -1,4 +1,7 @@
-"""Scrape set piece xG for all EPL seasons available on Understat (2014-2024).
+"""Scrape xG data for all EPL seasons available on Understat (2014-2024).
+
+Fetches per-team breakdowns by situation (set pieces), shot zone, and
+attack speed from Understat.
 
 Usage:
     pip install aiohttp understat
@@ -12,6 +15,31 @@ from understat import Understat
 
 SET_PIECE_SITUATIONS = ["FromCorner", "SetPiece", "DirectFreekick", "Penalty"]
 
+
+def extract_category(stats_group, category_keys=None):
+    """Extract xG data from a stats group (situation, shotZone, attackSpeed).
+
+    If category_keys is None, extracts all keys found in the group.
+    Returns a dict of {key: {xG, goals, shots, against_xG, against_goals, against_shots}}.
+    """
+    if not stats_group:
+        return {}
+    keys = category_keys if category_keys else list(stats_group.keys())
+    result = {}
+    for key in keys:
+        data = stats_group.get(key, {})
+        against = data.get("against", {})
+        result[key] = {
+            "xG": round(float(data.get("xG", 0)), 2),
+            "goals": int(data.get("goals", 0)),
+            "shots": int(data.get("shots", 0)),
+            "against_xG": round(float(against.get("xG", 0)), 2),
+            "against_goals": int(against.get("goals", 0)),
+            "against_shots": int(against.get("shots", 0)),
+        }
+    return result
+
+
 async def main():
     results = {}
     async with aiohttp.ClientSession() as session:
@@ -20,7 +48,6 @@ async def main():
             label = f"{season}/{season+1}"
             print(f"Fetching {label}...", file=sys.stderr)
             try:
-                # Get team list for this season
                 league_teams = await understat.get_teams("EPL", season)
                 team_names = [t["title"] for t in league_teams]
             except Exception as e:
@@ -31,22 +58,27 @@ async def main():
             for team_name in sorted(team_names):
                 try:
                     stats = await understat.get_team_stats(team_name, season)
-                    situation = stats.get("situation", {})
                     entry = {"team": team_name}
+
+                    # Set piece situations (flat keys for backward compat)
+                    situation = stats.get("situation", {})
                     for sit in SET_PIECE_SITUATIONS:
-                        data = situation.get(sit, {})
-                        against = data.get("against", {})
-                        entry[sit] = {
-                            "xG": round(float(data.get("xG", 0)), 2),
-                            "goals": int(data.get("goals", 0)),
-                            "shots": int(data.get("shots", 0)),
-                            "against_xG": round(float(against.get("xG", 0)), 2),
-                            "against_goals": int(against.get("goals", 0)),
-                            "against_shots": int(against.get("shots", 0)),
-                        }
+                        entry[sit] = extract_category(situation, [sit]).get(sit, {
+                            "xG": 0, "goals": 0, "shots": 0,
+                            "against_xG": 0, "against_goals": 0, "against_shots": 0,
+                        })
                     entry["total_setpiece_xG"] = round(sum(entry[s]["xG"] for s in SET_PIECE_SITUATIONS), 2)
                     entry["total_setpiece_goals"] = sum(entry[s]["goals"] for s in SET_PIECE_SITUATIONS)
                     entry["total_setpiece_against_xG"] = round(sum(entry[s]["against_xG"] for s in SET_PIECE_SITUATIONS), 2)
+
+                    # Shot zones (all keys found dynamically)
+                    shot_zone = stats.get("shotZone", {})
+                    entry["shotZone"] = extract_category(shot_zone)
+
+                    # Attack speed (all keys found dynamically)
+                    attack_speed = stats.get("attackSpeed", {})
+                    entry["attackSpeed"] = extract_category(attack_speed)
+
                     season_teams.append(entry)
                     await asyncio.sleep(0.3)
                 except Exception as e:
