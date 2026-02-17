@@ -269,6 +269,14 @@ html = r"""<!DOCTYPE html>
     <h2 class="section-title" id="sz-c3-title">xG per Shot by Zone</h2>
     <p class="section-subtitle" id="sz-c3-sub">Shot quality — xG per shot taken from each zone</p>
     <div class="chart-container"><svg id="sz-c3"></svg></div>
+
+    <h2 class="section-title" id="sz-c4-title">xG Balance by Shot Zone</h2>
+    <p class="section-subtitle" id="sz-c4-sub">xG created vs xG conceded — attacking and defensive breakdown</p>
+    <div class="chart-container"><svg id="sz-c4"></svg></div>
+
+    <h2 class="section-title" id="sz-c5-title">Shot Efficiency — xG/Shot vs xGA/Shot</h2>
+    <p class="section-subtitle" id="sz-c5-sub">Offensive shot quality vs defensive shot quality conceded</p>
+    <div class="chart-container"><svg id="sz-c5"></svg></div>
   </div>
 </div>
 
@@ -298,6 +306,14 @@ html = r"""<!DOCTYPE html>
     <h2 class="section-title" id="as-c3-title">xG per Shot by Attack Speed</h2>
     <p class="section-subtitle" id="as-c3-sub">Shot quality — xG per shot from each attack tempo</p>
     <div class="chart-container"><svg id="as-c3"></svg></div>
+
+    <h2 class="section-title" id="as-c4-title">xG Balance by Attack Speed</h2>
+    <p class="section-subtitle" id="as-c4-sub">xG created vs xG conceded — attacking and defensive breakdown</p>
+    <div class="chart-container"><svg id="as-c4"></svg></div>
+
+    <h2 class="section-title" id="as-c5-title">Shot Efficiency — xG/Shot vs xGA/Shot</h2>
+    <p class="section-subtitle" id="as-c5-sub">Offensive shot quality vs defensive shot quality conceded</p>
+    <div class="chart-container"><svg id="as-c5"></svg></div>
   </div>
 </div>
 
@@ -643,6 +659,8 @@ function redrawShotZones(teams) {
   drawCatTotal("sz", teams, SHOT_ZONES, f, "shotZone", "Shot Zone");
   drawCatNet("sz", teams, SHOT_ZONES, f, "shotZone", "Shot Zone");
   drawCatPerShot("sz", teams, SHOT_ZONES, f, "shotZone", "Shot Zone");
+  drawCatBalance("sz", teams, SHOT_ZONES, f, "shotZone", "Shot Zone");
+  drawCatShotEfficiency("sz", teams, SHOT_ZONES, f, "shotZone", "Shot Zone");
 }
 
 // ╔══════════════════════════════════════════════════════════════════╗
@@ -657,6 +675,8 @@ function redrawAttackSpeed(teams) {
   drawCatTotal("as", teams, ATTACK_SPEEDS, f, "attackSpeed", "Attack Speed");
   drawCatNet("as", teams, ATTACK_SPEEDS, f, "attackSpeed", "Attack Speed");
   drawCatPerShot("as", teams, ATTACK_SPEEDS, f, "attackSpeed", "Attack Speed");
+  drawCatBalance("as", teams, ATTACK_SPEEDS, f, "attackSpeed", "Attack Speed");
+  drawCatShotEfficiency("as", teams, ATTACK_SPEEDS, f, "attackSpeed", "Attack Speed");
 }
 
 // ╔══════════════════════════════════════════════════════════════════╗
@@ -788,6 +808,152 @@ function drawCatPerShot(prefix, teamsRaw, allCats, filter, dataKey, tabLabel) {
       if(isAll)h+=`<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">Overall</span><span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/shot (${team.totalShots} shots)</span></div>`;
       return h;
     },legendSuffix:()=>"xG/shot"});
+}
+
+// ── Generic xG Balance (Butterfly chart) ─────────────────────────
+function drawCatBalance(prefix, teamsRaw, allCats, filter, dataKey, tabLabel) {
+  const svg = d3.select(`#${prefix}-c4`); svg.selectAll("*").remove();
+  const isAll = filter === "all";
+  const cats = isAll ? allCats : allCats.filter(c => c.key === filter);
+  const lbl = isAll ? `All ${tabLabel}s` : cats[0].label;
+  d3.select(`#${prefix}-c4-title`).text(`xG Balance — ${lbl} — ${seasonLabel()}`);
+  d3.select(`#${prefix}-c4-sub`).text(`xG created (right, green) vs xG conceded (left, red). Shows attacking output and defensive exposure side by side.`);
+
+  const teams = [...teamsRaw].map(t => {
+    const forXG = cats.reduce((s,c) => s + catData(t,dataKey,c.key).xG, 0);
+    const againstXG = cats.reduce((s,c) => s + catData(t,dataKey,c.key).against_xG, 0);
+    const forShots = cats.reduce((s,c) => s + catData(t,dataKey,c.key).shots, 0);
+    const againstShots = cats.reduce((s,c) => s + catData(t,dataKey,c.key).against_shots, 0);
+    const forGoals = cats.reduce((s,c) => s + catData(t,dataKey,c.key).goals, 0);
+    const againstGoals = cats.reduce((s,c) => s + catData(t,dataKey,c.key).against_goals, 0);
+    return {...t, forXG, againstXG, forShots, againstShots, forGoals, againstGoals, net: +(forXG - againstXG).toFixed(2)};
+  }).sort((a,b) => b.net - a.net);
+
+  const margin = {top:32, right:60, bottom:40, left:110}, rowH = 30, W = 1160;
+  const H = margin.top + margin.bottom + teams.length * rowH;
+  svg.attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%");
+  const absMax = d3.max(teams, d => Math.max(d.forXG, d.againstXG)) * 1.15 || 1;
+  const x = d3.scaleLinear().domain([-absMax, absMax]).range([margin.left, W - margin.right]);
+  const y = d3.scaleBand().domain(teams.map(d => d.short)).range([margin.top, H - margin.bottom]).paddingInner(0.22);
+
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(10).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
+  svg.append("line").attr("x1",x(0)).attr("x2",x(0)).attr("y1",margin.top).attr("y2",H-margin.bottom).attr("stroke","#020202").attr("stroke-width",1.5).attr("stroke-opacity",0.3);
+  svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(10).tickFormat(d => Math.abs(d).toFixed(1)));
+  // Axis labels
+  svg.append("text").attr("x", x(-absMax/2)).attr("y", H - 4).attr("text-anchor","middle").attr("font-size",12).attr("fill","#dc2626").text("\u2190 xG Conceded");
+  svg.append("text").attr("x", x(absMax/2)).attr("y", H - 4).attr("text-anchor","middle").attr("font-size",12).attr("fill","#16a34a").text("xG Created \u2192");
+
+  const tooltip = d3.select("#tooltip");
+  teams.forEach(team => {
+    // xG Against bar (left, red)
+    svg.append("rect").attr("x", x(-team.againstXG)).attr("y", y(team.short)).attr("width", Math.abs(x(0) - x(-team.againstXG))).attr("height", y.bandwidth()).attr("rx",3).attr("fill","#dc2626").attr("opacity",0.7).style("cursor","pointer")
+      .on("mouseover", event => { tooltip.html(balanceTT(team, cats, dataKey)).style("opacity",1); moveTooltip(event); }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+    // xG For bar (right, green)
+    svg.append("rect").attr("x", x(0)).attr("y", y(team.short)).attr("width", Math.max(0, x(team.forXG) - x(0))).attr("height", y.bandwidth()).attr("rx",3).attr("fill","#16a34a").attr("opacity",0.7).style("cursor","pointer")
+      .on("mouseover", event => { tooltip.html(balanceTT(team, cats, dataKey)).style("opacity",1); moveTooltip(event); }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+    // Labels
+    svg.append("text").attr("x", x(-team.againstXG) - 5).attr("y", y(team.short) + y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor","end").attr("font-size",12).attr("font-weight",600).attr("fill","#dc2626").text(team.againstXG.toFixed(1));
+    svg.append("text").attr("x", x(team.forXG) + 5).attr("y", y(team.short) + y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor","start").attr("font-size",12).attr("font-weight",600).attr("fill","#16a34a").text(team.forXG.toFixed(1));
+  });
+
+  // Legend
+  const lg = svg.append("g").attr("transform", `translate(${margin.left}, 6)`);
+  lg.append("rect").attr("x",0).attr("width",10).attr("height",10).attr("rx",2).attr("fill","#16a34a").attr("opacity",0.7);
+  lg.append("text").attr("x",14).attr("y",9).attr("font-size",13).attr("fill","#555555").text("xG Created");
+  lg.append("rect").attr("x",110).attr("width",10).attr("height",10).attr("rx",2).attr("fill","#dc2626").attr("opacity",0.7);
+  lg.append("text").attr("x",124).attr("y",9).attr("font-size",13).attr("fill","#555555").text("xG Conceded");
+
+  function balanceTT(team, cats, dk) {
+    let h = `<div class="tt-team">${team.team}</div>`;
+    cats.forEach(c => {
+      const d = catData(team, dk, c.key);
+      h += `<div class="tt-row"><span class="tt-label"><span style="color:${c.color}">\u25A0</span> ${c.label}</span><span class="tt-val" style="color:#16a34a">+${d.xG.toFixed(2)}</span></div>`;
+      h += `<div class="tt-row"><span class="tt-label" style="padding-left:16px">Conceded</span><span class="tt-val" style="color:#dc2626">\u2212${d.against_xG.toFixed(2)}</span></div>`;
+    });
+    h += `<div class="tt-row tt-total"><span class="tt-label">Total Created</span><span class="tt-val" style="color:#16a34a">${team.forXG.toFixed(2)} (${team.forGoals}g / ${team.forShots}sh)</span></div>`;
+    h += `<div class="tt-row"><span class="tt-label">Total Conceded</span><span class="tt-val" style="color:#dc2626">${team.againstXG.toFixed(2)} (${team.againstGoals}g / ${team.againstShots}sh)</span></div>`;
+    const col = team.net >= 0 ? "#16a34a" : "#dc2626";
+    h += `<div class="tt-row" style="font-weight:700"><span class="tt-label">Net</span><span class="tt-val" style="color:${col}">${(team.net>0?"+":"") + team.net.toFixed(2)}</span></div>`;
+    return h;
+  }
+}
+
+// ── Generic Shot Efficiency (xG/Shot vs xGA/Shot) ────────────────
+function drawCatShotEfficiency(prefix, teamsRaw, allCats, filter, dataKey, tabLabel) {
+  const svg = d3.select(`#${prefix}-c5`); svg.selectAll("*").remove();
+  const isAll = filter === "all";
+  const cats = isAll ? allCats : allCats.filter(c => c.key === filter);
+  const lbl = isAll ? `All ${tabLabel}s` : cats[0].label;
+  d3.select(`#${prefix}-c5-title`).text(`Shot Efficiency — ${lbl} — ${seasonLabel()}`);
+  d3.select(`#${prefix}-c5-sub`).text(`xG/Shot (offensive quality, green) vs xGA/Shot (defensive quality conceded, red). Bigger green gap = more efficient team.`);
+
+  const teams = teamsRaw.map(t => {
+    let txg=0, tsh=0, taxg=0, tash=0;
+    cats.forEach(c => {
+      const d = catData(t, dataKey, c.key);
+      txg += d.xG; tsh += d.shots; taxg += d.against_xG; tash += d.against_shots;
+    });
+    const offEff = tsh > 0 ? txg / tsh : 0;
+    const defEff = tash > 0 ? taxg / tash : 0;
+    return {
+      team: t.team, short: SHORT_NAMES[t.team] || t.team,
+      offEff, defEff, diff: offEff - defEff,
+      totalXG: txg, totalShots: tsh, totalAXG: taxg, totalAShots: tash,
+      _src: t
+    };
+  }).sort((a,b) => b.diff - a.diff);
+
+  const margin = {top:32, right:80, bottom:40, left:110}, rowH = 36, W = 1160;
+  const H = margin.top + margin.bottom + teams.length * rowH;
+  svg.attr("viewBox", `0 0 ${W} ${H}`).attr("width", "100%");
+  const xMax = d3.max(teams, d => Math.max(d.offEff, d.defEff)) * 1.18 || 0.01;
+  const x = d3.scaleLinear().domain([0, xMax]).range([margin.left, W - margin.right]);
+  const y = d3.scaleBand().domain(teams.map(d => d.short)).range([margin.top, H - margin.bottom]).paddingInner(0.2);
+
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(8).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
+  svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toFixed(3)));
+  svg.append("text").attr("x",(margin.left + W - margin.right)/2).attr("y",H-4).attr("text-anchor","middle").attr("font-size",12).attr("fill","#555555").text("xG per Shot");
+
+  const tooltip = d3.select("#tooltip"), barsG = svg.append("g");
+  const subH = y.bandwidth() / 2;
+
+  teams.forEach(team => {
+    // Offensive bar (top half, green)
+    barsG.append("rect").attr("x", x(0)).attr("y", y(team.short)).attr("width", Math.max(0, x(team.offEff) - x(0))).attr("height", subH - 1).attr("rx",2).attr("fill","#16a34a").attr("opacity",0.8).style("cursor","pointer")
+      .on("mouseover", event => { tooltip.html(effTT(team, cats, dataKey)).style("opacity",1); moveTooltip(event); }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+    barsG.append("text").attr("x", x(team.offEff) + 4).attr("y", y(team.short) + (subH-1)/2).attr("dy","0.35em").attr("font-size",12).attr("font-weight",600).attr("fill","#16a34a").text(team.offEff.toFixed(4));
+
+    // Defensive bar (bottom half, red)
+    barsG.append("rect").attr("x", x(0)).attr("y", y(team.short) + subH).attr("width", Math.max(0, x(team.defEff) - x(0))).attr("height", subH - 1).attr("rx",2).attr("fill","#dc2626").attr("opacity",0.8).style("cursor","pointer")
+      .on("mouseover", event => { tooltip.html(effTT(team, cats, dataKey)).style("opacity",1); moveTooltip(event); }).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+    barsG.append("text").attr("x", x(team.defEff) + 4).attr("y", y(team.short) + subH + (subH-1)/2).attr("dy","0.35em").attr("font-size",12).attr("font-weight",600).attr("fill","#dc2626").text(team.defEff.toFixed(4));
+  });
+
+  // Legend
+  const lg = svg.append("g").attr("transform",`translate(${margin.left}, 6)`);
+  lg.append("rect").attr("x",0).attr("width",10).attr("height",10).attr("rx",2).attr("fill","#16a34a").attr("opacity",0.8);
+  lg.append("text").attr("x",14).attr("y",9).attr("font-size",13).attr("fill","#555555").text("xG/Shot (Offensive)");
+  lg.append("rect").attr("x",160).attr("width",10).attr("height",10).attr("rx",2).attr("fill","#dc2626").attr("opacity",0.8);
+  lg.append("text").attr("x",174).attr("y",9).attr("font-size",13).attr("fill","#555555").text("xGA/Shot (Defensive)");
+
+  function effTT(team, cats, dk) {
+    let h = `<div class="tt-team">${team.team}</div>`;
+    h += `<div style="margin-bottom:6px;font-size:12px;color:#555">Sorted by efficiency differential (xG/Shot \u2212 xGA/Shot)</div>`;
+    cats.forEach(c => {
+      const d = catData(team._src, dk, c.key);
+      const oE = d.shots > 0 ? (d.xG / d.shots) : 0;
+      const dE = d.against_shots > 0 ? (d.against_xG / d.against_shots) : 0;
+      h += `<div class="tt-row"><span class="tt-label"><span style="color:${c.color}">\u25A0</span> ${c.label}</span><span class="tt-val" style="color:#16a34a">${oE.toFixed(4)}</span></div>`;
+      h += `<div class="tt-row"><span class="tt-label" style="padding-left:16px">xGA/Shot</span><span class="tt-val" style="color:#dc2626">${dE.toFixed(4)}</span></div>`;
+    });
+    h += `<div class="tt-row tt-total"><span class="tt-label">Overall xG/Shot</span><span class="tt-val" style="color:#16a34a">${team.offEff.toFixed(4)} (${team.totalXG.toFixed(1)} xG / ${team.totalShots} sh)</span></div>`;
+    h += `<div class="tt-row"><span class="tt-label">Overall xGA/Shot</span><span class="tt-val" style="color:#dc2626">${team.defEff.toFixed(4)} (${team.totalAXG.toFixed(1)} xGA / ${team.totalAShots} sh)</span></div>`;
+    const diffCol = team.diff >= 0 ? "#16a34a" : "#dc2626";
+    h += `<div class="tt-row" style="font-weight:700"><span class="tt-label">Differential</span><span class="tt-val" style="color:${diffCol}">${(team.diff>0?"+":"") + team.diff.toFixed(4)}</span></div>`;
+    return h;
+  }
 }
 
 // ── Init ────────────────────────────────────────────────────────
