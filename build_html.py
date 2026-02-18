@@ -367,7 +367,7 @@ const ATTACK_SPEEDS = [
 ];
 
 // ── State ───────────────────────────────────────────────────────────
-let activeSeason = "2024";
+let activeSeason = "2025";
 let activeTab = "setpieces";
 const tabFilters = { setpieces: "all", shotzones: "all", attackspeed: "all" };
 

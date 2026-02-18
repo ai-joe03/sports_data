@@ -23357,5 +23357,2122 @@
         }
       }
     ]
+  },
+  "2025": {
+    "season": "2025/2026",
+    "teams": [
+      {
+        "team": "Arsenal",
+        "FromCorner": {
+          "xG": 14.4,
+          "goals": 14,
+          "shots": 77,
+          "against_xG": 2.44,
+          "against_goals": 2,
+          "against_shots": 24
+        },
+        "SetPiece": {
+          "xG": 3.4,
+          "goals": 3,
+          "shots": 24,
+          "against_xG": 1.99,
+          "against_goals": 2,
+          "against_shots": 17
+        },
+        "DirectFreekick": {
+          "xG": 0.24,
+          "goals": 0,
+          "shots": 6,
+          "against_xG": 0.35,
+          "against_goals": 1,
+          "against_shots": 6
+        },
+        "Penalty": {
+          "xG": 2.28,
+          "goals": 3,
+          "shots": 3,
+          "against_xG": 0.0,
+          "against_goals": 0,
+          "against_shots": 0
+        },
+        "total_setpiece_xG": 20.32,
+        "total_setpiece_goals": 20,
+        "total_setpiece_against_xG": 4.78,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 5.0,
+            "goals": 5,
+            "shots": 5,
+            "against_xG": 0.0,
+            "against_goals": 0,
+            "against_shots": 0
+          },
+          "shotOboxTotal": {
+            "xG": 3.31,
+            "goals": 7,
+            "shots": 92,
+            "against_xG": 2.41,
+            "against_goals": 5,
+            "against_shots": 71
+          },
+          "shotPenaltyArea": {
+            "xG": 29.73,
+            "goals": 26,
+            "shots": 231,
+            "against_xG": 12.46,
+            "against_goals": 10,
+            "against_shots": 112
+          },
+          "shotSixYardBox": {
+            "xG": 19.17,
+            "goals": 12,
+            "shots": 57,
+            "against_xG": 7.27,
+            "against_goals": 3,
+            "against_shots": 19
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 27.51,
+            "goals": 22,
+            "shots": 216,
+            "against_xG": 9.29,
+            "against_goals": 9,
+            "against_shots": 115
+          },
+          "Standard": {
+            "xG": 20.33,
+            "goals": 20,
+            "shots": 110,
+            "against_xG": 4.77,
+            "against_goals": 5,
+            "against_shots": 47
+          },
+          "Slow": {
+            "xG": 5.6,
+            "goals": 5,
+            "shots": 40,
+            "against_xG": 4.67,
+            "against_goals": 3,
+            "against_shots": 22
+          },
+          "Fast": {
+            "xG": 3.77,
+            "goals": 3,
+            "shots": 19,
+            "against_xG": 3.41,
+            "against_goals": 1,
+            "against_shots": 18
+          }
+        }
+      },
+      {
+        "team": "Newcastle United",
+        "FromCorner": {
+          "xG": 9.43,
+          "goals": 7,
+          "shots": 72,
+          "against_xG": 4.18,
+          "against_goals": 7,
+          "against_shots": 43
+        },
+        "SetPiece": {
+          "xG": 5.39,
+          "goals": 4,
+          "shots": 33,
+          "against_xG": 1.91,
+          "against_goals": 0,
+          "against_shots": 13
+        },
+        "DirectFreekick": {
+          "xG": 0.33,
+          "goals": 0,
+          "shots": 6,
+          "against_xG": 0.5,
+          "against_goals": 1,
+          "against_shots": 8
+        },
+        "Penalty": {
+          "xG": 3.81,
+          "goals": 5,
+          "shots": 5,
+          "against_xG": 3.04,
+          "against_goals": 4,
+          "against_shots": 4
+        },
+        "total_setpiece_xG": 18.96,
+        "total_setpiece_goals": 16,
+        "total_setpiece_against_xG": 9.63,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 0.0,
+            "goals": 0,
+            "shots": 0,
+            "against_xG": 2.0,
+            "against_goals": 2,
+            "against_shots": 2
+          },
+          "shotOboxTotal": {
+            "xG": 4.0,
+            "goals": 5,
+            "shots": 116,
+            "against_xG": 3.14,
+            "against_goals": 6,
+            "against_shots": 89
+          },
+          "shotPenaltyArea": {
+            "xG": 26.83,
+            "goals": 22,
+            "shots": 185,
+            "against_xG": 24.05,
+            "against_goals": 22,
+            "against_shots": 180
+          },
+          "shotSixYardBox": {
+            "xG": 15.42,
+            "goals": 10,
+            "shots": 43,
+            "against_xG": 6.71,
+            "against_goals": 7,
+            "against_shots": 22
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 22.57,
+            "goals": 18,
+            "shots": 190,
+            "against_xG": 19.21,
+            "against_goals": 18,
+            "against_shots": 180
+          },
+          "Standard": {
+            "xG": 18.95,
+            "goals": 16,
+            "shots": 116,
+            "against_xG": 9.64,
+            "against_goals": 12,
+            "against_shots": 68
+          },
+          "Slow": {
+            "xG": 2.75,
+            "goals": 3,
+            "shots": 28,
+            "against_xG": 2.91,
+            "against_goals": 2,
+            "against_shots": 22
+          },
+          "Fast": {
+            "xG": 1.98,
+            "goals": 0,
+            "shots": 10,
+            "against_xG": 4.14,
+            "against_goals": 5,
+            "against_shots": 23
+          }
+        }
+      },
+      {
+        "team": "Chelsea",
+        "FromCorner": {
+          "xG": 8.8,
+          "goals": 9,
+          "shots": 59,
+          "against_xG": 5.71,
+          "against_goals": 6,
+          "against_shots": 43
+        },
+        "SetPiece": {
+          "xG": 1.22,
+          "goals": 1,
+          "shots": 14,
+          "against_xG": 3.46,
+          "against_goals": 1,
+          "against_shots": 25
+        },
+        "DirectFreekick": {
+          "xG": 0.69,
+          "goals": 2,
+          "shots": 12,
+          "against_xG": 0.8,
+          "against_goals": 0,
+          "against_shots": 11
+        },
+        "Penalty": {
+          "xG": 5.33,
+          "goals": 7,
+          "shots": 7,
+          "against_xG": 0.76,
+          "against_goals": 1,
+          "against_shots": 1
+        },
+        "total_setpiece_xG": 16.04,
+        "total_setpiece_goals": 19,
+        "total_setpiece_against_xG": 10.73,
+        "shotZone": {
+          "shotOboxTotal": {
+            "xG": 4.0,
+            "goals": 4,
+            "shots": 108,
+            "against_xG": 3.08,
+            "against_goals": 3,
+            "against_shots": 85
+          },
+          "shotPenaltyArea": {
+            "xG": 33.26,
+            "goals": 27,
+            "shots": 202,
+            "against_xG": 21.04,
+            "against_goals": 12,
+            "against_shots": 160
+          },
+          "shotSixYardBox": {
+            "xG": 18.33,
+            "goals": 16,
+            "shots": 46,
+            "against_xG": 16.44,
+            "against_goals": 15,
+            "against_shots": 39
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 28.72,
+            "goals": 23,
+            "shots": 205,
+            "against_xG": 26.71,
+            "against_goals": 19,
+            "against_shots": 178
+          },
+          "Standard": {
+            "xG": 16.04,
+            "goals": 19,
+            "shots": 92,
+            "against_xG": 10.74,
+            "against_goals": 8,
+            "against_shots": 80
+          },
+          "Slow": {
+            "xG": 4.24,
+            "goals": 1,
+            "shots": 33,
+            "against_xG": 1.56,
+            "against_goals": 2,
+            "against_shots": 14
+          },
+          "Fast": {
+            "xG": 6.6,
+            "goals": 4,
+            "shots": 26,
+            "against_xG": 1.56,
+            "against_goals": 1,
+            "against_shots": 12
+          }
+        }
+      },
+      {
+        "team": "Brentford",
+        "FromCorner": {
+          "xG": 5.96,
+          "goals": 2,
+          "shots": 42,
+          "against_xG": 4.15,
+          "against_goals": 2,
+          "against_shots": 56
+        },
+        "SetPiece": {
+          "xG": 2.89,
+          "goals": 0,
+          "shots": 13,
+          "against_xG": 1.57,
+          "against_goals": 1,
+          "against_shots": 14
+        },
+        "DirectFreekick": {
+          "xG": 0.43,
+          "goals": 0,
+          "shots": 5,
+          "against_xG": 0.38,
+          "against_goals": 0,
+          "against_shots": 6
+        },
+        "Penalty": {
+          "xG": 6.09,
+          "goals": 6,
+          "shots": 8,
+          "against_xG": 5.33,
+          "against_goals": 4,
+          "against_shots": 7
+        },
+        "total_setpiece_xG": 15.37,
+        "total_setpiece_goals": 8,
+        "total_setpiece_against_xG": 11.43,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 1.0,
+            "goals": 1,
+            "shots": 1,
+            "against_xG": 2.0,
+            "against_goals": 2,
+            "against_shots": 2
+          },
+          "shotOboxTotal": {
+            "xG": 2.97,
+            "goals": 1,
+            "shots": 65,
+            "against_xG": 3.56,
+            "against_goals": 2,
+            "against_shots": 118
+          },
+          "shotPenaltyArea": {
+            "xG": 31.87,
+            "goals": 28,
+            "shots": 171,
+            "against_xG": 25.17,
+            "against_goals": 22,
+            "against_shots": 175
+          },
+          "shotSixYardBox": {
+            "xG": 11.98,
+            "goals": 10,
+            "shots": 35,
+            "against_xG": 10.97,
+            "against_goals": 9,
+            "against_shots": 29
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 23.84,
+            "goals": 22,
+            "shots": 163,
+            "against_xG": 24.83,
+            "against_goals": 23,
+            "against_shots": 204
+          },
+          "Standard": {
+            "xG": 15.37,
+            "goals": 8,
+            "shots": 68,
+            "against_xG": 11.43,
+            "against_goals": 7,
+            "against_shots": 83
+          },
+          "Fast": {
+            "xG": 6.74,
+            "goals": 9,
+            "shots": 24,
+            "against_xG": 2.64,
+            "against_goals": 3,
+            "against_shots": 12
+          },
+          "Slow": {
+            "xG": 1.86,
+            "goals": 1,
+            "shots": 17,
+            "against_xG": 2.79,
+            "against_goals": 2,
+            "against_shots": 25
+          }
+        }
+      },
+      {
+        "team": "Leeds",
+        "FromCorner": {
+          "xG": 7.04,
+          "goals": 6,
+          "shots": 64,
+          "against_xG": 8.55,
+          "against_goals": 6,
+          "against_shots": 59
+        },
+        "SetPiece": {
+          "xG": 3.05,
+          "goals": 2,
+          "shots": 18,
+          "against_xG": 2.16,
+          "against_goals": 1,
+          "against_shots": 15
+        },
+        "DirectFreekick": {
+          "xG": 0.29,
+          "goals": 2,
+          "shots": 5,
+          "against_xG": 0.82,
+          "against_goals": 2,
+          "against_shots": 11
+        },
+        "Penalty": {
+          "xG": 3.81,
+          "goals": 4,
+          "shots": 5,
+          "against_xG": 3.81,
+          "against_goals": 5,
+          "against_shots": 5
+        },
+        "total_setpiece_xG": 14.19,
+        "total_setpiece_goals": 14,
+        "total_setpiece_against_xG": 15.34,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 0.0,
+            "goals": 0,
+            "shots": 0,
+            "against_xG": 2.0,
+            "against_goals": 2,
+            "against_shots": 2
+          },
+          "shotOboxTotal": {
+            "xG": 2.99,
+            "goals": 4,
+            "shots": 96,
+            "against_xG": 3.66,
+            "against_goals": 4,
+            "against_shots": 109
+          },
+          "shotPenaltyArea": {
+            "xG": 25.31,
+            "goals": 21,
+            "shots": 181,
+            "against_xG": 25.59,
+            "against_goals": 30,
+            "against_shots": 169
+          },
+          "shotSixYardBox": {
+            "xG": 13.97,
+            "goals": 11,
+            "shots": 38,
+            "against_xG": 11.58,
+            "against_goals": 9,
+            "against_shots": 43
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 23.72,
+            "goals": 19,
+            "shots": 178,
+            "against_xG": 23.24,
+            "against_goals": 29,
+            "against_shots": 197
+          },
+          "Standard": {
+            "xG": 14.19,
+            "goals": 14,
+            "shots": 92,
+            "against_xG": 15.34,
+            "against_goals": 14,
+            "against_shots": 90
+          },
+          "Slow": {
+            "xG": 1.87,
+            "goals": 0,
+            "shots": 28,
+            "against_xG": 3.01,
+            "against_goals": 2,
+            "against_shots": 26
+          },
+          "Fast": {
+            "xG": 2.49,
+            "goals": 3,
+            "shots": 17,
+            "against_xG": 1.25,
+            "against_goals": 0,
+            "against_shots": 10
+          }
+        }
+      },
+      {
+        "team": "West Ham",
+        "FromCorner": {
+          "xG": 8.48,
+          "goals": 6,
+          "shots": 53,
+          "against_xG": 9.26,
+          "against_goals": 12,
+          "against_shots": 69
+        },
+        "SetPiece": {
+          "xG": 2.81,
+          "goals": 2,
+          "shots": 20,
+          "against_xG": 1.55,
+          "against_goals": 0,
+          "against_shots": 21
+        },
+        "DirectFreekick": {
+          "xG": 0.28,
+          "goals": 0,
+          "shots": 4,
+          "against_xG": 0.33,
+          "against_goals": 0,
+          "against_shots": 7
+        },
+        "Penalty": {
+          "xG": 2.28,
+          "goals": 3,
+          "shots": 3,
+          "against_xG": 4.57,
+          "against_goals": 5,
+          "against_shots": 6
+        },
+        "total_setpiece_xG": 13.85,
+        "total_setpiece_goals": 11,
+        "total_setpiece_against_xG": 15.71,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 2.0,
+            "goals": 2,
+            "shots": 2,
+            "against_xG": 1.0,
+            "against_goals": 1,
+            "against_shots": 1
+          },
+          "shotOboxTotal": {
+            "xG": 2.68,
+            "goals": 6,
+            "shots": 74,
+            "against_xG": 3.13,
+            "against_goals": 3,
+            "against_shots": 110
+          },
+          "shotPenaltyArea": {
+            "xG": 19.64,
+            "goals": 17,
+            "shots": 158,
+            "against_xG": 31.06,
+            "against_goals": 30,
+            "against_shots": 224
+          },
+          "shotSixYardBox": {
+            "xG": 10.65,
+            "goals": 7,
+            "shots": 31,
+            "against_xG": 17.6,
+            "against_goals": 15,
+            "against_shots": 51
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 14.5,
+            "goals": 12,
+            "shots": 139,
+            "against_xG": 32.98,
+            "against_goals": 29,
+            "against_shots": 249
+          },
+          "Standard": {
+            "xG": 13.84,
+            "goals": 11,
+            "shots": 80,
+            "against_xG": 15.71,
+            "against_goals": 17,
+            "against_shots": 103
+          },
+          "Fast": {
+            "xG": 4.63,
+            "goals": 5,
+            "shots": 24,
+            "against_xG": 0.87,
+            "against_goals": 1,
+            "against_shots": 6
+          },
+          "Slow": {
+            "xG": 1.99,
+            "goals": 4,
+            "shots": 22,
+            "against_xG": 3.23,
+            "against_goals": 2,
+            "against_shots": 28
+          }
+        }
+      },
+      {
+        "team": "Manchester United",
+        "FromCorner": {
+          "xG": 6.78,
+          "goals": 8,
+          "shots": 64,
+          "against_xG": 7.07,
+          "against_goals": 7,
+          "against_shots": 54
+        },
+        "SetPiece": {
+          "xG": 3.55,
+          "goals": 4,
+          "shots": 21,
+          "against_xG": 1.53,
+          "against_goals": 0,
+          "against_shots": 17
+        },
+        "DirectFreekick": {
+          "xG": 0.43,
+          "goals": 1,
+          "shots": 5,
+          "against_xG": 0.55,
+          "against_goals": 2,
+          "against_shots": 8
+        },
+        "Penalty": {
+          "xG": 3.04,
+          "goals": 2,
+          "shots": 4,
+          "against_xG": 1.52,
+          "against_goals": 2,
+          "against_shots": 2
+        },
+        "total_setpiece_xG": 13.8,
+        "total_setpiece_goals": 15,
+        "total_setpiece_against_xG": 10.67,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 2.0,
+            "goals": 2,
+            "shots": 2,
+            "against_xG": 2.0,
+            "against_goals": 2,
+            "against_shots": 2
+          },
+          "shotOboxTotal": {
+            "xG": 4.39,
+            "goals": 8,
+            "shots": 141,
+            "against_xG": 3.14,
+            "against_goals": 4,
+            "against_shots": 84
+          },
+          "shotPenaltyArea": {
+            "xG": 33.6,
+            "goals": 29,
+            "shots": 233,
+            "against_xG": 20.75,
+            "against_goals": 23,
+            "against_shots": 168
+          },
+          "shotSixYardBox": {
+            "xG": 13.79,
+            "goals": 8,
+            "shots": 43,
+            "against_xG": 10.7,
+            "against_goals": 8,
+            "against_shots": 30
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 32.51,
+            "goals": 24,
+            "shots": 279,
+            "against_xG": 18.63,
+            "against_goals": 16,
+            "against_shots": 158
+          },
+          "Standard": {
+            "xG": 13.81,
+            "goals": 15,
+            "shots": 94,
+            "against_xG": 10.68,
+            "against_goals": 11,
+            "against_shots": 81
+          },
+          "Slow": {
+            "xG": 2.61,
+            "goals": 3,
+            "shots": 25,
+            "against_xG": 3.68,
+            "against_goals": 4,
+            "against_shots": 23
+          },
+          "Fast": {
+            "xG": 4.85,
+            "goals": 5,
+            "shots": 21,
+            "against_xG": 3.61,
+            "against_goals": 6,
+            "against_shots": 22
+          }
+        }
+      },
+      {
+        "team": "Crystal Palace",
+        "FromCorner": {
+          "xG": 7.46,
+          "goals": 6,
+          "shots": 48,
+          "against_xG": 7.94,
+          "against_goals": 6,
+          "against_shots": 50
+        },
+        "SetPiece": {
+          "xG": 1.59,
+          "goals": 1,
+          "shots": 20,
+          "against_xG": 2.91,
+          "against_goals": 4,
+          "against_shots": 28
+        },
+        "DirectFreekick": {
+          "xG": 0.22,
+          "goals": 0,
+          "shots": 4,
+          "against_xG": 0.72,
+          "against_goals": 1,
+          "against_shots": 8
+        },
+        "Penalty": {
+          "xG": 3.81,
+          "goals": 5,
+          "shots": 5,
+          "against_xG": 2.28,
+          "against_goals": 3,
+          "against_shots": 3
+        },
+        "total_setpiece_xG": 13.08,
+        "total_setpiece_goals": 12,
+        "total_setpiece_against_xG": 13.85,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 1.0,
+            "goals": 1,
+            "shots": 1,
+            "against_xG": 1.0,
+            "against_goals": 1,
+            "against_shots": 1
+          },
+          "shotOboxTotal": {
+            "xG": 3.23,
+            "goals": 1,
+            "shots": 82,
+            "against_xG": 3.0,
+            "against_goals": 4,
+            "against_shots": 86
+          },
+          "shotPenaltyArea": {
+            "xG": 28.76,
+            "goals": 17,
+            "shots": 183,
+            "against_xG": 24.27,
+            "against_goals": 19,
+            "against_shots": 165
+          },
+          "shotSixYardBox": {
+            "xG": 12.67,
+            "goals": 9,
+            "shots": 42,
+            "against_xG": 13.17,
+            "against_goals": 8,
+            "against_shots": 39
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 24.74,
+            "goals": 12,
+            "shots": 190,
+            "against_xG": 22.15,
+            "against_goals": 14,
+            "against_shots": 165
+          },
+          "Standard": {
+            "xG": 13.07,
+            "goals": 12,
+            "shots": 77,
+            "against_xG": 13.85,
+            "against_goals": 14,
+            "against_shots": 89
+          },
+          "Fast": {
+            "xG": 5.16,
+            "goals": 2,
+            "shots": 26,
+            "against_xG": 2.19,
+            "against_goals": 3,
+            "against_shots": 12
+          },
+          "Slow": {
+            "xG": 2.68,
+            "goals": 2,
+            "shots": 15,
+            "against_xG": 3.24,
+            "against_goals": 1,
+            "against_shots": 25
+          }
+        }
+      },
+      {
+        "team": "Everton",
+        "FromCorner": {
+          "xG": 6.18,
+          "goals": 4,
+          "shots": 52,
+          "against_xG": 6.6,
+          "against_goals": 5,
+          "against_shots": 61
+        },
+        "SetPiece": {
+          "xG": 4.75,
+          "goals": 2,
+          "shots": 31,
+          "against_xG": 1.93,
+          "against_goals": 1,
+          "against_shots": 12
+        },
+        "DirectFreekick": {
+          "xG": 0.39,
+          "goals": 0,
+          "shots": 9,
+          "against_xG": 0.47,
+          "against_goals": 0,
+          "against_shots": 8
+        },
+        "Penalty": {
+          "xG": 1.52,
+          "goals": 2,
+          "shots": 2,
+          "against_xG": 2.28,
+          "against_goals": 2,
+          "against_shots": 3
+        },
+        "total_setpiece_xG": 12.84,
+        "total_setpiece_goals": 8,
+        "total_setpiece_against_xG": 11.28,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 2.0,
+            "goals": 2,
+            "shots": 2,
+            "against_xG": 1.0,
+            "against_goals": 1,
+            "against_shots": 1
+          },
+          "shotOboxTotal": {
+            "xG": 2.69,
+            "goals": 2,
+            "shots": 85,
+            "against_xG": 3.47,
+            "against_goals": 2,
+            "against_shots": 108
+          },
+          "shotPenaltyArea": {
+            "xG": 18.31,
+            "goals": 16,
+            "shots": 161,
+            "against_xG": 27.52,
+            "against_goals": 19,
+            "against_shots": 209
+          },
+          "shotSixYardBox": {
+            "xG": 13.11,
+            "goals": 9,
+            "shots": 40,
+            "against_xG": 9.76,
+            "against_goals": 8,
+            "against_shots": 34
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 17.19,
+            "goals": 15,
+            "shots": 150,
+            "against_xG": 25.36,
+            "against_goals": 16,
+            "against_shots": 215
+          },
+          "Standard": {
+            "xG": 12.84,
+            "goals": 8,
+            "shots": 94,
+            "against_xG": 11.29,
+            "against_goals": 8,
+            "against_shots": 84
+          },
+          "Slow": {
+            "xG": 3.2,
+            "goals": 3,
+            "shots": 28,
+            "against_xG": 1.18,
+            "against_goals": 2,
+            "against_shots": 28
+          },
+          "Fast": {
+            "xG": 2.88,
+            "goals": 3,
+            "shots": 16,
+            "against_xG": 3.91,
+            "against_goals": 4,
+            "against_shots": 25
+          }
+        }
+      },
+      {
+        "team": "Bournemouth",
+        "FromCorner": {
+          "xG": 5.53,
+          "goals": 3,
+          "shots": 37,
+          "against_xG": 6.83,
+          "against_goals": 9,
+          "against_shots": 67
+        },
+        "SetPiece": {
+          "xG": 2.86,
+          "goals": 4,
+          "shots": 21,
+          "against_xG": 2.69,
+          "against_goals": 4,
+          "against_shots": 20
+        },
+        "DirectFreekick": {
+          "xG": 1.04,
+          "goals": 2,
+          "shots": 14,
+          "against_xG": 0.58,
+          "against_goals": 3,
+          "against_shots": 8
+        },
+        "Penalty": {
+          "xG": 3.04,
+          "goals": 3,
+          "shots": 4,
+          "against_xG": 3.04,
+          "against_goals": 4,
+          "against_shots": 4
+        },
+        "total_setpiece_xG": 12.47,
+        "total_setpiece_goals": 12,
+        "total_setpiece_against_xG": 13.14,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 0.0,
+            "goals": 0,
+            "shots": 0,
+            "against_xG": 1.0,
+            "against_goals": 1,
+            "against_shots": 1
+          },
+          "shotOboxTotal": {
+            "xG": 4.6,
+            "goals": 11,
+            "shots": 134,
+            "against_xG": 3.99,
+            "against_goals": 7,
+            "against_shots": 107
+          },
+          "shotPenaltyArea": {
+            "xG": 24.78,
+            "goals": 20,
+            "shots": 182,
+            "against_xG": 26.83,
+            "against_goals": 28,
+            "against_shots": 196
+          },
+          "shotSixYardBox": {
+            "xG": 17.31,
+            "goals": 12,
+            "shots": 37,
+            "against_xG": 7.4,
+            "against_goals": 9,
+            "against_shots": 27
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 28.13,
+            "goals": 24,
+            "shots": 230,
+            "against_xG": 19.55,
+            "against_goals": 20,
+            "against_shots": 183
+          },
+          "Standard": {
+            "xG": 12.48,
+            "goals": 12,
+            "shots": 76,
+            "against_xG": 13.15,
+            "against_goals": 20,
+            "against_shots": 99
+          },
+          "Slow": {
+            "xG": 2.28,
+            "goals": 1,
+            "shots": 28,
+            "against_xG": 1.33,
+            "against_goals": 0,
+            "against_shots": 23
+          },
+          "Fast": {
+            "xG": 3.82,
+            "goals": 6,
+            "shots": 19,
+            "against_xG": 5.19,
+            "against_goals": 5,
+            "against_shots": 26
+          }
+        }
+      },
+      {
+        "team": "Brighton",
+        "FromCorner": {
+          "xG": 6.87,
+          "goals": 6,
+          "shots": 51,
+          "against_xG": 6.75,
+          "against_goals": 5,
+          "against_shots": 51
+        },
+        "SetPiece": {
+          "xG": 0.53,
+          "goals": 0,
+          "shots": 13,
+          "against_xG": 2.86,
+          "against_goals": 1,
+          "against_shots": 22
+        },
+        "DirectFreekick": {
+          "xG": 0.58,
+          "goals": 1,
+          "shots": 11,
+          "against_xG": 0.34,
+          "against_goals": 1,
+          "against_shots": 7
+        },
+        "Penalty": {
+          "xG": 3.81,
+          "goals": 3,
+          "shots": 5,
+          "against_xG": 4.57,
+          "against_goals": 5,
+          "against_shots": 6
+        },
+        "total_setpiece_xG": 11.79,
+        "total_setpiece_goals": 10,
+        "total_setpiece_against_xG": 14.52,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 1.0,
+            "goals": 1,
+            "shots": 1,
+            "against_xG": 4.0,
+            "against_goals": 4,
+            "against_shots": 4
+          },
+          "shotOboxTotal": {
+            "xG": 3.8,
+            "goals": 5,
+            "shots": 119,
+            "against_xG": 3.28,
+            "against_goals": 6,
+            "against_shots": 96
+          },
+          "shotPenaltyArea": {
+            "xG": 23.38,
+            "goals": 19,
+            "shots": 179,
+            "against_xG": 25.38,
+            "against_goals": 14,
+            "against_shots": 187
+          },
+          "shotSixYardBox": {
+            "xG": 11.59,
+            "goals": 9,
+            "shots": 36,
+            "against_xG": 11.57,
+            "against_goals": 10,
+            "against_shots": 37
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 23.28,
+            "goals": 20,
+            "shots": 212,
+            "against_xG": 21.83,
+            "against_goals": 15,
+            "against_shots": 191
+          },
+          "Standard": {
+            "xG": 11.78,
+            "goals": 10,
+            "shots": 80,
+            "against_xG": 14.51,
+            "against_goals": 12,
+            "against_shots": 86
+          },
+          "Slow": {
+            "xG": 2.44,
+            "goals": 2,
+            "shots": 27,
+            "against_xG": 2.8,
+            "against_goals": 1,
+            "against_shots": 21
+          },
+          "Fast": {
+            "xG": 2.28,
+            "goals": 2,
+            "shots": 16,
+            "against_xG": 5.1,
+            "against_goals": 6,
+            "against_shots": 26
+          }
+        }
+      },
+      {
+        "team": "Wolverhampton Wanderers",
+        "FromCorner": {
+          "xG": 5.11,
+          "goals": 4,
+          "shots": 42,
+          "against_xG": 6.15,
+          "against_goals": 3,
+          "against_shots": 53
+        },
+        "SetPiece": {
+          "xG": 2.28,
+          "goals": 1,
+          "shots": 15,
+          "against_xG": 2.89,
+          "against_goals": 1,
+          "against_shots": 23
+        },
+        "DirectFreekick": {
+          "xG": 0.8,
+          "goals": 0,
+          "shots": 11,
+          "against_xG": 0.86,
+          "against_goals": 1,
+          "against_shots": 12
+        },
+        "Penalty": {
+          "xG": 2.28,
+          "goals": 2,
+          "shots": 3,
+          "against_xG": 2.28,
+          "against_goals": 3,
+          "against_shots": 3
+        },
+        "total_setpiece_xG": 10.47,
+        "total_setpiece_goals": 7,
+        "total_setpiece_against_xG": 12.18,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 1.0,
+            "goals": 1,
+            "shots": 1,
+            "against_xG": 4.0,
+            "against_goals": 4,
+            "against_shots": 4
+          },
+          "shotOboxTotal": {
+            "xG": 2.91,
+            "goals": 2,
+            "shots": 89,
+            "against_xG": 4.89,
+            "against_goals": 8,
+            "against_shots": 129
+          },
+          "shotPenaltyArea": {
+            "xG": 15.45,
+            "goals": 9,
+            "shots": 139,
+            "against_xG": 28.78,
+            "against_goals": 30,
+            "against_shots": 204
+          },
+          "shotSixYardBox": {
+            "xG": 5.71,
+            "goals": 4,
+            "shots": 14,
+            "against_xG": 11.59,
+            "against_goals": 6,
+            "against_shots": 29
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 12.62,
+            "goals": 8,
+            "shots": 136,
+            "against_xG": 26.37,
+            "against_goals": 31,
+            "against_shots": 208
+          },
+          "Standard": {
+            "xG": 10.47,
+            "goals": 7,
+            "shots": 71,
+            "against_xG": 12.18,
+            "against_goals": 8,
+            "against_shots": 91
+          },
+          "Slow": {
+            "xG": 0.64,
+            "goals": 1,
+            "shots": 20,
+            "against_xG": 6.47,
+            "against_goals": 4,
+            "against_shots": 46
+          },
+          "Fast": {
+            "xG": 1.34,
+            "goals": 0,
+            "shots": 16,
+            "against_xG": 4.23,
+            "against_goals": 5,
+            "against_shots": 21
+          }
+        }
+      },
+      {
+        "team": "Manchester City",
+        "FromCorner": {
+          "xG": 5.9,
+          "goals": 6,
+          "shots": 62,
+          "against_xG": 4.7,
+          "against_goals": 5,
+          "against_shots": 31
+        },
+        "SetPiece": {
+          "xG": 0.82,
+          "goals": 0,
+          "shots": 8,
+          "against_xG": 1.29,
+          "against_goals": 1,
+          "against_shots": 14
+        },
+        "DirectFreekick": {
+          "xG": 0.4,
+          "goals": 0,
+          "shots": 6,
+          "against_xG": 0.4,
+          "against_goals": 1,
+          "against_shots": 7
+        },
+        "Penalty": {
+          "xG": 3.04,
+          "goals": 3,
+          "shots": 4,
+          "against_xG": 1.52,
+          "against_goals": 1,
+          "against_shots": 2
+        },
+        "total_setpiece_xG": 10.16,
+        "total_setpiece_goals": 9,
+        "total_setpiece_against_xG": 7.91,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 3.0,
+            "goals": 3,
+            "shots": 3,
+            "against_xG": 0.0,
+            "against_goals": 0,
+            "against_shots": 0
+          },
+          "shotOboxTotal": {
+            "xG": 3.76,
+            "goals": 7,
+            "shots": 99,
+            "against_xG": 2.47,
+            "against_goals": 5,
+            "against_shots": 71
+          },
+          "shotPenaltyArea": {
+            "xG": 39.4,
+            "goals": 37,
+            "shots": 239,
+            "against_xG": 19.69,
+            "against_goals": 15,
+            "against_shots": 161
+          },
+          "shotSixYardBox": {
+            "xG": 8.92,
+            "goals": 7,
+            "shots": 29,
+            "against_xG": 11.03,
+            "against_goals": 4,
+            "against_shots": 25
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 34.26,
+            "goals": 33,
+            "shots": 222,
+            "against_xG": 18.84,
+            "against_goals": 10,
+            "against_shots": 165
+          },
+          "Standard": {
+            "xG": 10.17,
+            "goals": 9,
+            "shots": 80,
+            "against_xG": 7.91,
+            "against_goals": 8,
+            "against_shots": 54
+          },
+          "Slow": {
+            "xG": 6.46,
+            "goals": 7,
+            "shots": 46,
+            "against_xG": 1.55,
+            "against_goals": 3,
+            "against_shots": 18
+          },
+          "Fast": {
+            "xG": 4.19,
+            "goals": 5,
+            "shots": 22,
+            "against_xG": 4.89,
+            "against_goals": 3,
+            "against_shots": 20
+          }
+        }
+      },
+      {
+        "team": "Aston Villa",
+        "FromCorner": {
+          "xG": 6.29,
+          "goals": 8,
+          "shots": 68,
+          "against_xG": 7.6,
+          "against_goals": 6,
+          "against_shots": 56
+        },
+        "SetPiece": {
+          "xG": 2.79,
+          "goals": 0,
+          "shots": 13,
+          "against_xG": 2.16,
+          "against_goals": 1,
+          "against_shots": 17
+        },
+        "DirectFreekick": {
+          "xG": 0.86,
+          "goals": 2,
+          "shots": 10,
+          "against_xG": 0.4,
+          "against_goals": 0,
+          "against_shots": 5
+        },
+        "Penalty": {
+          "xG": 0.0,
+          "goals": 0,
+          "shots": 0,
+          "against_xG": 1.52,
+          "against_goals": 1,
+          "against_shots": 2
+        },
+        "total_setpiece_xG": 9.94,
+        "total_setpiece_goals": 10,
+        "total_setpiece_against_xG": 11.68,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 2.0,
+            "goals": 2,
+            "shots": 2,
+            "against_xG": 1.0,
+            "against_goals": 1,
+            "against_shots": 1
+          },
+          "shotOboxTotal": {
+            "xG": 4.05,
+            "goals": 13,
+            "shots": 116,
+            "against_xG": 4.02,
+            "against_goals": 3,
+            "against_shots": 113
+          },
+          "shotPenaltyArea": {
+            "xG": 20.1,
+            "goals": 14,
+            "shots": 173,
+            "against_xG": 21.28,
+            "against_goals": 13,
+            "against_shots": 181
+          },
+          "shotSixYardBox": {
+            "xG": 12.88,
+            "goals": 8,
+            "shots": 36,
+            "against_xG": 14.05,
+            "against_goals": 10,
+            "against_shots": 38
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 19.52,
+            "goals": 18,
+            "shots": 187,
+            "against_xG": 22.66,
+            "against_goals": 15,
+            "against_shots": 207
+          },
+          "Standard": {
+            "xG": 9.94,
+            "goals": 10,
+            "shots": 91,
+            "against_xG": 11.69,
+            "against_goals": 8,
+            "against_shots": 80
+          },
+          "Slow": {
+            "xG": 6.05,
+            "goals": 4,
+            "shots": 27,
+            "against_xG": 3.54,
+            "against_goals": 3,
+            "against_shots": 28
+          },
+          "Fast": {
+            "xG": 3.52,
+            "goals": 5,
+            "shots": 22,
+            "against_xG": 2.46,
+            "against_goals": 1,
+            "against_shots": 18
+          }
+        }
+      },
+      {
+        "team": "Tottenham",
+        "FromCorner": {
+          "xG": 7.94,
+          "goals": 13,
+          "shots": 53,
+          "against_xG": 6.89,
+          "against_goals": 4,
+          "against_shots": 58
+        },
+        "SetPiece": {
+          "xG": 0.8,
+          "goals": 0,
+          "shots": 16,
+          "against_xG": 3.25,
+          "against_goals": 2,
+          "against_shots": 23
+        },
+        "DirectFreekick": {
+          "xG": 0.46,
+          "goals": 0,
+          "shots": 8,
+          "against_xG": 0.36,
+          "against_goals": 0,
+          "against_shots": 8
+        },
+        "Penalty": {
+          "xG": 0.0,
+          "goals": 0,
+          "shots": 0,
+          "against_xG": 0.76,
+          "against_goals": 1,
+          "against_shots": 1
+        },
+        "total_setpiece_xG": 9.2,
+        "total_setpiece_goals": 13,
+        "total_setpiece_against_xG": 11.26,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 1.0,
+            "goals": 1,
+            "shots": 1,
+            "against_xG": 0.0,
+            "against_goals": 0,
+            "against_shots": 0
+          },
+          "shotOboxTotal": {
+            "xG": 2.7,
+            "goals": 3,
+            "shots": 91,
+            "against_xG": 3.57,
+            "against_goals": 8,
+            "against_shots": 104
+          },
+          "shotPenaltyArea": {
+            "xG": 17.58,
+            "goals": 23,
+            "shots": 159,
+            "against_xG": 21.05,
+            "against_goals": 19,
+            "against_shots": 183
+          },
+          "shotSixYardBox": {
+            "xG": 11.89,
+            "goals": 9,
+            "shots": 37,
+            "against_xG": 13.55,
+            "against_goals": 10,
+            "against_shots": 38
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 18.9,
+            "goals": 14,
+            "shots": 166,
+            "against_xG": 21.12,
+            "against_goals": 26,
+            "against_shots": 193
+          },
+          "Standard": {
+            "xG": 9.19,
+            "goals": 13,
+            "shots": 77,
+            "against_xG": 11.26,
+            "against_goals": 7,
+            "against_shots": 90
+          },
+          "Slow": {
+            "xG": 3.28,
+            "goals": 6,
+            "shots": 32,
+            "against_xG": 2.45,
+            "against_goals": 3,
+            "against_shots": 25
+          },
+          "Fast": {
+            "xG": 1.79,
+            "goals": 3,
+            "shots": 13,
+            "against_xG": 3.34,
+            "against_goals": 1,
+            "against_shots": 17
+          }
+        }
+      },
+      {
+        "team": "Fulham",
+        "FromCorner": {
+          "xG": 6.6,
+          "goals": 7,
+          "shots": 54,
+          "against_xG": 10.67,
+          "against_goals": 8,
+          "against_shots": 58
+        },
+        "SetPiece": {
+          "xG": 0.44,
+          "goals": 0,
+          "shots": 8,
+          "against_xG": 1.81,
+          "against_goals": 1,
+          "against_shots": 13
+        },
+        "DirectFreekick": {
+          "xG": 0.63,
+          "goals": 1,
+          "shots": 7,
+          "against_xG": 0.43,
+          "against_goals": 0,
+          "against_shots": 8
+        },
+        "Penalty": {
+          "xG": 1.52,
+          "goals": 2,
+          "shots": 2,
+          "against_xG": 2.28,
+          "against_goals": 2,
+          "against_shots": 3
+        },
+        "total_setpiece_xG": 9.19,
+        "total_setpiece_goals": 10,
+        "total_setpiece_against_xG": 15.19,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 4.0,
+            "goals": 4,
+            "shots": 4,
+            "against_xG": 3.0,
+            "against_goals": 3,
+            "against_shots": 3
+          },
+          "shotOboxTotal": {
+            "xG": 3.62,
+            "goals": 8,
+            "shots": 104,
+            "against_xG": 3.3,
+            "against_goals": 4,
+            "against_shots": 94
+          },
+          "shotPenaltyArea": {
+            "xG": 19.04,
+            "goals": 15,
+            "shots": 174,
+            "against_xG": 23.17,
+            "against_goals": 21,
+            "against_shots": 161
+          },
+          "shotSixYardBox": {
+            "xG": 9.41,
+            "goals": 8,
+            "shots": 32,
+            "against_xG": 15.67,
+            "against_goals": 12,
+            "against_shots": 52
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 23.29,
+            "goals": 23,
+            "shots": 208,
+            "against_xG": 20.47,
+            "against_goals": 18,
+            "against_shots": 173
+          },
+          "Standard": {
+            "xG": 9.2,
+            "goals": 10,
+            "shots": 71,
+            "against_xG": 15.19,
+            "against_goals": 11,
+            "against_shots": 82
+          },
+          "Slow": {
+            "xG": 2.88,
+            "goals": 2,
+            "shots": 26,
+            "against_xG": 5.51,
+            "against_goals": 6,
+            "against_shots": 36
+          },
+          "Fast": {
+            "xG": 0.71,
+            "goals": 0,
+            "shots": 9,
+            "against_xG": 3.96,
+            "against_goals": 5,
+            "against_shots": 19
+          }
+        }
+      },
+      {
+        "team": "Liverpool",
+        "FromCorner": {
+          "xG": 5.22,
+          "goals": 4,
+          "shots": 51,
+          "against_xG": 4.25,
+          "against_goals": 7,
+          "against_shots": 43
+        },
+        "SetPiece": {
+          "xG": 1.25,
+          "goals": 0,
+          "shots": 16,
+          "against_xG": 1.46,
+          "against_goals": 2,
+          "against_shots": 16
+        },
+        "DirectFreekick": {
+          "xG": 0.77,
+          "goals": 3,
+          "shots": 13,
+          "against_xG": 0.5,
+          "against_goals": 0,
+          "against_shots": 12
+        },
+        "Penalty": {
+          "xG": 1.52,
+          "goals": 1,
+          "shots": 2,
+          "against_xG": 3.04,
+          "against_goals": 3,
+          "against_shots": 4
+        },
+        "total_setpiece_xG": 8.76,
+        "total_setpiece_goals": 8,
+        "total_setpiece_against_xG": 9.25,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 1.0,
+            "goals": 1,
+            "shots": 1,
+            "against_xG": 0.0,
+            "against_goals": 0,
+            "against_shots": 0
+          },
+          "shotOboxTotal": {
+            "xG": 5.16,
+            "goals": 5,
+            "shots": 148,
+            "against_xG": 2.98,
+            "against_goals": 6,
+            "against_shots": 96
+          },
+          "shotPenaltyArea": {
+            "xG": 32.31,
+            "goals": 26,
+            "shots": 235,
+            "against_xG": 23.83,
+            "against_goals": 22,
+            "against_shots": 165
+          },
+          "shotSixYardBox": {
+            "xG": 10.02,
+            "goals": 9,
+            "shots": 23,
+            "against_xG": 7.82,
+            "against_goals": 7,
+            "against_shots": 19
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 33.39,
+            "goals": 28,
+            "shots": 281,
+            "against_xG": 19.8,
+            "against_goals": 15,
+            "against_shots": 158
+          },
+          "Standard": {
+            "xG": 8.77,
+            "goals": 8,
+            "shots": 82,
+            "against_xG": 9.25,
+            "against_goals": 12,
+            "against_shots": 75
+          },
+          "Slow": {
+            "xG": 2.26,
+            "goals": 1,
+            "shots": 24,
+            "against_xG": 1.64,
+            "against_goals": 3,
+            "against_shots": 26
+          },
+          "Fast": {
+            "xG": 4.08,
+            "goals": 4,
+            "shots": 20,
+            "against_xG": 3.95,
+            "against_goals": 5,
+            "against_shots": 21
+          }
+        }
+      },
+      {
+        "team": "Sunderland",
+        "FromCorner": {
+          "xG": 2.85,
+          "goals": 2,
+          "shots": 39,
+          "against_xG": 5.35,
+          "against_goals": 6,
+          "against_shots": 59
+        },
+        "SetPiece": {
+          "xG": 3.1,
+          "goals": 3,
+          "shots": 26,
+          "against_xG": 1.59,
+          "against_goals": 0,
+          "against_shots": 19
+        },
+        "DirectFreekick": {
+          "xG": 0.17,
+          "goals": 0,
+          "shots": 4,
+          "against_xG": 0.43,
+          "against_goals": 0,
+          "against_shots": 7
+        },
+        "Penalty": {
+          "xG": 2.28,
+          "goals": 2,
+          "shots": 3,
+          "against_xG": 1.52,
+          "against_goals": 1,
+          "against_shots": 2
+        },
+        "total_setpiece_xG": 8.4,
+        "total_setpiece_goals": 7,
+        "total_setpiece_against_xG": 8.89,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 3.0,
+            "goals": 3,
+            "shots": 3,
+            "against_xG": 1.0,
+            "against_goals": 1,
+            "against_shots": 1
+          },
+          "shotOboxTotal": {
+            "xG": 1.86,
+            "goals": 3,
+            "shots": 68,
+            "against_xG": 4.19,
+            "against_goals": 6,
+            "against_shots": 133
+          },
+          "shotPenaltyArea": {
+            "xG": 19.87,
+            "goals": 19,
+            "shots": 160,
+            "against_xG": 26.24,
+            "against_goals": 15,
+            "against_shots": 210
+          },
+          "shotSixYardBox": {
+            "xG": 4.92,
+            "goals": 2,
+            "shots": 23,
+            "against_xG": 12.37,
+            "against_goals": 8,
+            "against_shots": 33
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 14.75,
+            "goals": 16,
+            "shots": 146,
+            "against_xG": 27.77,
+            "against_goals": 16,
+            "against_shots": 236
+          },
+          "Standard": {
+            "xG": 8.4,
+            "goals": 7,
+            "shots": 72,
+            "against_xG": 8.9,
+            "against_goals": 7,
+            "against_shots": 87
+          },
+          "Slow": {
+            "xG": 5.05,
+            "goals": 3,
+            "shots": 25,
+            "against_xG": 3.96,
+            "against_goals": 4,
+            "against_shots": 37
+          },
+          "Fast": {
+            "xG": 1.45,
+            "goals": 1,
+            "shots": 11,
+            "against_xG": 3.18,
+            "against_goals": 3,
+            "against_shots": 17
+          }
+        }
+      },
+      {
+        "team": "Burnley",
+        "FromCorner": {
+          "xG": 3.51,
+          "goals": 3,
+          "shots": 34,
+          "against_xG": 10.17,
+          "against_goals": 8,
+          "against_shots": 74
+        },
+        "SetPiece": {
+          "xG": 2.23,
+          "goals": 0,
+          "shots": 21,
+          "against_xG": 2.28,
+          "against_goals": 1,
+          "against_shots": 17
+        },
+        "DirectFreekick": {
+          "xG": 0.69,
+          "goals": 0,
+          "shots": 12,
+          "against_xG": 0.57,
+          "against_goals": 0,
+          "against_shots": 9
+        },
+        "Penalty": {
+          "xG": 1.52,
+          "goals": 2,
+          "shots": 2,
+          "against_xG": 4.57,
+          "against_goals": 5,
+          "against_shots": 6
+        },
+        "total_setpiece_xG": 7.95,
+        "total_setpiece_goals": 5,
+        "total_setpiece_against_xG": 17.59,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 2.0,
+            "goals": 2,
+            "shots": 2,
+            "against_xG": 4.0,
+            "against_goals": 4,
+            "against_shots": 4
+          },
+          "shotOboxTotal": {
+            "xG": 3.33,
+            "goals": 2,
+            "shots": 96,
+            "against_xG": 4.49,
+            "against_goals": 4,
+            "against_shots": 147
+          },
+          "shotPenaltyArea": {
+            "xG": 15.81,
+            "goals": 19,
+            "shots": 121,
+            "against_xG": 35.91,
+            "against_goals": 32,
+            "against_shots": 239
+          },
+          "shotSixYardBox": {
+            "xG": 5.9,
+            "goals": 5,
+            "shots": 16,
+            "against_xG": 17.64,
+            "against_goals": 11,
+            "against_shots": 48
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 15.0,
+            "goals": 18,
+            "shots": 138,
+            "against_xG": 35.03,
+            "against_goals": 30,
+            "against_shots": 283
+          },
+          "Standard": {
+            "xG": 7.95,
+            "goals": 5,
+            "shots": 69,
+            "against_xG": 17.59,
+            "against_goals": 14,
+            "against_shots": 106
+          },
+          "Slow": {
+            "xG": 2.34,
+            "goals": 4,
+            "shots": 15,
+            "against_xG": 5.03,
+            "against_goals": 4,
+            "against_shots": 29
+          },
+          "Fast": {
+            "xG": 1.75,
+            "goals": 1,
+            "shots": 13,
+            "against_xG": 4.38,
+            "against_goals": 3,
+            "against_shots": 20
+          }
+        }
+      },
+      {
+        "team": "Nottingham Forest",
+        "FromCorner": {
+          "xG": 4.33,
+          "goals": 4,
+          "shots": 54,
+          "against_xG": 9.39,
+          "against_goals": 8,
+          "against_shots": 67
+        },
+        "SetPiece": {
+          "xG": 1.15,
+          "goals": 1,
+          "shots": 18,
+          "against_xG": 5.6,
+          "against_goals": 4,
+          "against_shots": 23
+        },
+        "DirectFreekick": {
+          "xG": 0.46,
+          "goals": 0,
+          "shots": 9,
+          "against_xG": 0.37,
+          "against_goals": 1,
+          "against_shots": 5
+        },
+        "Penalty": {
+          "xG": 1.52,
+          "goals": 2,
+          "shots": 2,
+          "against_xG": 3.81,
+          "against_goals": 5,
+          "against_shots": 5
+        },
+        "total_setpiece_xG": 7.46,
+        "total_setpiece_goals": 7,
+        "total_setpiece_against_xG": 19.17,
+        "shotZone": {
+          "ownGoals": {
+            "xG": 0.0,
+            "goals": 0,
+            "shots": 0,
+            "against_xG": 2.0,
+            "against_goals": 2,
+            "against_shots": 2
+          },
+          "shotOboxTotal": {
+            "xG": 3.56,
+            "goals": 2,
+            "shots": 129,
+            "against_xG": 3.85,
+            "against_goals": 9,
+            "against_shots": 102
+          },
+          "shotPenaltyArea": {
+            "xG": 19.08,
+            "goals": 17,
+            "shots": 178,
+            "against_xG": 30.08,
+            "against_goals": 25,
+            "against_shots": 195
+          },
+          "shotSixYardBox": {
+            "xG": 9.57,
+            "goals": 6,
+            "shots": 25,
+            "against_xG": 10.33,
+            "against_goals": 2,
+            "against_shots": 31
+          }
+        },
+        "attackSpeed": {
+          "Normal": {
+            "xG": 19.72,
+            "goals": 15,
+            "shots": 215,
+            "against_xG": 22.34,
+            "against_goals": 15,
+            "against_shots": 193
+          },
+          "Standard": {
+            "xG": 7.46,
+            "goals": 7,
+            "shots": 83,
+            "against_xG": 19.17,
+            "against_goals": 18,
+            "against_shots": 100
+          },
+          "Fast": {
+            "xG": 3.83,
+            "goals": 3,
+            "shots": 19,
+            "against_xG": 3.58,
+            "against_goals": 3,
+            "against_shots": 18
+          },
+          "Slow": {
+            "xG": 1.2,
+            "goals": 0,
+            "shots": 15,
+            "against_xG": 1.17,
+            "against_goals": 2,
+            "against_shots": 19
+          }
+        }
+      }
+    ]
   }
 }

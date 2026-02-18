@@ -2033,5 +2033,190 @@
         "penalties_conceded": 4
       }
     ]
+  },
+  "2025": {
+    "season": "2025/2026",
+    "teams": [
+      {
+        "team": "Newcastle United",
+        "corners_taken": 180,
+        "freekicks_won": 286,
+        "penalties_won": 5,
+        "corners_conceded": 132,
+        "freekicks_conceded": 257,
+        "penalties_conceded": 4
+      },
+      {
+        "team": "Arsenal",
+        "corners_taken": 157,
+        "freekicks_won": 266,
+        "penalties_won": 3,
+        "corners_conceded": 83,
+        "freekicks_conceded": 263,
+        "penalties_conceded": 0
+      },
+      {
+        "team": "Liverpool",
+        "corners_taken": 151,
+        "freekicks_won": 262,
+        "penalties_won": 2,
+        "corners_conceded": 116,
+        "freekicks_conceded": 252,
+        "penalties_conceded": 4
+      },
+      {
+        "team": "Chelsea",
+        "corners_taken": 149,
+        "freekicks_won": 300,
+        "penalties_won": 7,
+        "corners_conceded": 111,
+        "freekicks_conceded": 288,
+        "penalties_conceded": 1
+      },
+      {
+        "team": "Bournemouth",
+        "corners_taken": 147,
+        "freekicks_won": 260,
+        "penalties_won": 4,
+        "corners_conceded": 137,
+        "freekicks_conceded": 317,
+        "penalties_conceded": 4
+      },
+      {
+        "team": "Nottingham Forest",
+        "corners_taken": 146,
+        "freekicks_won": 298,
+        "penalties_won": 2,
+        "corners_conceded": 123,
+        "freekicks_conceded": 274,
+        "penalties_conceded": 5
+      },
+      {
+        "team": "Manchester City",
+        "corners_taken": 141,
+        "freekicks_won": 287,
+        "penalties_won": 4,
+        "corners_conceded": 99,
+        "freekicks_conceded": 263,
+        "penalties_conceded": 2
+      },
+      {
+        "team": "Aston Villa",
+        "corners_taken": 139,
+        "freekicks_won": 333,
+        "corners_conceded": 126,
+        "freekicks_conceded": 262,
+        "penalties_conceded": 2,
+        "penalties_won": 0
+      },
+      {
+        "team": "West Ham",
+        "corners_taken": 130,
+        "freekicks_won": 273,
+        "penalties_won": 3,
+        "corners_conceded": 161,
+        "freekicks_conceded": 287,
+        "penalties_conceded": 6
+      },
+      {
+        "team": "Brentford",
+        "corners_taken": 128,
+        "freekicks_won": 236,
+        "penalties_won": 8,
+        "corners_conceded": 134,
+        "freekicks_conceded": 280,
+        "penalties_conceded": 7
+      },
+      {
+        "team": "Brighton",
+        "corners_taken": 128,
+        "freekicks_won": 257,
+        "penalties_won": 5,
+        "corners_conceded": 122,
+        "freekicks_conceded": 311,
+        "penalties_conceded": 6
+      },
+      {
+        "team": "Tottenham",
+        "corners_taken": 128,
+        "freekicks_won": 242,
+        "penalties_won": 0,
+        "corners_conceded": 135,
+        "freekicks_conceded": 291,
+        "penalties_conceded": 1
+      },
+      {
+        "team": "Fulham",
+        "corners_taken": 121,
+        "freekicks_won": 233,
+        "penalties_won": 2,
+        "corners_conceded": 146,
+        "freekicks_conceded": 284,
+        "penalties_conceded": 3
+      },
+      {
+        "team": "Manchester United",
+        "corners_taken": 116,
+        "freekicks_won": 272,
+        "penalties_won": 4,
+        "corners_conceded": 127,
+        "freekicks_conceded": 262,
+        "penalties_conceded": 2
+      },
+      {
+        "team": "Leeds United",
+        "corners_taken": 115,
+        "freekicks_won": 287,
+        "penalties_won": 5,
+        "corners_conceded": 114,
+        "freekicks_conceded": 264,
+        "penalties_conceded": 5
+      },
+      {
+        "team": "Everton",
+        "corners_taken": 111,
+        "freekicks_won": 296,
+        "penalties_won": 2,
+        "corners_conceded": 133,
+        "freekicks_conceded": 278,
+        "penalties_conceded": 3
+      },
+      {
+        "team": "Crystal Palace",
+        "corners_taken": 109,
+        "freekicks_won": 226,
+        "penalties_won": 5,
+        "corners_conceded": 126,
+        "freekicks_conceded": 264,
+        "penalties_conceded": 3
+      },
+      {
+        "team": "Burnley",
+        "corners_taken": 88,
+        "freekicks_won": 226,
+        "penalties_won": 2,
+        "corners_conceded": 151,
+        "freekicks_conceded": 258,
+        "penalties_conceded": 6
+      },
+      {
+        "team": "Sunderland",
+        "corners_taken": 88,
+        "freekicks_won": 262,
+        "penalties_won": 3,
+        "corners_conceded": 129,
+        "freekicks_conceded": 259,
+        "penalties_conceded": 2
+      },
+      {
+        "team": "Wolverhampton Wanderers",
+        "corners_taken": 88,
+        "freekicks_won": 262,
+        "penalties_won": 3,
+        "corners_conceded": 163,
+        "freekicks_conceded": 357,
+        "penalties_conceded": 3
+      }
+    ]
   }
 }

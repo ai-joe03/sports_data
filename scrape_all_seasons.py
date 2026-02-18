@@ -60,7 +60,7 @@ def extract_category(stats_group, category_keys=None):
 
 def main():
     results = {}
-    for season in range(2014, 2025):
+    for season in range(2014, 2026):
         label = f"{season}/{season+1}"
         print(f"Fetching {label}...", file=sys.stderr)
 
