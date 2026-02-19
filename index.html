@@ -233,6 +233,10 @@
   <h2 class="section-title" id="sp-c4-title">xG Allowed per Action</h2>
   <p class="section-subtitle" id="sp-c4-sub">Expected goals conceded per set piece faced</p>
   <div class="chart-container"><svg id="sp-c4"></svg></div>
+
+  <h2 class="section-title" id="sp-c5-title">Raw Set Piece Counts</h2>
+  <p class="section-subtitle" id="sp-c5-sub">Total corners, free kicks and penalties — taken vs conceded</p>
+  <div class="chart-container"><svg id="sp-c5"></svg></div>
 </div>
 
 <!-- ═══════════ TAB: Shot Zones ═══════════ -->
@@ -442,6 +446,7 @@ function redrawSetPieces(teams) {
   drawSpNet(teams, f);
   drawSpPerAction(teams, f);
   drawSpAllowedPerAction(teams, f);
+  drawSpRawCounts(teams, f);
 }
 
 // ── SP Chart 1: Total xG Created ─────────────────────────────────
@@ -591,6 +596,83 @@ function drawSpAllowedPerAction(teamsRaw, filter) {
       if(isAll)h+=`<div class="tt-row tt-total" style="font-weight:700"><span class="tt-label">Overall</span><span class="tt-val">${team.totalEfficiency.toFixed(4)} xG/action (${team.totalConcededCount} faced)</span></div>`;
       return h;
     },legendSuffix:et=>`xG/${et.unit} faced`});
+}
+
+// ── SP Chart 5: Raw Set Piece Counts ─────────────────────────────
+function drawSpRawCounts(teamsRaw, filter) {
+  const countsLookup = getCountsLookup();
+  const hasCounts = Object.keys(countsLookup).length > 0;
+  const CTYPE = [
+    {takenKey:"corners_taken",concKey:"corners_conceded",label:"Corners",color:"#6B6EAF",filterKey:"FromCorner"},
+    {takenKey:"freekicks_won",concKey:"freekicks_conceded",label:"Free Kicks",color:"#4A9B6F",filterKey:"DirectFreekick"},
+    {takenKey:"penalties_won",concKey:"penalties_conceded",label:"Penalties",color:"#FF5A5F",filterKey:"Penalty"},
+  ];
+  const isAll = filter === "all";
+  if(!isAll && filter==="SetPiece"){const svg=d3.select("#sp-c5");svg.selectAll("*").remove();d3.select("#sp-c5-title").text("Raw Set Piece Counts");d3.select("#sp-c5-sub").text("No raw count data available for indirect set pieces.");svg.attr("viewBox","0 0 1160 60").attr("width","100%");svg.append("text").attr("x",580).attr("y",35).attr("text-anchor","middle").attr("font-size",14).attr("fill","#555555").text("Select a different filter to see raw counts.");return;}
+  const activeTypes = isAll ? CTYPE : CTYPE.filter(c => c.filterKey === filter);
+  const lbl = isAll ? "All Measurable Set Pieces" : activeTypes[0].label;
+  d3.select("#sp-c5-title").text(`Raw Set Piece Counts — ${lbl} — ${seasonLabel()}`);
+  d3.select("#sp-c5-sub").text(`Total ${lbl.toLowerCase()} taken (green, right) vs conceded (red, left). Use this to cross-check the efficiency charts above.`);
+  if(!hasCounts){const svg=d3.select("#sp-c5");svg.selectAll("*").remove();svg.attr("viewBox","0 0 1160 60").attr("width","100%");svg.append("text").attr("x",580).attr("y",35).attr("text-anchor","middle").attr("font-size",14).attr("fill","#555555").text("No Premier League count data available for this season.");return;}
+
+  const teams = teamsRaw.map(t=>{
+    const c=countsLookup[t.team];if(!c)return null;
+    const e={team:t.team,short:SHORT_NAMES[t.team]||t.team};
+    let totalTaken=0,totalConc=0;
+    activeTypes.forEach(ct=>{
+      const tk=c[ct.takenKey]||0, cn=c[ct.concKey]||0;
+      e[ct.filterKey]={taken:tk,conceded:cn,label:ct.label};
+      totalTaken+=tk;totalConc+=cn;
+    });
+    e.totalTaken=totalTaken;e.totalConceded=totalConc;
+    return e;
+  }).filter(Boolean).sort((a,b)=>b.totalTaken-a.totalTaken);
+
+  const svg=d3.select("#sp-c5");svg.selectAll("*").remove();
+  const margin={top:32,right:60,bottom:40,left:110},rowH=30,W=1160;
+  const H=margin.top+margin.bottom+teams.length*rowH;
+  svg.attr("viewBox",`0 0 ${W} ${H}`).attr("width","100%");
+  const absMax=d3.max(teams,d=>Math.max(d.totalTaken,d.totalConceded))*1.15||1;
+  const x=d3.scaleLinear().domain([-absMax,absMax]).range([margin.left,W-margin.right]);
+  const y=d3.scaleBand().domain(teams.map(d=>d.short)).range([margin.top,H-margin.bottom]).paddingInner(0.22);
+
+  svg.append("g").attr("class","grid").attr("transform",`translate(0,${margin.top})`).call(d3.axisTop(x).ticks(10).tickSize(-(H-margin.top-margin.bottom)).tickFormat(""));
+  svg.append("line").attr("x1",x(0)).attr("x2",x(0)).attr("y1",margin.top).attr("y2",H-margin.bottom).attr("stroke","#020202").attr("stroke-width",1.5).attr("stroke-opacity",0.3);
+  svg.append("g").attr("class","axis").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).tickSize(0).tickPadding(8)).select(".domain").remove();
+  svg.append("g").attr("class","axis").attr("transform",`translate(0,${H-margin.bottom})`).call(d3.axisBottom(x).ticks(10).tickFormat(d=>Math.abs(d)));
+
+  svg.append("text").attr("x",x(-absMax/2)).attr("y",H-4).attr("text-anchor","middle").attr("font-size",12).attr("fill","#dc2626").text("\u2190 Conceded");
+  svg.append("text").attr("x",x(absMax/2)).attr("y",H-4).attr("text-anchor","middle").attr("font-size",12).attr("fill","#16a34a").text("Taken \u2192");
+
+  const tooltip=d3.select("#tooltip");
+  teams.forEach(team=>{
+    svg.append("rect").attr("x",x(-team.totalConceded)).attr("y",y(team.short)).attr("width",Math.abs(x(0)-x(-team.totalConceded))).attr("height",y.bandwidth()).attr("rx",3).attr("fill","#dc2626").attr("opacity",0.7).style("cursor","pointer")
+      .on("mouseover",event=>{tooltip.html(countsTT(team)).style("opacity",1);moveTooltip(event);}).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+    svg.append("rect").attr("x",x(0)).attr("y",y(team.short)).attr("width",Math.max(0,x(team.totalTaken)-x(0))).attr("height",y.bandwidth()).attr("rx",3).attr("fill","#16a34a").attr("opacity",0.7).style("cursor","pointer")
+      .on("mouseover",event=>{tooltip.html(countsTT(team)).style("opacity",1);moveTooltip(event);}).on("mousemove",moveTooltip).on("mouseout",hideTooltip);
+    svg.append("text").attr("x",x(-team.totalConceded)-5).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor","end").attr("font-size",12).attr("font-weight",600).attr("fill","#dc2626").text(team.totalConceded);
+    svg.append("text").attr("x",x(team.totalTaken)+5).attr("y",y(team.short)+y.bandwidth()/2).attr("dy","0.35em").attr("text-anchor","start").attr("font-size",12).attr("font-weight",600).attr("fill","#16a34a").text(team.totalTaken);
+  });
+
+  const lg=svg.append("g").attr("transform",`translate(${margin.left},6)`);
+  lg.append("rect").attr("x",0).attr("width",10).attr("height",10).attr("rx",2).attr("fill","#16a34a").attr("opacity",0.7);
+  lg.append("text").attr("x",14).attr("y",9).attr("font-size",13).attr("fill","#555555").text("Taken");
+  lg.append("rect").attr("x",70).attr("width",10).attr("height",10).attr("rx",2).attr("fill","#dc2626").attr("opacity",0.7);
+  lg.append("text").attr("x",84).attr("y",9).attr("font-size",13).attr("fill","#555555").text("Conceded");
+
+  function countsTT(team){
+    let h=`<div class="tt-team">${team.team}</div>`;
+    activeTypes.forEach(ct=>{
+      const d=team[ct.filterKey];
+      h+=`<div class="tt-row"><span class="tt-label"><span style="color:${ct.color}">\u25A0</span> ${d.label}</span><span class="tt-val" style="color:#16a34a">${d.taken} taken</span></div>`;
+      h+=`<div class="tt-row"><span class="tt-label" style="padding-left:16px">Conceded</span><span class="tt-val" style="color:#dc2626">${d.conceded}</span></div>`;
+    });
+    if(isAll){
+      h+=`<div class="tt-row tt-total"><span class="tt-label">Total Taken</span><span class="tt-val" style="color:#16a34a">${team.totalTaken}</span></div>`;
+      h+=`<div class="tt-row"><span class="tt-label">Total Conceded</span><span class="tt-val" style="color:#dc2626">${team.totalConceded}</span></div>`;
+    }
+    return h;
+  }
 }
 
 // ╔══════════════════════════════════════════════════════════════════╗
