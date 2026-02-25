@@ -464,6 +464,6 @@ function drawEfficiency(teamsRaw) {
 </body>
 </html>"""
 
-with open("index.html", "w") as f:
+with open("epl/index.html", "w") as f:
     f.write(html)
 print(f"Wrote index.html ({len(html)} bytes)")

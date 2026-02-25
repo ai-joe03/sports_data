@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLB Shot Zones — Opposition Scouting</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f6f8fa; color: #24292f; min-height: 100vh;
+  }
+
+  header {
+    background: #fff; border-bottom: 1px solid #d0d7de;
+    padding: 12px 24px; display: flex; align-items: center; gap: 12px;
+  }
+  header h1 { font-size: 16px; font-weight: 600; }
+  header span { font-size: 13px; color: #57606a; }
+
+  .main { max-width: 1140px; margin: 0 auto; padding: 20px 16px; }
+
+  /* Load bar */
+  .load-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+    padding: 12px 16px; margin-bottom: 12px;
+  }
+  .load-bar label { font-size: 13px; font-weight: 500; white-space: nowrap; }
+  .load-bar input {
+    width: 130px; padding: 5px 10px; font-size: 13px;
+    border: 1px solid #d0d7de; border-radius: 6px; outline: none;
+  }
+  .load-bar input:focus { border-color: #0969da; box-shadow: 0 0 0 3px #0969da22; }
+  .btn {
+    padding: 5px 14px; font-size: 13px; font-weight: 500;
+    border-radius: 6px; border: 1px solid; cursor: pointer;
+  }
+  .btn-primary { background: #0969da; color: #fff; border-color: #0550ae; }
+  .btn-primary:hover { background: #0550ae; }
+  .btn-primary:disabled { background: #8cc4f5; border-color: #8cc4f5; cursor: not-allowed; }
+  .load-hint { font-size: 12px; color: #57606a; margin-left: auto; }
+  .load-hint a { color: #0969da; }
+
+  /* Status */
+  .status-msg {
+    font-size: 13px; padding: 8px 14px; border-radius: 6px;
+    margin-bottom: 10px; display: none;
+  }
+  .status-msg.error { background: #fff0f0; border: 1px solid #ff8182; color: #a40000; display: block; }
+  .status-msg.info  { background: #ddf4ff; border: 1px solid #54aeff; color: #0550ae; display: block; }
+
+  /* Controls */
+  .controls {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+    padding: 10px 16px; margin-bottom: 14px;
+  }
+  .team-tabs { display: flex; gap: 4px; }
+  .team-tab {
+    padding: 4px 14px; font-size: 13px; border-radius: 20px;
+    border: 1px solid #d0d7de; background: #f6f8fa;
+    cursor: pointer; font-weight: 500; color: #57606a;
+  }
+  .team-tab.active { background: #0969da; color: #fff; border-color: #0969da; }
+  .sep { color: #d0d7de; }
+  select {
+    padding: 4px 8px; font-size: 13px; border: 1px solid #d0d7de;
+    border-radius: 6px; background: #fff; cursor: pointer;
+    outline: none; max-width: 210px;
+  }
+  .view-btns { display: flex; gap: 4px; margin-left: auto; }
+  .view-btn {
+    padding: 4px 12px; font-size: 12px; border-radius: 6px;
+    border: 1px solid #d0d7de; background: #f6f8fa;
+    cursor: pointer; font-weight: 500; color: #57606a;
+  }
+  .view-btn.active { background: #24292f; color: #fff; border-color: #24292f; }
+
+  /* Layout */
+  .viz-layout { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+
+  /* Court panel */
+  .court-panel {
+    background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+    padding: 16px; flex-shrink: 0;
+  }
+  .court-panel h2 { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #57606a; }
+
+  /* Court SVG elements */
+  .court-bg   { fill: #f5e6c8; }
+  .court-key  { fill: #e0c46e; stroke: #8b6914; stroke-width: 1.5; }
+  .court-line { fill: none; stroke: #8b6914; stroke-width: 2; }
+  .court-arc  { fill: none; stroke: #8b6914; stroke-width: 1.5; }
+  .court-dashed { fill: none; stroke: #8b6914; stroke-width: 1.2; stroke-dasharray: 5 3; }
+  .basket-rim { fill: none; stroke: #d4500a; stroke-width: 2.5; }
+  .backboard  { fill: #888; }
+
+  /* Shots */
+  .shot-made   { fill: #22a06b; fill-opacity: 0.85; stroke: #fff; stroke-width: 0.8; }
+  .shot-missed { fill: none; stroke: #ef4444; stroke-width: 1.5; }
+
+  /* Zone bubbles */
+  .zone-label { font-size: 10px; font-weight: 700; fill: #fff; pointer-events: none; }
+  .zone-pct   { font-size: 9px; fill: rgba(255,255,255,0.9); pointer-events: none; }
+
+  /* Stats panel */
+  .stats-panel {
+    background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+    padding: 16px; flex: 1; min-width: 260px;
+  }
+  .stats-panel h2 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #57606a; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+  .summary-card {
+    background: #f6f8fa; border: 1px solid #d0d7de;
+    border-radius: 6px; padding: 8px; text-align: center;
+  }
+  .summary-card .num { font-size: 22px; font-weight: 700; color: #0969da; }
+  .summary-card .lbl { font-size: 11px; color: #57606a; margin-top: 2px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    text-align: left; padding: 6px 8px;
+    border-bottom: 2px solid #d0d7de; font-size: 11px; color: #57606a; white-space: nowrap;
+  }
+  th.r, td.r { text-align: right; }
+  td { padding: 5px 8px; border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f6f8fa; }
+  .zone-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+  /* Legend */
+  .legend { display: flex; gap: 14px; font-size: 11px; color: #57606a; margin-top: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .leg-dot    { width: 10px; height: 10px; border-radius: 50%; }
+  .leg-circle { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #ef4444; background: none; }
+
+  /* Tooltip */
+  .tooltip {
+    position: absolute; pointer-events: none; background: #24292f; color: #fff;
+    border-radius: 6px; padding: 6px 10px; font-size: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3); white-space: nowrap;
+    opacity: 0; transition: opacity .15s; line-height: 1.5;
+  }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 50px 20px; color: #57606a; }
+  .empty-state .icon { font-size: 36px; margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; margin-bottom: 4px; }
+  .empty-state small { font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Super League Basketball</h1>
+  <span>Opposition Shot Zone Scouting</span>
+</header>
+
+<div class="main">
+
+  <div class="load-bar">
+    <label for="gameId">Game ID</label>
+    <input id="gameId" type="text" placeholder="e.g. 2702621" maxlength="10">
+    <button class="btn btn-primary" id="loadBtn" onclick="loadGame()">Load Game</button>
+    <span class="load-hint">
+      Find IDs on
+      <a href="https://www.superleaguebasketballm.co.uk/livestats/" target="_blank">superleaguebasketballm.co.uk/livestats</a>
+      — open a game box score, copy the number from the URL
+    </span>
+  </div>
+
+  <div class="status-msg" id="statusMsg"></div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="team-tabs" id="teamTabs"></div>
+    <span class="sep">|</span>
+    <select id="playerSelect" onchange="render()">
+      <option value="all">All players</option>
+    </select>
+    <div class="view-btns">
+      <button class="view-btn active" onclick="setView('scatter',this)">Shot Locations</button>
+      <button class="view-btn"        onclick="setView('zones',this)">Zone Analysis</button>
+    </div>
+  </div>
+
+  <div class="viz-layout">
+    <div class="court-panel" id="courtPanel">
+      <h2 id="courtTitle">Half-court — offensive end</h2>
+      <svg id="court-svg"></svg>
+      <div class="legend" id="legend" style="display:none">
+        <div class="legend-item"><div class="leg-dot" style="background:#22a06b"></div>Made</div>
+        <div class="legend-item"><div class="leg-circle"></div>Missed</div>
+      </div>
+    </div>
+
+    <div class="stats-panel">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">&#127936;</div>
+        <p>Enter a FIBA LiveStats game ID to load shot data</p>
+        <small>Each completed game has a unique numeric ID — see the hint above</small>
+      </div>
+      <div id="statsContent" style="display:none">
+        <h2 id="statsTitle">Zone statistics</h2>
+        <div class="summary-grid" id="summaryGrid"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Zone</th>
+              <th class="r">Att</th>
+              <th class="r">Made</th>
+              <th class="r">FG%</th>
+              <th class="r">Shot%</th>
+            </tr>
+          </thead>
+          <tbody id="zoneBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// FIBA court constants  (all in normalised 0-100 units)
+//
+// x : 0 = left baseline  →  100 = right baseline   (28 m full court)
+// y : 0 = left sideline  →  100 = right sideline   (15 m court width)
+//
+// Left basket centre : (BX, BY) = (5.625, 50)
+// Shots with x < 50 attack the left basket.
+// Shots with x ≥ 50 are mirrored: x'=100-x, y'=100-y
+// ─────────────────────────────────────────────────────────────
+const PHYS_LEN = 28, PHYS_WID = 15;   // court metres
+const BX = 1.575 / PHYS_LEN * 100;    // 5.625 norm-units from left baseline
+const BY = 50;                          // centre of width
+
+// Convert normalised coords to physical metres for distance calculations
+function physDist(x, y) {
+  const dx = (x - BX) / 100 * PHYS_LEN;
+  const dy = (y - BY) / 100 * PHYS_WID;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Key / paint boundaries (norm units)
+const KEY_HALF_W = 2.45 / PHYS_WID * 100;  // 16.33 units each side of centre
+const FT_X       = 5.8  / PHYS_LEN * 100;  // 20.71 units from baseline (FT line)
+
+// Corner-3 junction: where the 3pt arc hits the corner straight line (0.9m from sideline)
+const CORNER_Y_N = 0.9 / PHYS_WID * 100;   // 6.0 units from sideline
+function cornerJunctionX() {
+  // basket at (BX, BY), corner line at y = CORNER_Y_N
+  // dist = 6.75m → x = BX + sqrt(6.75² - dy_m²) / PHYS_LEN * 100
+  const dy_m = (CORNER_Y_N - BY) / 100 * PHYS_WID;  // negative
+  return BX + Math.sqrt(6.75 * 6.75 - dy_m * dy_m) / PHYS_LEN * 100;
+}
+const CORNER_X_N = cornerJunctionX();  // ~10.68 norm-units
+
+// ─────────────────────────────────────────────────────────────
+// SVG layout
+// Court width (y axis) → SVG x-axis (horizontal, 500 px)
+// Court half-length (x axis) → SVG y-axis (vertical, flipped, 467 px)
+// ─────────────────────────────────────────────────────────────
+const SVG_W = 500, SVG_H = 467;
+const SC  = SVG_W / 100;                  // 5 px per norm-unit (y direction)
+const SCX = SVG_H / 50;                   // 9.34 px per norm-unit (x direction)
+
+// court-norm → SVG pixel
+function sx(ny)  { return ny * SC; }            // court y → SVG x
+function sy(nx)  { return SVG_H - nx * SCX; }  // court x → SVG y (flipped, baseline at bottom)
+
+// Basket in SVG px
+const BSX = sx(BY), BSY = sy(BX);             // (250, ~414)
+
+// 3pt arc radius in SVG px (same in both axes since aspect ratio is preserved)
+const TP_R = 6.75 / PHYS_WID * 100 * SC;      // 225 px
+
+// ─────────────────────────────────────────────────────────────
+// Zone definitions
+// ─────────────────────────────────────────────────────────────
+const ZONES = [
+  { id: "ra",    label: "Restricted Area",  cx: BX + 2,     cy: BY        },
+  { id: "paint", label: "Paint",            cx: FT_X * 0.55, cy: BY        },
+  { id: "lmid",  label: "Left Mid-Range",   cx: FT_X * 0.7,  cy: BY - 22  },
+  { id: "rmid",  label: "Right Mid-Range",  cx: FT_X * 0.7,  cy: BY + 22  },
+  { id: "cmid",  label: "Centre Mid",       cx: FT_X * 1.15, cy: BY        },
+  { id: "lc3",   label: "Left Corner 3",    cx: 8,                cy: 7     },
+  { id: "rc3",   label: "Right Corner 3",   cx: 8,                cy: 93    },
+  { id: "lw3",   label: "Left Wing 3",      cx: CORNER_X_N + 12,  cy: 20    },
+  { id: "rw3",   label: "Right Wing 3",     cx: CORNER_X_N + 12,  cy: 80    },
+  { id: "top3",  label: "Top of Arc",       cx: CORNER_X_N + 18,  cy: BY    },
+];
+
+const ZONE_COLOURS = {
+  ra:    "#f97316", paint: "#fb923c",
+  lmid:  "#a78bfa", rmid:  "#818cf8", cmid: "#c084fc",
+  lc3:   "#34d399", rc3:   "#2dd4bf",
+  lw3:   "#60a5fa", rw3:   "#38bdf8", top3: "#0ea5e9",
+};
+
+function getShotZone(nx, ny) {
+  // nx: 0-50 (half-court length, 0 = baseline)
+  // ny: 0-100 (court width, 0 = left sideline, 100 = right sideline)
+  const dist = physDist(nx, ny);
+  const in3pt = dist > 6.75;
+
+  if (in3pt) {
+    // Corner 3: near sideline (within ~2m = 13 units of sideline)
+    if (ny < 13)  return "lc3";
+    if (ny > 87)  return "rc3";
+    // Wing vs top-of-arc split at ~35 degrees from centre
+    if (ny < 33)  return "lw3";
+    if (ny > 67)  return "rw3";
+    return "top3";
+  }
+  if (dist < 1.25) return "ra";
+  if (ny >= (BY - KEY_HALF_W) && ny <= (BY + KEY_HALF_W) && nx <= FT_X) return "paint";
+  if (ny < BY - 8)  return "lmid";
+  if (ny > BY + 8)  return "rmid";
+  return "cmid";
+}
+
+// FG% → colour: cold blue → yellow → hot green
+function fgpColour(fgp) {
+  if (isNaN(fgp)) return "#aaa";
+  const stops = [[0,[59,130,246]],[0.33,[251,191,36]],[0.55,[34,197,94]],[1,[21,128,61]]];
+  let lo = stops[0], hi = stops[stops.length-1];
+  for (let i = 0; i < stops.length-1; i++) {
+    if (fgp >= stops[i][0] && fgp <= stops[i+1][0]) { lo=stops[i]; hi=stops[i+1]; break; }
+  }
+  const t = (hi[0]-lo[0]) ? (fgp-lo[0])/(hi[0]-lo[0]) : 0;
+  return `rgb(${stops.map((_,j)=>0)[0]||Math.round(lo[1][0]+t*(hi[1][0]-lo[1][0]))},${Math.round(lo[1][1]+t*(hi[1][1]-lo[1][1]))},${Math.round(lo[1][2]+t*(hi[1][2]-lo[1][2]))})`;
+}
+// Cleaner colour interpolation
+function lerp3(lo, hi, t) {
+  return `rgb(${Math.round(lo[0]+t*(hi[0]-lo[0]))},${Math.round(lo[1]+t*(hi[1]-lo[1]))},${Math.round(lo[2]+t*(hi[2]-lo[2]))})`;
+}
+function zoneColourByFGP(fgp) {
+  if (isNaN(fgp) || fgp === undefined) return "#aaa";
+  const stops = [[0,[59,130,246]],[0.33,[251,191,36]],[0.50,[34,197,94]],[1,[21,128,61]]];
+  for (let i = 0; i < stops.length-1; i++) {
+    if (fgp <= stops[i+1][0]) {
+      const t = (fgp - stops[i][0]) / (stops[i+1][0] - stops[i][0]);
+      return lerp3(stops[i][1], stops[i+1][1], t);
+    }
+  }
+  return lerp3(stops[stops.length-2][1], stops[stops.length-1][1], 1);
+}
+
+// ─────────────────────────────────────────────────────────────
+// App state
+// ─────────────────────────────────────────────────────────────
+let state = { gameData: null, team: "1", player: "all", view: "scatter" };
+
+// ─────────────────────────────────────────────────────────────
+// Load game
+// ─────────────────────────────────────────────────────────────
+async function loadGame() {
+  const gid = document.getElementById("gameId").value.trim();
+  if (!gid || !/^\d+$/.test(gid)) { showStatus("Please enter a numeric game ID.", "error"); return; }
+  const btn = document.getElementById("loadBtn");
+  btn.disabled = true; btn.textContent = "Loading…";
+  showStatus(`Fetching game ${gid}…`, "info");
+  try {
+    const res  = await fetch(`/api/game/${gid}`);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    if (!json.shots || json.shots.length === 0)
+      throw new Error("No shot coordinate data found for this game. Try another game ID.");
+    state.gameData = json;
+    state.team = "1"; state.player = "all";
+    showStatus("", "");
+    initUI();
+    drawCourtBase();
+    render();
+  } catch (e) {
+    showStatus(`Error: ${e.message}`, "error");
+  } finally {
+    btn.disabled = false; btn.textContent = "Load Game";
+  }
+}
+
+document.getElementById("gameId").addEventListener("keydown", e => { if (e.key === "Enter") loadGame(); });
+
+function showStatus(msg, type) {
+  const el = document.getElementById("statusMsg");
+  el.textContent = msg;
+  el.className = "status-msg" + (type ? ` ${type}` : "");
+  el.style.display = msg ? "block" : "none";
+}
+
+// ─────────────────────────────────────────────────────────────
+// Init UI elements after data loads
+// ─────────────────────────────────────────────────────────────
+function initUI() {
+  const { teams } = state.gameData;
+  const tabs = document.getElementById("teamTabs");
+  tabs.innerHTML = "";
+  ["1","2"].forEach(tid => {
+    const b = document.createElement("button");
+    b.className = "team-tab" + (tid === state.team ? " active" : "");
+    b.textContent = teams[tid].short || teams[tid].name;
+    b.title = teams[tid].name;
+    b.onclick = () => { state.team = tid; state.player = "all"; updateTeamTabs(); populatePlayers(); render(); };
+    tabs.appendChild(b);
+  });
+  document.getElementById("controls").style.display = "flex";
+  document.getElementById("emptyState").style.display = "none";
+  document.getElementById("statsContent").style.display = "block";
+  populatePlayers();
+}
+
+function updateTeamTabs() {
+  document.querySelectorAll(".team-tab").forEach((b,i) => b.classList.toggle("active", (i+1).toString() === state.team));
+}
+
+function populatePlayers() {
+  const shots = state.gameData.shots.filter(s => s.team === state.team);
+  const players = [...new Set(shots.map(s => s.player).filter(Boolean))].sort();
+  const sel = document.getElementById("playerSelect");
+  sel.innerHTML = `<option value="all">All players (${players.length})</option>`;
+  players.forEach(p => { const o = document.createElement("option"); o.value = p; o.textContent = p; sel.appendChild(o); });
+  state.player = "all";
+}
+
+function setView(v, el) {
+  state.view = v;
+  document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("legend").style.display = v === "scatter" ? "flex" : "none";
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Draw static court (called once per game load)
+// ─────────────────────────────────────────────────────────────
+function drawCourtBase() {
+  const svg = d3.select("#court-svg")
+    .attr("width",  SVG_W)
+    .attr("height", SVG_H);
+  svg.selectAll("*").remove();
+
+  // Clip path
+  svg.append("defs").append("clipPath").attr("id","cc")
+    .append("rect").attr("width",SVG_W).attr("height",SVG_H);
+
+  const g = svg.append("g").attr("clip-path","url(#cc)");
+
+  // Background
+  g.append("rect").attr("class","court-bg").attr("width",SVG_W).attr("height",SVG_H);
+
+  // Key / paint
+  const keyX = sx(BY - KEY_HALF_W);
+  const keyW = sx(BY + KEY_HALF_W) - keyX;
+  const keyTop = sy(FT_X);
+  g.append("rect").attr("class","court-key")
+    .attr("x", keyX).attr("y", keyTop)
+    .attr("width", keyW).attr("height", SVG_H - keyTop);
+
+  // Free-throw circle
+  const ftR = 1.8 / PHYS_WID * 100 * SC;  // 60 px
+  const ftSX = BSX, ftSY = sy(FT_X);
+  // Top half (inside key) dashed
+  g.append("path").attr("class","court-dashed")
+    .attr("d", `M ${ftSX-ftR} ${ftSY} A ${ftR} ${ftR} 0 0 0 ${ftSX+ftR} ${ftSY}`);
+  // Bottom half (outside key) solid
+  g.append("path").attr("class","court-arc")
+    .attr("d", `M ${ftSX-ftR} ${ftSY} A ${ftR} ${ftR} 0 0 1 ${ftSX+ftR} ${ftSY}`);
+
+  // Restricted area arc (semicircle only — no side lines on real courts)
+  const raR = 1.25 / PHYS_WID * 100 * SC;  // ~41.7 px
+  g.append("path").attr("class","court-arc")
+    .attr("d", `M ${BSX-raR} ${BSY} A ${raR} ${raR} 0 0 1 ${BSX+raR} ${BSY}`);
+
+  // 3-point line: corner straights + arc
+  // Corner straights are at absolute y = CORNER_Y_N (6) and 100-CORNER_Y_N (94)
+  const cJX  = sx(CORNER_Y_N);            // SVG x of left corner straight  → sx(6)  = 30
+  const cJXr = sx(100 - CORNER_Y_N);      // SVG x of right corner straight → sx(94) = 470
+  const cJY  = sy(CORNER_X_N);            // SVG y where straight meets arc
+  g.append("line").attr("class","court-arc")
+    .attr("x1",cJX).attr("y1",SVG_H).attr("x2",cJX).attr("y2",cJY);
+  g.append("line").attr("class","court-arc")
+    .attr("x1",cJXr).attr("y1",SVG_H).attr("x2",cJXr).attr("y2",cJY);
+  // Arc: large-arc from left corner to right corner over the top
+  g.append("path").attr("class","court-arc")
+    .attr("d", `M ${cJX} ${cJY} A ${TP_R} ${TP_R} 0 0 1 ${cJXr} ${cJY}`);
+
+  // Backboard
+  const bbW = 1.8 / PHYS_WID * 100 * SC;
+  g.append("rect").attr("class","backboard")
+    .attr("x", BSX - bbW/2).attr("y", BSY - 3)
+    .attr("width", bbW).attr("height", 4);
+
+  // Basket rim
+  const rimR = 0.23 / PHYS_WID * 100 * SC;
+  g.append("circle").attr("class","basket-rim")
+    .attr("cx", BSX).attr("cy", BSY).attr("r", rimR);
+
+  // Half-court line (dashed reference)
+  g.append("line").attr("class","court-dashed").attr("stroke-dasharray","8 4")
+    .attr("x1",0).attr("y1",0).attr("x2",SVG_W).attr("y2",0);
+
+  // Court outline
+  g.append("rect").attr("class","court-line").attr("fill","none")
+    .attr("x",0).attr("y",0).attr("width",SVG_W).attr("height",SVG_H);
+
+  // Shot layer (populated by render())
+  svg.append("g").attr("id","shot-layer");
+}
+
+// ─────────────────────────────────────────────────────────────
+// Normalise: mirror right-basket shots to left-basket view
+// ─────────────────────────────────────────────────────────────
+function normalise(shots) {
+  return shots.map(s => {
+    let nx = s.x, ny = s.y;
+    if (nx >= 50) { nx = 100 - nx; }
+    return { ...s, nx, ny, zone: getShotZone(nx, ny) };
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Main render
+// ─────────────────────────────────────────────────────────────
+function render() {
+  if (!state.gameData) return;
+  state.player = document.getElementById("playerSelect").value;
+
+  const raw = state.gameData.shots.filter(s => {
+    if (s.team !== state.team) return false;
+    if (state.player !== "all" && s.player !== state.player) return false;
+    return true;
+  });
+
+  const shots = normalise(raw);
+  const t = state.gameData.teams[state.team];
+  const pLabel = state.player === "all" ? "All players" : state.player;
+  document.getElementById("courtTitle").textContent = `${t.name} — ${pLabel}`;
+  document.getElementById("statsTitle").textContent  = `Zone stats — ${t.short}`;
+
+  if (state.view === "scatter") renderScatter(shots);
+  else                          renderZones(shots);
+
+  renderStats(shots);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Scatter
+// ─────────────────────────────────────────────────────────────
+function renderScatter(shots) {
+  const layer = d3.select("#shot-layer");
+  layer.selectAll("*").remove();
+  document.getElementById("legend").style.display = "flex";
+
+  const tip = document.getElementById("tooltip");
+
+  layer.selectAll("circle").data(shots).join("circle")
+    .attr("class", d => d.made ? "shot-made" : "shot-missed")
+    .attr("cx", d => sx(d.ny))
+    .attr("cy", d => sy(d.nx))
+    .attr("r", 5)
+    .style("cursor","pointer")
+    .on("mouseover", (event, d) => {
+      const zone = ZONES.find(z => z.id === d.zone);
+      tip.innerHTML = `<b>${d.player || "Unknown"}</b><br>${d.made ? "&#10003; Made" : "&#10007; Missed"} ${d.type} (Q${d.period})<br><em>${zone ? zone.label : ""}</em>`;
+      tip.style.opacity = 1;
+    })
+    .on("mousemove", e => {
+      tip.style.left = (e.pageX + 14) + "px";
+      tip.style.top  = (e.pageY - 36) + "px";
+    })
+    .on("mouseout", () => { tip.style.opacity = 0; });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Zone analysis
+// ─────────────────────────────────────────────────────────────
+function renderZones(shots) {
+  document.getElementById("legend").style.display = "none";
+  const layer = d3.select("#shot-layer");
+  layer.selectAll("*").remove();
+
+  const agg = {};
+  ZONES.forEach(z => { agg[z.id] = { att:0, made:0 }; });
+  shots.forEach(s => { if (agg[s.zone]) { agg[s.zone].att++; if (s.made) agg[s.zone].made++; } });
+
+  const maxAtt = Math.max(...Object.values(agg).map(z => z.att), 1);
+
+  ZONES.forEach(z => {
+    const { att, made } = agg[z.id];
+    if (att === 0) return;
+    const fgp    = made / att;
+    const colour = zoneColourByFGP(fgp);
+    const r      = Math.max(18, Math.min(44, 18 + 26 * (att / maxAtt)));
+    const bx = sx(z.cy), by = sy(z.cx);
+
+    layer.append("circle")
+      .attr("cx",bx).attr("cy",by).attr("r",r)
+      .attr("fill",colour).attr("fill-opacity",0.88)
+      .attr("stroke","#fff").attr("stroke-width",1.5);
+
+    layer.append("text").attr("class","zone-label")
+      .attr("x",bx).attr("y",by-3).attr("text-anchor","middle")
+      .text(`${made}/${att}`);
+
+    layer.append("text").attr("class","zone-pct")
+      .attr("x",bx).attr("y",by+10).attr("text-anchor","middle")
+      .text(`${Math.round(fgp*100)}%`);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Stats table
+// ─────────────────────────────────────────────────────────────
+function renderStats(shots) {
+  const made  = shots.filter(s => s.made).length;
+  const att   = shots.length;
+  const fgp   = att > 0 ? Math.round(made/att*100) : 0;
+  const pts   = shots.filter(s => s.made && s.type==="2pt").length*2
+              + shots.filter(s => s.made && s.type==="3pt").length*3;
+
+  document.getElementById("summaryGrid").innerHTML = `
+    <div class="summary-card"><div class="num">${att}</div><div class="lbl">FGA</div></div>
+    <div class="summary-card"><div class="num">${fgp}%</div><div class="lbl">FG%</div></div>
+    <div class="summary-card"><div class="num">${pts}</div><div class="lbl">Points</div></div>`;
+
+  const agg = {};
+  ZONES.forEach(z => { agg[z.id] = { att:0, made:0, label:z.label, id:z.id }; });
+  shots.forEach(s => { if (agg[s.zone]) { agg[s.zone].att++; if(s.made) agg[s.zone].made++; } });
+
+  document.getElementById("zoneBody").innerHTML =
+    Object.values(agg)
+      .filter(z => z.att > 0)
+      .sort((a,b) => b.att - a.att)
+      .map(z => {
+        const fp  = z.att ? (z.made/z.att*100).toFixed(1) : "—";
+        const sp  = att   ? (z.att/att*100).toFixed(1)     : "0.0";
+        const col = ZONE_COLOURS[z.id] || "#888";
+        return `<tr>
+          <td><span class="zone-dot" style="background:${col}"></span>${z.label}</td>
+          <td class="r">${z.att}</td>
+          <td class="r">${z.made}</td>
+          <td class="r">${fp}${z.att?"%":""}</td>
+          <td class="r">${sp}%</td>
+        </tr>`;
+      }).join("");
+}
+</script>
+</body>
+</html>
