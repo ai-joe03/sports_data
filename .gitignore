@@ -1,1 +1,5 @@
 scrape.log
+__pycache__/
+*.pyc
+*.pyo
+basketball_update.log

@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-Super League Basketball — Shot Zone Server
+Sports Analytics Server
 
 Usage:
     python serve.py          # starts on port 8080
     python serve.py 9000     # custom port
 
-Then open: http://localhost:8080/basketball_shots.html
+Then open: http://localhost:8080/basketball/
 
-API endpoint:
-    GET /api/game/{game_id}  -> fetches & processes FIBA LiveStats data
+API endpoints:
+    GET /api/game/{game_id}  -> serves cached game data or fetches from FIBA LiveStats
+    GET /api/season          -> aggregates all cached season games
 """
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -22,17 +23,39 @@ import os
 
 PORT = 8080
 
+DATA_ROOT       = r"C:\Users\ai_jo\Documents\sports-data"
+BASKETBALL_DIR  = os.path.join(DATA_ROOT, "basketball")
+SEASON_FILE     = os.path.join(BASKETBALL_DIR, "season_2526.json")
+GAMES_DIR       = os.path.join(BASKETBALL_DIR, "games")
+EPL_FILE        = os.path.join(DATA_ROOT, "all_seasons.json")
+
 
 class ShotZoneHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
-        m = re.match(r'^/api/game/(\d+)$', self.path)
-        if m:
-            self._proxy_game(m.group(1))
+        if re.match(r'^/api/season$', self.path):
+            self._serve_season()
+        elif re.match(r'^/api/epl$', self.path):
+            self._serve_epl()
         else:
-            super().do_GET()
+            m = re.match(r'^/api/game/(\d+)$', self.path)
+            if m:
+                self._proxy_game(m.group(1))
+            else:
+                super().do_GET()
 
     def _proxy_game(self, gid):
+        cache_path = os.path.join(GAMES_DIR, f"{gid}.json")
+        if os.path.exists(cache_path):
+            print(f"  -> Serving {gid} from cache")
+            try:
+                with open(cache_path, "rb") as f:
+                    body = f.read()
+                self._respond(200, "application/json", body)
+                return
+            except Exception as e:
+                print(f"  -> Cache read failed ({e}), falling through to FIBA")
+
         url = f"http://www.fibalivestats.com/data/{gid}/data.json"
         print(f"  -> Fetching {url}")
         try:
@@ -47,6 +70,63 @@ class ShotZoneHandler(SimpleHTTPRequestHandler):
             self._respond_error(e.code, f"FIBA LiveStats returned {e.code}: {e.reason}")
         except urllib.error.URLError as e:
             self._respond_error(503, f"Could not reach fibalivestats.com: {e.reason}")
+        except Exception as e:
+            self._respond_error(500, str(e))
+
+    def _serve_season(self):
+        try:
+            if not os.path.exists(SEASON_FILE):
+                self._respond_error(404, "season_2526.json not found")
+                return
+
+            with open(SEASON_FILE, "r", encoding="utf-8") as f:
+                season_meta = json.load(f)
+
+            game_ids = season_meta.get("game_ids", [])
+            teams = {}
+            shots = []
+
+            for gid in game_ids:
+                path = os.path.join(GAMES_DIR, f"{gid}.json")
+                if not os.path.exists(path):
+                    print(f"  -> Warning: game {gid} in season file but not cached — skipping")
+                    continue
+                with open(path, "r", encoding="utf-8") as f:
+                    game = json.load(f)
+
+                # Build teams dict keyed by team name
+                for tid, info in game.get("teams", {}).items():
+                    name = info["name"]
+                    if name not in teams:
+                        teams[name] = {"name": name, "short": info["short"]}
+
+                # Add shots with team name and game_id
+                for sh in game.get("shots", []):
+                    tid = sh.get("team")
+                    team_name = game["teams"].get(tid, {}).get("name", tid)
+                    shots.append({**sh, "team": team_name, "game_id": gid})
+
+            out = {
+                "season":     season_meta.get("season", "2025/26"),
+                "game_count": len(game_ids),
+                "game_dates": season_meta.get("game_dates", {}),
+                "teams":      teams,
+                "shots":      shots,
+                "total":      len(shots),
+            }
+            body = json.dumps(out).encode()
+            self._respond(200, "application/json", body)
+        except Exception as e:
+            self._respond_error(500, str(e))
+
+    def _serve_epl(self):
+        try:
+            if not os.path.exists(EPL_FILE):
+                self._respond_error(404, "all_seasons.json not found")
+                return
+            with open(EPL_FILE, "r", encoding="utf-8") as f:
+                body = f.read().encode()
+            self._respond(200, "application/json", body)
         except Exception as e:
             self._respond_error(500, str(e))
 

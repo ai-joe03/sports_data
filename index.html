@@ -4,49 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sports Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #0f1117;
-      color: #e2e8f0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-family: 'Open Sans', sans-serif;
+      background: #f4f4fb;
+      color: #020202;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
     header {
-      padding: 56px 32px 40px;
-      text-align: center;
-      border-bottom: 1px solid #1e2533;
+      background: #FFFBFF;
+      border-bottom: 3px solid #FFA726;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
-
-    header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: #f1f5f9;
-    }
-
-    header p {
-      margin-top: 8px;
-      font-size: 0.95rem;
-      color: #64748b;
-    }
+    header img.logo { height: 120px; width: auto; }
+    header span { font-size: 16px; font-weight: 500; color: #020202; margin-left: auto; }
 
     main {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 48px 32px;
+      padding: 48px 24px;
     }
 
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
+      gap: 20px;
       width: 100%;
       max-width: 780px;
     }
@@ -54,91 +47,98 @@
     .card {
       display: block;
       text-decoration: none;
-      background: #161b27;
-      border: 1px solid #1e2533;
-      border-radius: 12px;
-      padding: 32px;
-      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      background: #FFFBFF;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      padding: 28px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      color: #020202;
     }
 
     .card:hover {
-      border-color: #3b82f6;
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(59,130,246,0.12);
+      border-color: #FFA726;
+      box-shadow: 0 4px 20px rgba(255,167,38,0.15);
     }
 
     .card-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
-      margin-bottom: 20px;
+      font-size: 1.3rem;
+      margin-bottom: 18px;
     }
 
-    .card-icon.epl   { background: #1e2d1e; }
-    .card-icon.bball { background: #2d1e1a; }
+    .card-icon.epl   { background: #fff3e0; }
+    .card-icon.bball { background: #ede7f6; }
 
     .card h2 {
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: #f1f5f9;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #020202;
       margin-bottom: 8px;
     }
 
     .card .desc {
       font-size: 0.875rem;
-      color: #94a3b8;
-      line-height: 1.55;
-      margin-bottom: 20px;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 18px;
     }
 
     .card .meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
 
     .tag {
       font-size: 0.75rem;
       padding: 3px 10px;
       border-radius: 20px;
-      background: #1e2533;
-      color: #64748b;
-      border: 1px solid #2a3347;
+      background: #f4f4fb;
+      color: #555;
+      border: 1px solid #d0d7de;
     }
 
     .card-arrow {
-      margin-top: 24px;
+      margin-top: 20px;
       font-size: 0.8rem;
-      color: #3b82f6;
-      font-weight: 500;
+      color: #FFA726;
+      font-weight: 600;
     }
+
+    .card:hover .card-arrow { color: #e65100; }
+
+    /* accent stripe on left edge */
+    .card.epl   { border-left: 4px solid #f97316; }
+    .card.bball { border-left: 4px solid #a78bfa; }
 
     footer {
-      padding: 24px 32px;
+      padding: 20px 32px;
       text-align: center;
       font-size: 0.78rem;
-      color: #334155;
-      border-top: 1px solid #1e2533;
+      color: #aaa;
+      border-top: 1px solid #d0d7de;
+      background: #FFFBFF;
     }
-
-    footer a { color: #334155; }
+    footer a { color: #aaa; text-decoration: none; }
+    footer a:hover { color: #FFA726; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Sports Analytics</h1>
-    <p>Data visualisation tools for football and basketball</p>
+    <img class="logo" src="/cv_logo_name.png" alt="Court Vision">
+    <span>Sports Analytics</span>
   </header>
 
   <main>
     <div class="cards">
 
-      <a class="card" href="/epl/">
+      <a class="card epl" href="/epl/">
         <div class="card-icon epl">&#9917;</div>
         <h2>EPL Set Piece xG</h2>
         <p class="desc">
@@ -154,13 +154,13 @@
         <div class="card-arrow">Open dashboard &rarr;</div>
       </a>
 
-      <a class="card" href="/basketball/">
+      <a class="card bball" href="/basketball/">
         <div class="card-icon bball">&#127936;</div>
         <h2>Basketball Shot Zones</h2>
         <p class="desc">
-          Opposition scouting for Super League Basketball.
-          Load any FIBA LiveStats game ID to visualise where teams
-          and individual players shoot from, with zone-by-zone efficiency breakdowns.
+          Shot zone analytics for Super League Basketball.
+          Visualise where teams and individual players shoot from,
+          with zone-by-zone efficiency and shot quality breakdowns.
         </p>
         <div class="meta">
           <span class="tag">FIBA LiveStats</span>

@@ -3,46 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SLB Shot Zones — Opposition Scouting</title>
+<title>Court Vision — Shot Zone Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #f6f8fa; color: #24292f; min-height: 100vh;
+    font-family: 'Open Sans', sans-serif;
+    background: #f4f4fb; color: #020202; min-height: 100vh;
   }
 
   header {
-    background: #fff; border-bottom: 1px solid #d0d7de;
-    padding: 12px 24px; display: flex; align-items: center; gap: 12px;
+    background: #FFFBFF; border-bottom: 3px solid #FFA726;
+    padding: 14px 32px; display: flex; align-items: center; gap: 20px;
   }
-  header h1 { font-size: 16px; font-weight: 600; }
-  header span { font-size: 13px; color: #57606a; }
+  header img.logo { height: 120px; width: auto; }
+  header span { font-size: 16px; font-weight: 500; color: #020202; margin-left: auto; }
 
   .main { max-width: 1140px; margin: 0 auto; padding: 20px 16px; }
 
   /* Load bar */
   .load-bar {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+    background: #FFFBFF; border: 1px solid #d0d7de; border-radius: 8px;
     padding: 12px 16px; margin-bottom: 12px;
   }
-  .load-bar label { font-size: 13px; font-weight: 500; white-space: nowrap; }
+  .load-bar label { font-size: 13px; font-weight: 500; white-space: nowrap; color: #020202; }
   .load-bar input {
     width: 130px; padding: 5px 10px; font-size: 13px;
     border: 1px solid #d0d7de; border-radius: 6px; outline: none;
   }
-  .load-bar input:focus { border-color: #0969da; box-shadow: 0 0 0 3px #0969da22; }
+  .load-bar input:focus { border-color: #2E30C4; box-shadow: 0 0 0 3px #2E30C422; }
   .btn {
     padding: 5px 14px; font-size: 13px; font-weight: 500;
     border-radius: 6px; border: 1px solid; cursor: pointer;
   }
-  .btn-primary { background: #0969da; color: #fff; border-color: #0550ae; }
-  .btn-primary:hover { background: #0550ae; }
-  .btn-primary:disabled { background: #8cc4f5; border-color: #8cc4f5; cursor: not-allowed; }
-  .load-hint { font-size: 12px; color: #57606a; margin-left: auto; }
-  .load-hint a { color: #0969da; }
+  .btn-primary { background: #2E30C4; color: #fff; border-color: #1f21a0; }
+  .btn-primary:hover { background: #1f21a0; }
+  .btn-primary:disabled { background: #9899e8; border-color: #9899e8; cursor: not-allowed; }
+  .load-hint { font-size: 12px; color: #020202; margin-left: auto; }
+  .load-hint a { color: #2E30C4; }
 
   /* Status */
   .status-msg {
@@ -50,57 +51,57 @@
     margin-bottom: 10px; display: none;
   }
   .status-msg.error { background: #fff0f0; border: 1px solid #ff8182; color: #a40000; display: block; }
-  .status-msg.info  { background: #ddf4ff; border: 1px solid #54aeff; color: #0550ae; display: block; }
+  .status-msg.info  { background: #eeeeff; border: 1px solid #9899e8; color: #1f21a0; display: block; }
 
   /* Controls */
   .controls {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+    background: #FFFBFF; border: 1px solid #d0d7de; border-radius: 8px;
     padding: 10px 16px; margin-bottom: 14px;
   }
   .team-tabs { display: flex; gap: 4px; }
   .team-tab {
     padding: 4px 14px; font-size: 13px; border-radius: 20px;
-    border: 1px solid #d0d7de; background: #f6f8fa;
-    cursor: pointer; font-weight: 500; color: #57606a;
+    border: 1px solid #d0d7de; background: #f4f4fb;
+    cursor: pointer; font-weight: 500; color: #020202;
   }
-  .team-tab.active { background: #0969da; color: #fff; border-color: #0969da; }
-  .sep { color: #d0d7de; }
+  .team-tab.active { background: #2E30C4; color: #fff; border-color: #2E30C4; }
+  .sep { color: #020202; }
   select {
     padding: 4px 8px; font-size: 13px; border: 1px solid #d0d7de;
-    border-radius: 6px; background: #fff; cursor: pointer;
+    border-radius: 6px; background: #FFFBFF; cursor: pointer;
     outline: none; max-width: 210px;
   }
   .view-btns { display: flex; gap: 4px; margin-left: auto; }
   .view-btn {
     padding: 4px 12px; font-size: 12px; border-radius: 6px;
-    border: 1px solid #d0d7de; background: #f6f8fa;
-    cursor: pointer; font-weight: 500; color: #57606a;
+    border: 1px solid #d0d7de; background: #f4f4fb;
+    cursor: pointer; font-weight: 500; color: #020202;
   }
-  .view-btn.active { background: #24292f; color: #fff; border-color: #24292f; }
+  .view-btn.active { background: #1a1c3e; color: #FFA726; border-color: #1a1c3e; }
 
   /* Layout */
   .viz-layout { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
 
   /* Court panel */
   .court-panel {
-    background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+    background: #FFFBFF; border: 1px solid #d0d7de; border-radius: 8px;
     padding: 16px; flex-shrink: 0;
   }
-  .court-panel h2 { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #57606a; }
+  .court-panel h2 { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #020202; text-align: center; }
 
-  /* Court SVG elements */
-  .court-bg   { fill: #f5e6c8; }
-  .court-key  { fill: #e0c46e; stroke: #8b6914; stroke-width: 1.5; }
-  .court-line { fill: none; stroke: #8b6914; stroke-width: 2; }
-  .court-arc  { fill: none; stroke: #8b6914; stroke-width: 1.5; }
-  .court-dashed { fill: none; stroke: #8b6914; stroke-width: 1.2; stroke-dasharray: 5 3; }
-  .basket-rim { fill: none; stroke: #d4500a; stroke-width: 2.5; }
-  .backboard  { fill: #888; }
+  /* Court SVG elements — premium hardwood */
+  .court-bg   { fill: #EDD9AC; }
+  .court-key  { fill: #C4924A; stroke: #6B4018; stroke-width: 1.5; }
+  .court-line { fill: none; stroke: #6B4018; stroke-width: 2; }
+  .court-arc  { fill: none; stroke: #6B4018; stroke-width: 1.5; }
+  .court-dashed { fill: none; stroke: #6B4018; stroke-width: 1.2; stroke-dasharray: 5 3; }
+  .basket-rim { fill: none; stroke: #C0622A; stroke-width: 2.5; }
+  .backboard  { fill: #6B4018; }
 
   /* Shots */
-  .shot-made   { fill: #22a06b; fill-opacity: 0.85; stroke: #fff; stroke-width: 0.8; }
-  .shot-missed { fill: none; stroke: #ef4444; stroke-width: 1.5; }
+  .shot-made   { fill: #87BBA2; fill-opacity: 0.9; stroke: #fff; stroke-width: 0.8; }
+  .shot-missed { fill: transparent; stroke: #FF5A5F; stroke-width: 1.5; }
 
   /* Zone bubbles */
   .zone-label { font-size: 10px; font-weight: 700; fill: #fff; pointer-events: none; }
@@ -108,46 +109,69 @@
 
   /* Stats panel */
   .stats-panel {
-    background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+    background: #FFFBFF; border: 1px solid #d0d7de; border-radius: 8px;
     padding: 16px; flex: 1; min-width: 260px;
   }
-  .stats-panel h2 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #57606a; }
+  .stats-panel h2 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #020202; }
 
   .summary-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+  .quality-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 16px; }
   .summary-card {
-    background: #f6f8fa; border: 1px solid #d0d7de;
+    background: #FFFBFF; border: 1px solid #d0d7de;
     border-radius: 6px; padding: 8px; text-align: center;
   }
-  .summary-card .num { font-size: 22px; font-weight: 700; color: #0969da; }
-  .summary-card .lbl { font-size: 11px; color: #57606a; margin-top: 2px; }
+  .summary-card .num { font-size: 22px; font-weight: 700; color: #2E30C4; }
+  .summary-card .lbl { font-size: 11px; color: #020202; margin-top: 2px; }
 
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   th {
     text-align: left; padding: 6px 8px;
-    border-bottom: 2px solid #d0d7de; font-size: 11px; color: #57606a; white-space: nowrap;
+    border-bottom: 2px solid #d0d7de; font-size: 11px; color: #020202; white-space: nowrap;
   }
   th.r, td.r { text-align: right; }
   td { padding: 5px 8px; border-bottom: 1px solid #f0f0f0; }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #f6f8fa; }
+  tr:hover td { background: #f0f0f8; }
   .zone-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
   /* Legend */
-  .legend { display: flex; gap: 14px; font-size: 11px; color: #57606a; margin-top: 10px; }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: #020202; margin-top: 10px; }
   .legend-item { display: flex; align-items: center; gap: 5px; }
   .leg-dot    { width: 10px; height: 10px; border-radius: 50%; }
-  .leg-circle { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #ef4444; background: none; }
+  .leg-circle { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #FF5A5F; background: none; }
 
   /* Tooltip */
   .tooltip {
-    position: absolute; pointer-events: none; background: #24292f; color: #fff;
+    position: absolute; pointer-events: none; background: #1a1c3e; color: #fff;
     border-radius: 6px; padding: 6px 10px; font-size: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,.3); white-space: nowrap;
     opacity: 0; transition: opacity .15s; line-height: 1.5;
   }
 
+  /* Mode toggle bar */
+  .mode-bar {
+    background: #FFFBFF; border: 1px solid #d0d7de; border-radius: 8px;
+    padding: 10px 16px; margin-bottom: 12px;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .mode-btn {
+    padding: 4px 14px; font-size: 13px; font-weight: 600;
+    border-radius: 6px; border: 1px solid #d0d7de; background: #f4f4fb;
+    cursor: pointer; color: #020202; transition: background .15s, color .15s;
+  }
+  .mode-btn.active { background: #1a1c3e; color: #FFA726; border-color: #1a1c3e; }
+  .mode-btn:not(.active):hover { background: #e8e8f4; }
+  .mode-desc { font-size: 12px; color: #555; margin-left: 8px; }
+
+  /* Team compare table */
+  .tc-active td { background: #eeeeff !important; font-weight: 600; }
+  #teamCompareInner table { min-width: 380px; }
+
+  /* Season info badge */
+  .season-badge { font-size: 12px; font-weight: 600; color: #FFA726; margin-left: 6px; }
+
   /* Empty state */
-  .empty-state { text-align: center; padding: 50px 20px; color: #57606a; }
+  .empty-state { text-align: center; padding: 50px 20px; color: #020202; }
   .empty-state .icon { font-size: 36px; margin-bottom: 8px; }
   .empty-state p { font-size: 14px; margin-bottom: 4px; }
   .empty-state small { font-size: 12px; }
@@ -156,34 +180,49 @@
 <body>
 
 <header>
-  <h1>Super League Basketball</h1>
-  <span>Opposition Shot Zone Scouting</span>
+  <a href="/"><img class="logo" src="/cv_logo_name.png" alt="Court Vision"></a>
+  <span>Shot Zone Analytics</span>
 </header>
 
 <div class="main">
 
   <div class="load-bar">
-    <label for="gameId">Game ID</label>
-    <input id="gameId" type="text" placeholder="e.g. 2702621" maxlength="10">
-    <button class="btn btn-primary" id="loadBtn" onclick="loadGame()">Load Game</button>
-    <span class="load-hint">
-      Find IDs on
-      <a href="https://www.superleaguebasketballm.co.uk/livestats/" target="_blank">superleaguebasketballm.co.uk/livestats</a>
-      — open a game box score, copy the number from the URL
-    </span>
+    <button class="btn btn-primary" id="loadSeasonBtn" onclick="loadSeason()">Refresh</button>
+    <span class="season-badge" id="seasonBadge"></span>
   </div>
 
   <div class="status-msg" id="statusMsg"></div>
 
+  <div class="mode-bar" id="modeBar" style="display:none">
+    <button class="mode-btn active" onclick="setQuality('selection',this)">Shot Selection</button>
+    <button class="mode-btn"        onclick="setQuality('execution',this)">Shot Execution</button>
+    <span class="mode-desc" id="modeDesc">Shot quality landscape — where good and poor shots come from</span>
+  </div>
+
+  <div id="teamCompare" style="display:none; margin-bottom:12px;">
+    <div style="background:#FFFBFF; border:1px solid #d0d7de; border-radius:8px; padding:12px 16px;">
+      <div style="font-size:13px; font-weight:600; margin-bottom:10px; color:#020202;">Team Comparison — Full Season</div>
+      <div id="teamCompareInner" style="overflow-x:auto"></div>
+    </div>
+  </div>
+
   <div class="controls" id="controls" style="display:none">
+    <div class="view-btns" id="periodBtns">
+      <button class="view-btn period-btn active" onclick="setPeriod('season',this)">Full Season</button>
+      <button class="view-btn period-btn"        onclick="setPeriod('last5',this)">Last 5 Games</button>
+    </div>
+    <span class="sep">|</span>
     <div class="team-tabs" id="teamTabs"></div>
     <span class="sep">|</span>
     <select id="playerSelect" onchange="render()">
       <option value="all">All players</option>
     </select>
-    <div class="view-btns">
-      <button class="view-btn active" onclick="setView('scatter',this)">Shot Locations</button>
-      <button class="view-btn"        onclick="setView('zones',this)">Zone Analysis</button>
+    <select id="opponentSelect" onchange="setOpponent()">
+      <option value="all">All opponents</option>
+    </select>
+    <div class="view-btns" id="viewBtns">
+      <button class="view-btn active" onclick="setView('zones',this)">Zone Analysis</button>
+      <button class="view-btn"        onclick="setView('scatter',this)">Shot Locations</button>
     </div>
   </div>
 
@@ -192,32 +231,78 @@
       <h2 id="courtTitle">Half-court — offensive end</h2>
       <svg id="court-svg"></svg>
       <div class="legend" id="legend" style="display:none">
-        <div class="legend-item"><div class="leg-dot" style="background:#22a06b"></div>Made</div>
+        <div class="legend-item"><div class="leg-dot" style="background:#87BBA2"></div>Made</div>
         <div class="legend-item"><div class="leg-circle"></div>Missed</div>
+      </div>
+      <div class="legend" id="zoneLegend" style="display:none; gap:10px; margin-top:6px; font-size:11px; align-items:center;">
+        <span style="color:#D22C2C;font-size:18px;line-height:1">■</span><span>Below avg</span>
+        <span style="color:#d0d0d8;font-size:18px;line-height:1">■</span><span>League avg</span>
+        <span style="color:#2E30C4;font-size:18px;line-height:1">■</span><span>Above avg</span>
+        <span style="color:#888;margin-left:4px">(size = shot selection vs league avg)</span>
+      </div>
+      <div class="legend" id="qualityLegend" style="display:none; gap:10px; margin-top:6px; font-size:11px; align-items:center;">
+        <span style="color:#2E30C4;font-size:18px;line-height:1">■</span><span>Good location</span>
+        <span style="color:#d0d0d8;font-size:18px;line-height:1">■</span><span>League avg</span>
+        <span style="color:#D22C2C;font-size:18px;line-height:1">■</span><span>Poor location</span>
+        <span style="color:#555;margin-left:6px">●&thinsp;made&ensp;○&thinsp;missed</span>
+      </div>
+      <div id="qualityExplain" style="display:none; margin-top:10px; padding:9px 11px; background:#f5f5fa; border-radius:6px; font-size:10.5px; color:#444; line-height:1.55; max-width:420px;">
+        <b style="font-size:11px;color:#1a1c3e">How xEFG% is calculated</b><br>
+        Each shot is assigned an expected eFG% from its physical distance and angle to the basket.
+        <ul style="margin:5px 0 3px; padding-left:16px;">
+          <li><b>Restricted area</b> ≈ 62%</li>
+          <li><b>Paint</b> 50% → 40% (linear with distance)</li>
+          <li><b>Corner 3</b> ≈ 58%</li>
+          <li><b>Above-break 3</b> ≈ 52%, with an additional penalty for each extra metre beyond 7 m</li>
+        </ul>
+        Shots are coloured relative to the season league average.
       </div>
     </div>
 
     <div class="stats-panel">
       <div class="empty-state" id="emptyState">
-        <div class="icon">&#127936;</div>
-        <p>Enter a FIBA LiveStats game ID to load shot data</p>
-        <small>Each completed game has a unique numeric ID — see the hint above</small>
+        <img src="/cv_logo.png" alt="" style="width:64px;height:64px;margin-bottom:10px;opacity:0.5;">
+        <p>Loading season data…</p>
+        <small>Run fetch_basketball.py to add games to the local store</small>
       </div>
       <div id="statsContent" style="display:none">
         <h2 id="statsTitle">Zone statistics</h2>
         <div class="summary-grid" id="summaryGrid"></div>
-        <table>
-          <thead>
-            <tr>
-              <th>Zone</th>
-              <th class="r">Att</th>
-              <th class="r">Made</th>
-              <th class="r">FG%</th>
-              <th class="r">Shot%</th>
-            </tr>
-          </thead>
-          <tbody id="zoneBody"></tbody>
-        </table>
+
+        <div id="zoneTableSection">
+          <table>
+            <thead>
+              <tr>
+                <th>Zone</th>
+                <th class="r">Att</th>
+                <th class="r">eFG%</th>
+                <th class="r">vs Avg</th>
+              </tr>
+            </thead>
+            <tbody id="zoneBody"></tbody>
+          </table>
+          <div id="playerStatsSection" style="display:none; margin-top:20px;">
+            <h2 style="font-size:13px;font-weight:600;margin-bottom:10px;color:#020202;">Player statistics</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th class="r">GP</th>
+                  <th class="r">FGA</th>
+                  <th class="r">eFG%</th>
+                  <th class="r">2P%</th>
+                  <th class="r">3P%</th>
+                </tr>
+              </thead>
+              <tbody id="playerStatsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="qualitySection" style="display:none">
+          <div id="qualityGrid"></div>
+          <div id="areaFreqSection"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -284,24 +369,38 @@ const TP_R = 6.75 / PHYS_WID * 100 * SC;      // 225 px
 // ─────────────────────────────────────────────────────────────
 // Zone definitions
 // ─────────────────────────────────────────────────────────────
+// arc3cx(ny): x position on the 3pt arc at a given court-width position
+// Used to place zone bubbles just outside the arc
+function arc3cx(ny) {
+  const dy_m = (ny - BY) / 100 * PHYS_WID;
+  const arg = 6.75 * 6.75 - dy_m * dy_m;
+  if (arg < 0) return CORNER_X_N;            // past corner, use junction
+  return BX + Math.sqrt(arg) / PHYS_LEN * 100;
+}
+
 const ZONES = [
-  { id: "ra",    label: "Restricted Area",  cx: BX + 2,     cy: BY        },
-  { id: "paint", label: "Paint",            cx: FT_X * 0.55, cy: BY        },
-  { id: "lmid",  label: "Left Mid-Range",   cx: FT_X * 0.7,  cy: BY - 22  },
-  { id: "rmid",  label: "Right Mid-Range",  cx: FT_X * 0.7,  cy: BY + 22  },
-  { id: "cmid",  label: "Centre Mid",       cx: FT_X * 1.15, cy: BY        },
-  { id: "lc3",   label: "Left Corner 3",    cx: 8,                cy: 7     },
-  { id: "rc3",   label: "Right Corner 3",   cx: 8,                cy: 93    },
-  { id: "lw3",   label: "Left Wing 3",      cx: CORNER_X_N + 12,  cy: 20    },
-  { id: "rw3",   label: "Right Wing 3",     cx: CORNER_X_N + 12,  cy: 80    },
-  { id: "top3",  label: "Top of Arc",       cx: CORNER_X_N + 18,  cy: BY    },
+  { id: "ra",     label: "Restricted Area",    cx: BX + 2,           cy: BY  },
+  { id: "paint",  label: "Paint (non-RA)",     cx: FT_X * 0.65,      cy: BY  },
+  { id: "lbase",  label: "Left Baseline Mid",  cx: 8,                cy: 23  },
+  { id: "rbase",  label: "Right Baseline Mid", cx: 8,                cy: 77  },
+  { id: "lelbow", label: "Left Elbow",         cx: FT_X * 0.82,      cy: BY - 23 },
+  { id: "relbow", label: "Right Elbow",        cx: FT_X * 0.82,      cy: BY + 23 },
+  { id: "cmid",   label: "High Post",          cx: FT_X * 1.15,      cy: BY  },
+  { id: "lc3",    label: "Left Corner 3",      cx: 7,                cy: 6   },
+  { id: "rc3",    label: "Right Corner 3",     cx: 7,                cy: 94  },
+  { id: "lw3",    label: "Left Wing 3",        cx: arc3cx(21) + 4,   cy: 21  },
+  { id: "rw3",    label: "Right Wing 3",       cx: arc3cx(79) + 4,   cy: 79  },
+  { id: "top3",   label: "Top of Arc",         cx: arc3cx(BY) + 4,   cy: BY  },
 ];
 
 const ZONE_COLOURS = {
-  ra:    "#f97316", paint: "#fb923c",
-  lmid:  "#a78bfa", rmid:  "#818cf8", cmid: "#c084fc",
-  lc3:   "#34d399", rc3:   "#2dd4bf",
-  lw3:   "#60a5fa", rw3:   "#38bdf8", top3: "#0ea5e9",
+  ra:     "#f97316", paint:  "#fb923c",
+  lbase:  "#a78bfa", rbase:  "#818cf8",
+  lelbow: "#c084fc", relbow: "#a855f7",
+  cmid:   "#6366f1",
+  lc3:    "#34d399", rc3:    "#2dd4bf",
+  lw3:    "#60a5fa", rw3:    "#38bdf8",
+  top3:   "#22d3ee",
 };
 
 function getShotZone(nx, ny) {
@@ -311,82 +410,94 @@ function getShotZone(nx, ny) {
   const in3pt = dist > 6.75;
 
   if (in3pt) {
-    // Corner 3: near sideline (within ~2m = 13 units of sideline)
-    if (ny < 13)  return "lc3";
-    if (ny > 87)  return "rc3";
-    // Wing vs top-of-arc split at ~35 degrees from centre
-    if (ny < 33)  return "lw3";
-    if (ny > 67)  return "rw3";
-    return "top3";
+    if (ny < 13)  return "lc3";       // left corner (within ~2m of sideline)
+    if (ny > 87)  return "rc3";       // right corner
+    if (ny < 30)  return "lw3";       // left wing
+    if (ny > 70)  return "rw3";       // right wing
+    return "top3";                    // all top-of-arc shots
   }
   if (dist < 1.25) return "ra";
   if (ny >= (BY - KEY_HALF_W) && ny <= (BY + KEY_HALF_W) && nx <= FT_X) return "paint";
-  if (ny < BY - 8)  return "lmid";
-  if (ny > BY + 8)  return "rmid";
+  // Mid-range outside key
+  if (nx < FT_X * 0.55) return ny < BY ? "lbase" : "rbase";  // near-baseline mid
+  if (ny < BY - 5)  return "lelbow";
+  if (ny > BY + 5)  return "relbow";
   return "cmid";
 }
 
-// FG% → colour: cold blue → yellow → hot green
-function fgpColour(fgp) {
-  if (isNaN(fgp)) return "#aaa";
-  const stops = [[0,[59,130,246]],[0.33,[251,191,36]],[0.55,[34,197,94]],[1,[21,128,61]]];
-  let lo = stops[0], hi = stops[stops.length-1];
-  for (let i = 0; i < stops.length-1; i++) {
-    if (fgp >= stops[i][0] && fgp <= stops[i+1][0]) { lo=stops[i]; hi=stops[i+1]; break; }
-  }
-  const t = (hi[0]-lo[0]) ? (fgp-lo[0])/(hi[0]-lo[0]) : 0;
-  return `rgb(${stops.map((_,j)=>0)[0]||Math.round(lo[1][0]+t*(hi[1][0]-lo[1][0]))},${Math.round(lo[1][1]+t*(hi[1][1]-lo[1][1]))},${Math.round(lo[1][2]+t*(hi[1][2]-lo[1][2]))})`;
-}
-// Cleaner colour interpolation
+// Colour interpolation helper
 function lerp3(lo, hi, t) {
   return `rgb(${Math.round(lo[0]+t*(hi[0]-lo[0]))},${Math.round(lo[1]+t*(hi[1]-lo[1]))},${Math.round(lo[2]+t*(hi[2]-lo[2]))})`;
 }
-function zoneColourByFGP(fgp) {
-  if (isNaN(fgp) || fgp === undefined) return "#aaa";
-  const stops = [[0,[59,130,246]],[0.33,[251,191,36]],[0.50,[34,197,94]],[1,[21,128,61]]];
-  for (let i = 0; i < stops.length-1; i++) {
-    if (fgp <= stops[i+1][0]) {
-      const t = (fgp - stops[i][0]) / (stops[i+1][0] - stops[i][0]);
-      return lerp3(stops[i][1], stops[i+1][1], t);
-    }
-  }
-  return lerp3(stops[stops.length-2][1], stops[stops.length-1][1], 1);
+
+// Diverging colour: blue (below league avg) ← light gray (avg) → red (above avg)
+// delta is the difference in eFG% from league average; clamped to ±0.20
+function deltaColour(delta) {
+  if (isNaN(delta)) return "#c8c8cc";
+  const d = Math.max(-0.20, Math.min(0.20, delta));
+  const t = Math.abs(d) / 0.20;
+  return d < 0
+    ? lerp3([225, 225, 232], [210, 44, 44], t)   // below avg → red
+    : lerp3([225, 225, 232], [46, 48, 196], t);  // above avg → brand blue
+}
+
+// Compute league-wide eFG% per zone from every team's shots in the loaded season
+function computeLeagueAvg() {
+  const agg = {};
+  ZONES.forEach(z => { agg[z.id] = { att: 0, made: 0, made3: 0 }; });
+  let total = 0;
+  normalise(state.gameData.shots).forEach(s => {
+    if (!agg[s.zone]) return;
+    agg[s.zone].att++; total++;
+    if (s.made) { agg[s.zone].made++; if (s.type === "3pt") agg[s.zone].made3++; }
+  });
+  const avg = {};
+  ZONES.forEach(z => {
+    avg[z.id] = {
+      efg:  efgp(agg[z.id].made, agg[z.id].made3, agg[z.id].att),
+      freq: total > 0 ? agg[z.id].att / total : 0
+    };
+  });
+  return avg;
 }
 
 // ─────────────────────────────────────────────────────────────
 // App state
 // ─────────────────────────────────────────────────────────────
-let state = { gameData: null, team: "1", player: "all", view: "scatter" };
+let state = { gameData: null, team: null, player: "all", view: "zones", quality: "selection", period: "season", opponent: "all" };
 
 // ─────────────────────────────────────────────────────────────
-// Load game
+// Load season
 // ─────────────────────────────────────────────────────────────
-async function loadGame() {
-  const gid = document.getElementById("gameId").value.trim();
-  if (!gid || !/^\d+$/.test(gid)) { showStatus("Please enter a numeric game ID.", "error"); return; }
-  const btn = document.getElementById("loadBtn");
+async function loadSeason() {
+  const btn = document.getElementById("loadSeasonBtn");
   btn.disabled = true; btn.textContent = "Loading…";
-  showStatus(`Fetching game ${gid}…`, "info");
+  showStatus("Loading season data…", "info");
   try {
-    const res  = await fetch(`/api/game/${gid}`);
+    const res  = await fetch("/api/season");
     const json = await res.json();
     if (json.error) throw new Error(json.error);
     if (!json.shots || json.shots.length === 0)
-      throw new Error("No shot coordinate data found for this game. Try another game ID.");
+      throw new Error("No shot data found. Use fetch_basketball.py to add games.");
     state.gameData = json;
-    state.team = "1"; state.player = "all";
+    state.team = Object.keys(json.teams)[0];
+    state.player = "all";
+    const badge = document.getElementById("seasonBadge");
+    badge.textContent = `${json.game_count} game${json.game_count !== 1 ? "s" : ""} · ${json.season}`;
     showStatus("", "");
     initUI();
     drawCourtBase();
+    buildQualityHeatmap();
     render();
   } catch (e) {
     showStatus(`Error: ${e.message}`, "error");
   } finally {
-    btn.disabled = false; btn.textContent = "Load Game";
+    btn.disabled = false; btn.textContent = "Refresh";
   }
 }
 
-document.getElementById("gameId").addEventListener("keydown", e => { if (e.key === "Enter") loadGame(); });
+// Auto-load season on page open
+loadSeason();
 
 function showStatus(msg, type) {
   const el = document.getElementById("statusMsg");
@@ -402,22 +513,27 @@ function initUI() {
   const { teams } = state.gameData;
   const tabs = document.getElementById("teamTabs");
   tabs.innerHTML = "";
-  ["1","2"].forEach(tid => {
+  Object.keys(teams).forEach(key => {
     const b = document.createElement("button");
-    b.className = "team-tab" + (tid === state.team ? " active" : "");
-    b.textContent = teams[tid].short || teams[tid].name;
-    b.title = teams[tid].name;
-    b.onclick = () => { state.team = tid; state.player = "all"; updateTeamTabs(); populatePlayers(); render(); };
+    b.className = "team-tab" + (key === state.team ? " active" : "");
+    b.textContent = teams[key].short || teams[key].name;
+    b.title = teams[key].name;
+    b.dataset.teamKey = key;
+    b.onclick = () => { state.team = key; state.player = "all"; state.opponent = "all"; updateTeamTabs(); populatePlayers(); populateOpponents(); render(); };
     tabs.appendChild(b);
   });
+  document.getElementById("modeBar").style.display = "flex";
+  document.getElementById("viewBtns").style.display = state.quality === "selection" ? "none" : "flex";
   document.getElementById("controls").style.display = "flex";
   document.getElementById("emptyState").style.display = "none";
   document.getElementById("statsContent").style.display = "block";
   populatePlayers();
+  populateOpponents();
+  buildTeamCompare();
 }
 
 function updateTeamTabs() {
-  document.querySelectorAll(".team-tab").forEach((b,i) => b.classList.toggle("active", (i+1).toString() === state.team));
+  document.querySelectorAll(".team-tab").forEach(b => b.classList.toggle("active", b.dataset.teamKey === state.team));
 }
 
 function populatePlayers() {
@@ -429,11 +545,158 @@ function populatePlayers() {
   state.player = "all";
 }
 
+// Build a map of game_id → Set of team names that appear in that game
+function buildGameTeamsMap() {
+  const map = {};
+  state.gameData.shots.forEach(s => {
+    if (!s.game_id) return;
+    if (!map[s.game_id]) map[s.game_id] = new Set();
+    map[s.game_id].add(s.team);
+  });
+  return map;
+}
+
+function buildTeamCompare() {
+  if (!state.gameData) return;
+  const allShots  = state.gameData.shots;
+  const gameTeams = buildGameTeamsMap();
+
+  // For each team: find their game ids, then compute off/def xEFG
+  const rows = Object.keys(state.gameData.teams).map(tKey => {
+    const gids = new Set();
+    Object.entries(gameTeams).forEach(([gid, teams]) => { if (teams.has(tKey)) gids.add(gid); });
+    const offShots = normalise(allShots.filter(s => s.team === tKey && gids.has(s.game_id)));
+    const defShots = normalise(allShots.filter(s => s.team !== tKey && gids.has(s.game_id)));
+    const offXefg  = computeTeamXEFG(offShots);
+    const defXefg  = computeTeamXEFG(defShots);
+    const diff     = isNaN(offXefg) || isNaN(defXefg) ? NaN : offXefg - defXefg;
+    const info     = state.gameData.teams[tKey];
+    return { tKey, name: info.name, short: info.short || info.name, gp: gids.size, offXefg, defXefg, diff };
+  });
+  rows.sort((a, b) => (isNaN(a.diff) ? 1 : isNaN(b.diff) ? -1 : b.diff - a.diff));
+
+  function fmtPct(v)   { return isNaN(v) ? "—" : (v * 100).toFixed(1) + "%"; }
+  function fmtDelta(v) { return isNaN(v) ? "—" : (v >= 0 ? "+" : "") + (v * 100).toFixed(1) + "%"; }
+  function dCol(v)     { return isNaN(v) ? "#555" : v > 0.005 ? "#2E30C4" : v < -0.005 ? "#b91c1c" : "#555"; }
+
+  const tbody = rows.map(r => `
+    <tr class="tc-row${r.tKey === state.team ? " tc-active" : ""}" style="cursor:pointer" data-tkey="${r.tKey}">
+      <td>${r.name}</td>
+      <td class="r">${r.gp}</td>
+      <td class="r">${fmtPct(r.offXefg)}</td>
+      <td class="r">${fmtPct(r.defXefg)}</td>
+      <td class="r" style="color:${dCol(r.diff)}">${fmtDelta(r.diff)}</td>
+    </tr>`).join("");
+
+  document.getElementById("teamCompareInner").innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Team</th>
+        <th class="r">GP</th>
+        <th class="r">xEFG%</th>
+        <th class="r">Opp xEFG%</th>
+        <th class="r">Diff</th>
+      </tr></thead>
+      <tbody>${tbody}</tbody>
+    </table>`;
+
+  // Click a row to switch to that team
+  document.querySelectorAll(".tc-row").forEach(tr => {
+    tr.addEventListener("click", () => {
+      const key = tr.dataset.tkey;
+      state.team = key; state.player = "all"; state.opponent = "all";
+      updateTeamTabs(); populatePlayers(); populateOpponents();
+      buildTeamCompare();
+      render();
+    });
+  });
+  document.getElementById("teamCompare").style.display = "block";
+}
+
+// Return Set of game_ids where both team and opponent appear
+function getGamesVsOpponent(team, opponent) {
+  const valid = new Set();
+  Object.entries(buildGameTeamsMap()).forEach(([gid, teams]) => {
+    if (teams.has(team) && teams.has(opponent)) valid.add(gid);
+  });
+  return valid;
+}
+
+// Populate the opponent dropdown — restricted to last 5 games when that period is active
+function populateOpponents() {
+  const recentIds = state.period === "last5" ? getRecentGameIds(5) : null;
+  const opponents = new Set();
+  Object.entries(buildGameTeamsMap()).forEach(([gid, teams]) => {
+    if (recentIds && !recentIds.has(gid)) return;
+    if (teams.has(state.team)) teams.forEach(t => { if (t !== state.team) opponents.add(t); });
+  });
+  const sel = document.getElementById("opponentSelect");
+  const prev = sel.value;
+  sel.innerHTML = `<option value="all">All opponents</option>`;
+  [...opponents].sort().forEach(op => {
+    const o = document.createElement("option");
+    o.value = op; o.textContent = op; sel.appendChild(o);
+  });
+  sel.value = (prev !== "all" && opponents.has(prev)) ? prev : "all";
+  state.opponent = sel.value;
+}
+
+function setOpponent() {
+  state.opponent = document.getElementById("opponentSelect").value;
+  render();
+}
+
+// Returns the last n game IDs the selected team played in, sorted by date
+// (uses game_dates from the season API; falls back to numeric ID order)
+function getRecentGameIds(n) {
+  const dates = state.gameData.game_dates || {};
+  const ids = [...new Set(
+    state.gameData.shots.filter(s => s.team === state.team && s.game_id).map(s => s.game_id)
+  )];
+  ids.sort((a, b) => {
+    const da = dates[a], db = dates[b];
+    if (da && db) return da < db ? -1 : da > db ? 1 : 0;  // ISO strings sort correctly
+    if (da) return -1;
+    if (db) return  1;
+    return parseInt(a) - parseInt(b);   // fallback: numeric ID
+  });
+  return new Set(ids.slice(-n));
+}
+
+function setPeriod(p, el) {
+  state.period = p;
+  document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+  populateOpponents();   // refresh dropdown to match new period
+  render();
+}
+
+function updateLegends() {
+  const v = state.view, q = state.quality;
+  document.getElementById("legend").style.display        = (v === "scatter" && q === "execution") ? "flex" : "none";
+  document.getElementById("zoneLegend").style.display    = (v === "zones"   && q === "execution") ? "flex" : "none";
+  document.getElementById("qualityLegend").style.display = q === "selection" ? "flex" : "none";
+  document.getElementById("qualityExplain").style.display = q === "selection" ? "block" : "none";
+}
+
+const MODE_DESCS = {
+  execution: "Team shooting performance vs league average by zone",
+  selection: "Shot quality landscape — where good and poor shots come from",
+};
+
+function setQuality(q, el) {
+  state.quality = q;
+  document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("modeDesc").textContent = MODE_DESCS[q] || "";
+  document.getElementById("viewBtns").style.display = q === "selection" ? "none" : "flex";
+  render();
+}
+
 function setView(v, el) {
   state.view = v;
-  document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".view-btn:not(.period-btn)").forEach(b => b.classList.remove("active"));
   el.classList.add("active");
-  document.getElementById("legend").style.display = v === "scatter" ? "flex" : "none";
   render();
 }
 
@@ -450,18 +713,21 @@ function drawCourtBase() {
   svg.append("defs").append("clipPath").attr("id","cc")
     .append("rect").attr("width",SVG_W).attr("height",SVG_H);
 
-  const g = svg.append("g").attr("clip-path","url(#cc)");
-
-  // Background
-  g.append("rect").attr("class","court-bg").attr("width",SVG_W).attr("height",SVG_H);
-
-  // Key / paint
+  // Layer 1 — court fills (below heatmap so colours show through)
+  const gBg = svg.append("g").attr("clip-path","url(#cc)");
+  gBg.append("rect").attr("class","court-bg").attr("width",SVG_W).attr("height",SVG_H);
   const keyX = sx(BY - KEY_HALF_W);
   const keyW = sx(BY + KEY_HALF_W) - keyX;
   const keyTop = sy(FT_X);
-  g.append("rect").attr("class","court-key")
+  gBg.append("rect").attr("class","court-key")
     .attr("x", keyX).attr("y", keyTop)
     .attr("width", keyW).attr("height", SVG_H - keyTop);
+
+  // Layer 2 — heatmap image (filled by renderSelectionCourt, cleared otherwise)
+  svg.append("g").attr("id","heatmap-layer").attr("clip-path","url(#cc)");
+
+  // Layer 3 — court lines (above heatmap so markings always visible)
+  const g = svg.append("g").attr("clip-path","url(#cc)");
 
   // Free-throw circle
   const ftR = 1.8 / PHYS_WID * 100 * SC;  // 60 px
@@ -479,15 +745,13 @@ function drawCourtBase() {
     .attr("d", `M ${BSX-raR} ${BSY} A ${raR} ${raR} 0 0 1 ${BSX+raR} ${BSY}`);
 
   // 3-point line: corner straights + arc
-  // Corner straights are at absolute y = CORNER_Y_N (6) and 100-CORNER_Y_N (94)
-  const cJX  = sx(CORNER_Y_N);            // SVG x of left corner straight  → sx(6)  = 30
-  const cJXr = sx(100 - CORNER_Y_N);      // SVG x of right corner straight → sx(94) = 470
-  const cJY  = sy(CORNER_X_N);            // SVG y where straight meets arc
+  const cJX  = sx(CORNER_Y_N);
+  const cJXr = sx(100 - CORNER_Y_N);
+  const cJY  = sy(CORNER_X_N);
   g.append("line").attr("class","court-arc")
     .attr("x1",cJX).attr("y1",SVG_H).attr("x2",cJX).attr("y2",cJY);
   g.append("line").attr("class","court-arc")
     .attr("x1",cJXr).attr("y1",SVG_H).attr("x2",cJXr).attr("y2",cJY);
-  // Arc: large-arc from left corner to right corner over the top
   g.append("path").attr("class","court-arc")
     .attr("d", `M ${cJX} ${cJY} A ${TP_R} ${TP_R} 0 0 1 ${cJXr} ${cJY}`);
 
@@ -520,7 +784,7 @@ function drawCourtBase() {
 function normalise(shots) {
   return shots.map(s => {
     let nx = s.x, ny = s.y;
-    if (nx >= 50) { nx = 100 - nx; }
+    if (nx >= 50) { nx = 100 - nx; } else { ny = 100 - ny; }
     return { ...s, nx, ny, zone: getShotZone(nx, ny) };
   });
 }
@@ -532,22 +796,57 @@ function render() {
   if (!state.gameData) return;
   state.player = document.getElementById("playerSelect").value;
 
+  const recentIds  = state.period === "last5"  ? getRecentGameIds(5) : null;
+  const oppGameIds = state.opponent !== "all"  ? getGamesVsOpponent(state.team, state.opponent) : null;
   const raw = state.gameData.shots.filter(s => {
     if (s.team !== state.team) return false;
     if (state.player !== "all" && s.player !== state.player) return false;
+    if (oppGameIds && !oppGameIds.has(s.game_id)) return false;
+    if (recentIds  && !recentIds.has(s.game_id))  return false;
     return true;
   });
 
   const shots = normalise(raw);
   const t = state.gameData.teams[state.team];
-  const pLabel = state.player === "all" ? "All players" : state.player;
-  document.getElementById("courtTitle").textContent = `${t.name} — ${pLabel}`;
-  document.getElementById("statsTitle").textContent  = `Zone stats — ${t.short}`;
+  const pLabel      = state.player   === "all"  ? "All players" : state.player;
+  let periodLabel = "";
+  if (state.period === "last5" && recentIds) {
+    const gameDates = state.gameData.game_dates || {};
+    const datesFound = [...recentIds].map(id => gameDates[id]).filter(Boolean).sort();
+    periodLabel = datesFound.length
+      ? ` · last 5 (${datesFound[0]} to ${datesFound[datesFound.length - 1]})`
+      : " · last 5";
+  }
+  const oppData     = state.gameData.teams[state.opponent];
+  const oppLabel    = state.opponent !== "all"   ? ` vs ${oppData ? oppData.short : state.opponent}` : "";
+  document.getElementById("courtTitle").textContent = `${t.name}${oppLabel} — ${pLabel}${periodLabel}`;
+  document.getElementById("statsTitle").textContent = state.quality === "selection"
+    ? `Shot selection — ${t.short}${oppLabel}${periodLabel}`
+    : `Zone stats — ${t.short}${oppLabel}${periodLabel}`;
 
-  if (state.view === "scatter") renderScatter(shots);
-  else                          renderZones(shots);
+  const leagueAvg = computeLeagueAvg();
+  updateLegends();
+  d3.select("#heatmap-layer").selectAll("*").remove();  // clear before each render
 
-  renderStats(shots);
+  if (state.quality === "selection") {
+    renderSelectionCourt(shots);
+    // Collect opponent shots from the same filtered game window
+    const filteredGids = new Set(raw.map(s => s.game_id).filter(Boolean));
+    const oppRaw = state.gameData.shots.filter(s => {
+      if (!filteredGids.has(s.game_id)) return false;
+      if (s.team === state.team) return false;
+      if (state.opponent !== "all" && s.team !== state.opponent) return false;
+      return true;
+    });
+    const oppShots = normalise(oppRaw);
+    renderQualityStats(shots, oppShots);
+  } else if (state.view === "scatter") {
+    renderScatter(shots);
+    renderStats(shots, leagueAvg);
+  } else {
+    renderZones(shots, leagueAvg);
+    renderStats(shots, leagueAvg);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -557,6 +856,7 @@ function renderScatter(shots) {
   const layer = d3.select("#shot-layer");
   layer.selectAll("*").remove();
   document.getElementById("legend").style.display = "flex";
+  document.getElementById("zoneLegend").style.display = "none";
 
   const tip = document.getElementById("tooltip");
 
@@ -568,7 +868,7 @@ function renderScatter(shots) {
     .style("cursor","pointer")
     .on("mouseover", (event, d) => {
       const zone = ZONES.find(z => z.id === d.zone);
-      tip.innerHTML = `<b>${d.player || "Unknown"}</b><br>${d.made ? "&#10003; Made" : "&#10007; Missed"} ${d.type} (Q${d.period})<br><em>${zone ? zone.label : ""}</em>`;
+      tip.innerHTML = `<b>${d.player || "Unknown"}</b><br>${d.made ? "&#10003; Made" : "&#10007; Missed"} ${d.type} (Q${d.period})<br><em>${zone ? zone.label : ""}</em>${d.game_id ? `<br>Match ${d.game_id}` : ""}`;
       tip.style.opacity = 1;
     })
     .on("mousemove", e => {
@@ -581,75 +881,554 @@ function renderScatter(shots) {
 // ─────────────────────────────────────────────────────────────
 // Zone analysis
 // ─────────────────────────────────────────────────────────────
-function renderZones(shots) {
+function renderZones(shots, leagueAvg) {
   document.getElementById("legend").style.display = "none";
+  document.getElementById("zoneLegend").style.display = "flex";
   const layer = d3.select("#shot-layer");
   layer.selectAll("*").remove();
 
   const agg = {};
-  ZONES.forEach(z => { agg[z.id] = { att:0, made:0 }; });
-  shots.forEach(s => { if (agg[s.zone]) { agg[s.zone].att++; if (s.made) agg[s.zone].made++; } });
+  ZONES.forEach(z => { agg[z.id] = { att:0, made:0, made3:0 }; });
+  shots.forEach(s => {
+    if (agg[s.zone]) {
+      agg[s.zone].att++;
+      if (s.made) { agg[s.zone].made++; if (s.type === "3pt") agg[s.zone].made3++; }
+    }
+  });
 
-  const maxAtt = Math.max(...Object.values(agg).map(z => z.att), 1);
+  const totalShots = shots.length || 1;
 
   ZONES.forEach(z => {
-    const { att, made } = agg[z.id];
+    const { att, made, made3 } = agg[z.id];
     if (att === 0) return;
-    const fgp    = made / att;
-    const colour = zoneColourByFGP(fgp);
-    const r      = Math.max(18, Math.min(44, 18 + 26 * (att / maxAtt)));
+    const zEfg   = efgp(made, made3, att);
+    const delta  = zEfg - (leagueAvg[z.id]?.efg ?? NaN);
+    const colour = deltaColour(delta);
+    const zFreq  = att / totalShots;
+    const lgFreq = leagueAvg[z.id]?.freq || 0.001;
+    const ratio  = zFreq / lgFreq;
+    const r      = Math.max(14, Math.min(46, Math.round(26 + 14 * Math.log2(Math.max(ratio, 0.15)))));
     const bx = sx(z.cy), by = sy(z.cx);
+    const textCol = !isNaN(delta) && Math.abs(delta) > 0.07 ? "#fff" : "#333";
 
     layer.append("circle")
       .attr("cx",bx).attr("cy",by).attr("r",r)
-      .attr("fill",colour).attr("fill-opacity",0.88)
-      .attr("stroke","#fff").attr("stroke-width",1.5);
+      .attr("fill",colour).attr("fill-opacity",0.92)
+      .attr("stroke","rgba(0,0,0,0.2)").attr("stroke-width",1);
 
     layer.append("text").attr("class","zone-label")
       .attr("x",bx).attr("y",by-3).attr("text-anchor","middle")
+      .style("fill", textCol)
       .text(`${made}/${att}`);
 
     layer.append("text").attr("class","zone-pct")
       .attr("x",bx).attr("y",by+10).attr("text-anchor","middle")
-      .text(`${Math.round(fgp*100)}%`);
+      .style("fill", textCol)
+      .text(`${Math.round(zEfg*100)}%`);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Zone selection view
+// Bubbles coloured by inherent zone quality (league avg eFG% for that
+// zone vs overall league xEFG%), sized by team freq vs league freq.
+// Shows where the team is shooting and whether those spots are good.
+// ─────────────────────────────────────────────────────────────
+function renderZonesSelection(shots, leagueAvg) {
+  const layer = d3.select("#shot-layer");
+  layer.selectAll("*").remove();
+
+  const leagueXEfg = computeLeagueXEFG(leagueAvg);
+
+  const agg = {};
+  ZONES.forEach(z => { agg[z.id] = { att:0, made:0, made3:0 }; });
+  shots.forEach(s => {
+    if (agg[s.zone]) {
+      agg[s.zone].att++;
+      if (s.made) { agg[s.zone].made++; if (s.type === "3pt") agg[s.zone].made3++; }
+    }
+  });
+
+  const totalShots = shots.length || 1;
+
+  ZONES.forEach(z => {
+    const { att } = agg[z.id];
+    if (att === 0) return;
+
+    // Colour by inherent zone quality (how good is this location for anyone?)
+    const zoneXEfg = leagueAvg[z.id]?.efg ?? NaN;
+    const delta    = isNaN(zoneXEfg) ? NaN : zoneXEfg - leagueXEfg;
+    const colour   = deltaColour(delta);
+
+    // Size by how much this team shoots here vs league average
+    const zFreq  = att / totalShots;
+    const lgFreq = leagueAvg[z.id]?.freq || 0.001;
+    const ratio  = zFreq / lgFreq;
+    const r      = Math.max(14, Math.min(46, Math.round(26 + 14 * Math.log2(Math.max(ratio, 0.15)))));
+    const bx = sx(z.cy), by = sy(z.cx);
+
+    layer.append("circle")
+      .attr("cx",bx).attr("cy",by).attr("r",r)
+      .attr("fill",colour).attr("fill-opacity",0.92)
+      .attr("stroke","rgba(0,0,0,0.2)").attr("stroke-width",1);
+
+    // Main: league avg eFG% for this zone (the quality benchmark)
+    layer.append("text").attr("class","zone-label")
+      .attr("x",bx).attr("y",by-3).attr("text-anchor","middle")
+      .style("fill","#fff")
+      .text(isNaN(zoneXEfg) ? "—" : Math.round(zoneXEfg*100)+"%");
+
+    // Sub: delta vs overall league avg (positive = above-avg location)
+    layer.append("text").attr("class","zone-pct")
+      .attr("x",bx).attr("y",by+10).attr("text-anchor","middle")
+      .style("fill","rgba(255,255,255,0.88)")
+      .text(isNaN(delta) ? "" : (delta >= 0 ? "+" : "") + Math.round(delta*100)+"%");
   });
 }
 
 // ─────────────────────────────────────────────────────────────
 // Stats table
 // ─────────────────────────────────────────────────────────────
-function renderStats(shots) {
-  const made  = shots.filter(s => s.made).length;
-  const att   = shots.length;
-  const fgp   = att > 0 ? Math.round(made/att*100) : 0;
-  const pts   = shots.filter(s => s.made && s.type==="2pt").length*2
-              + shots.filter(s => s.made && s.type==="3pt").length*3;
+function efgp(made, made3, att) {
+  return att > 0 ? (made + 0.5 * made3) / att : NaN;
+}
+
+function renderStats(shots, leagueAvg) {
+  document.getElementById("zoneTableSection").style.display = "block";
+  document.getElementById("qualitySection").style.display   = "none";
+  document.getElementById("summaryGrid").style.gridTemplateColumns = "repeat(3,1fr)";
+  const made   = shots.filter(s => s.made).length;
+  const made3  = shots.filter(s => s.made && s.type === "3pt").length;
+  const att    = shots.length;
+  const efg    = att > 0 ? Math.round(efgp(made, made3, att) * 100) : 0;
+  const pts    = shots.filter(s => s.made && s.type==="2pt").length*2
+               + made3*3;
 
   document.getElementById("summaryGrid").innerHTML = `
     <div class="summary-card"><div class="num">${att}</div><div class="lbl">FGA</div></div>
-    <div class="summary-card"><div class="num">${fgp}%</div><div class="lbl">FG%</div></div>
+    <div class="summary-card"><div class="num">${efg}%</div><div class="lbl">eFG%</div></div>
     <div class="summary-card"><div class="num">${pts}</div><div class="lbl">Points</div></div>`;
 
   const agg = {};
-  ZONES.forEach(z => { agg[z.id] = { att:0, made:0, label:z.label, id:z.id }; });
-  shots.forEach(s => { if (agg[s.zone]) { agg[s.zone].att++; if(s.made) agg[s.zone].made++; } });
+  ZONES.forEach(z => { agg[z.id] = { att:0, made:0, made3:0, label:z.label, id:z.id }; });
+  shots.forEach(s => {
+    if (agg[s.zone]) {
+      agg[s.zone].att++;
+      if (s.made) { agg[s.zone].made++; if (s.type === "3pt") agg[s.zone].made3++; }
+    }
+  });
 
   document.getElementById("zoneBody").innerHTML =
     Object.values(agg)
       .filter(z => z.att > 0)
       .sort((a,b) => b.att - a.att)
       .map(z => {
-        const fp  = z.att ? (z.made/z.att*100).toFixed(1) : "—";
-        const sp  = att   ? (z.att/att*100).toFixed(1)     : "0.0";
-        const col = ZONE_COLOURS[z.id] || "#888";
+        const zEfg  = efgp(z.made, z.made3, z.att);
+        const fp    = z.att ? (zEfg * 100).toFixed(1) + "%" : "—";
+        const sp    = att   ? (z.att/att*100).toFixed(1) + "%" : "0.0%";
+        const col   = ZONE_COLOURS[z.id] || "#888";
+        const lavg  = leagueAvg ? leagueAvg[z.id]?.efg : NaN;
+        const delta = zEfg - lavg;
+        const vsAvg = isNaN(delta) ? "—" : (delta >= 0 ? "+" : "") + (delta * 100).toFixed(1) + "%";
+        const vsCol = isNaN(delta) ? "#888" : delta > 0.01 ? "#2E30C4" : delta < -0.01 ? "#b91c1c" : "#888";
         return `<tr>
           <td><span class="zone-dot" style="background:${col}"></span>${z.label}</td>
           <td class="r">${z.att}</td>
-          <td class="r">${z.made}</td>
-          <td class="r">${fp}${z.att?"%":""}</td>
-          <td class="r">${sp}%</td>
+          <td class="r">${fp}</td>
+          <td class="r" style="color:${vsCol};font-weight:600">${vsAvg}</td>
         </tr>`;
       }).join("");
+  renderPlayerStats(shots);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Continuous shot-quality model
+// xEFG% is computed per shot from physical distance + angle,
+// not from discrete zone averages.
+// ─────────────────────────────────────────────────────────────
+
+// Fast RGB interpolation — avoids CSS string parsing in the heatmap pixel loop
+function deltaColourRGB(delta) {
+  const lo = [225, 225, 232];
+  if (isNaN(delta)) return lo;
+  const d = Math.max(-0.20, Math.min(0.20, delta));
+  const t = Math.abs(d) / 0.20;
+  const hi = d < 0 ? [210, 44, 44] : [46, 48, 196];
+  return [lo[0] + t*(hi[0]-lo[0]) | 0,
+          lo[1] + t*(hi[1]-lo[1]) | 0,
+          lo[2] + t*(hi[2]-lo[2]) | 0];
+}
+
+// Expected eFG% for any normalised half-court position (nx 0-50, ny 0-100).
+// Calibrated to real basketball analytics benchmarks:
+//   RA (<1.25 m)  →  ~62% eFG   (most efficient 2pt)
+//   Paint non-RA  →  50% → 40% eFG  (linear with distance)
+//   Corner 3      →  ~58% eFG   (angle ≤ 0° from sideline)
+//   Above-break 3 →  ~52% eFG   (angle ≥ 40° → top of arc)
+function computePointXEFG(nx, ny) {
+  const dist = physDist(nx, ny);
+
+  if (dist < 1.25) return 0.62;            // restricted area
+
+  if (dist < 6.75) {
+    // 2pt outside RA: quality falls linearly with distance
+    const t = (dist - 1.25) / (6.75 - 1.25);   // 0 → RA edge, 1 → 3pt line
+    return 0.50 - 0.10 * t;                     // 0.50 → 0.40
+  }
+
+  // 3pt: angleDeg = 0° = directly from sideline (corner), 90° = top of arc
+  const dx_m     = (nx - BX) / 100 * PHYS_LEN;
+  const dy_m     = Math.abs(ny - BY) / 100 * PHYS_WID;
+  const angleDeg = Math.atan2(dx_m, dy_m) * 180 / Math.PI;
+
+  // Smooth blend: corner (0°) → 0.58, above-break (≥40°) → 0.52
+  const cornerT = Math.min(Math.max(angleDeg, 0) / 40, 1);
+  const xefg3   = 0.58 - cornerT * 0.06;
+
+  // Small penalty for very long 3s (beyond 7 m)
+  return Math.max(0.28, xefg3 - Math.max(0, (dist - 7.0) * 0.022));
+}
+
+// Average continuous xEFG across a specific shot array
+function computeTeamXEFG(shots) {
+  if (!shots.length) return NaN;
+  return shots.reduce((s, sh) => s + computePointXEFG(sh.nx, sh.ny), 0) / shots.length;
+}
+
+// Average continuous xEFG across every shot in the loaded season
+function computeContinuousLeagueXEFG() {
+  const all = normalise(state.gameData.shots);
+  if (!all.length) return 0.50;
+  return all.reduce((s, sh) => s + computePointXEFG(sh.nx, sh.ny), 0) / all.length;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Quality heatmap — built once after season loads, cached as a
+// data-URL, then stamped into #heatmap-layer in selection mode
+// ─────────────────────────────────────────────────────────────
+let cachedHeatmapURL = null;
+
+function buildQualityHeatmap() {
+  const lgXEfg = computeContinuousLeagueXEFG();
+
+  const canvas = document.createElement("canvas");
+  canvas.width  = SVG_W;
+  canvas.height = SVG_H;
+  const ctx  = canvas.getContext("2d");
+  const img  = ctx.createImageData(SVG_W, SVG_H);
+  const data = img.data;
+
+  for (let py = 0; py < SVG_H; py++) {
+    const nx = (SVG_H - py) / SCX;       // SVG y (flipped) → court x (0 = baseline)
+    for (let px = 0; px < SVG_W; px++) {
+      const ny  = px / SC;               // SVG x → court y (0–100)
+      const idx = (py * SVG_W + px) * 4;
+      const [r, g, b] = deltaColourRGB(computePointXEFG(nx, ny) - lgXEfg);
+      data[idx]   = r;
+      data[idx+1] = g;
+      data[idx+2] = b;
+      data[idx+3] = 185;                 // ~73% opacity — court lines stay readable
+    }
+  }
+
+  ctx.putImageData(img, 0, 0);
+  cachedHeatmapURL = canvas.toDataURL();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Selection mode court: heatmap background + neutral shot dots
+// White filled = made, dark ring = missed
+// ─────────────────────────────────────────────────────────────
+function renderSelectionCourt(shots) {
+  // Colour is at the shot level: each dot coloured by its own xEFG% vs league avg
+  const layer  = d3.select("#shot-layer");
+  layer.selectAll("*").remove();
+  const lgXEfg = computeContinuousLeagueXEFG();
+  const tip    = document.getElementById("tooltip");
+
+  shots.forEach(s => {
+    const xEFG  = computePointXEFG(s.nx, s.ny);
+    const colour = deltaColour(xEFG - lgXEfg);   // blue=good location, red=poor
+    const zone  = ZONES.find(z => z.id === s.zone);
+    const dot   = layer.append("circle")
+      .attr("cx", sx(s.ny)).attr("cy", sy(s.nx)).attr("r", 5)
+      .style("cursor", "pointer");
+
+    if (s.made) {
+      dot.attr("fill", colour).attr("fill-opacity", 0.85)
+         .attr("stroke", "rgba(0,0,0,0.15)").attr("stroke-width", 0.5);
+    } else {
+      dot.attr("fill", "transparent")
+         .attr("stroke", colour).attr("stroke-width", 1.8);
+    }
+
+    dot.on("mouseover", () => {
+         const diff = xEFG - lgXEfg;
+         tip.innerHTML = `<b>${s.player || "Unknown"}</b><br>`
+           + `${s.made ? "&#10003; Made" : "&#10007; Missed"} ${s.type} (Q${s.period})<br>`
+           + `<em>${zone ? zone.label : ""}</em><br>`
+           + `xEFG%: <b>${(xEFG*100).toFixed(1)}%</b> `
+           + `(${diff >= 0 ? "+" : ""}${(diff*100).toFixed(1)}% vs league)`;
+         tip.style.opacity = 1;
+       })
+       .on("mousemove", e => {
+         tip.style.left = (e.pageX + 14) + "px";
+         tip.style.top  = (e.pageY - 36) + "px";
+       })
+       .on("mouseout", () => { tip.style.opacity = 0; });
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Shot Quality helpers
+// ─────────────────────────────────────────────────────────────
+
+// Weighted average of zone eFG% by league shot frequency
+// = the expected eFG% of a random shot taken anywhere in the league
+function computeLeagueXEFG(leagueAvg) {
+  let sum = 0;
+  ZONES.forEach(z => {
+    const efg  = leagueAvg[z.id]?.efg  ?? NaN;
+    const freq = leagueAvg[z.id]?.freq ?? 0;
+    if (!isNaN(efg)) sum += efg * freq;
+  });
+  return sum;
+}
+
+// Average of the league-zone eFG% across each of the team's shots
+// = xEFG%: measures shot selection quality (are shots from good locations?)
+function computeXEFG(shots, leagueAvg) {
+  if (shots.length === 0) return NaN;
+  let sum = 0, n = 0;
+  shots.forEach(s => {
+    const lgEfg = leagueAvg[s.zone]?.efg;
+    if (lgEfg !== undefined && !isNaN(lgEfg)) { sum += lgEfg; n++; }
+  });
+  return n > 0 ? sum / n : NaN;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Quality scatter: each shot coloured by location quality
+// blue = above-avg location,  red = below-avg location
+// filled = made,  ring = missed
+// ─────────────────────────────────────────────────────────────
+function renderQuality(shots, leagueAvg) {
+  document.getElementById("legend").style.display        = "none";
+  document.getElementById("zoneLegend").style.display    = "none";
+  document.getElementById("qualityLegend").style.display = "flex";
+
+  const layer = d3.select("#shot-layer");
+  layer.selectAll("*").remove();
+
+  const leagueXEfg = computeLeagueXEFG(leagueAvg);
+  const tip = document.getElementById("tooltip");
+
+  shots.forEach(s => {
+    const zoneEfg = leagueAvg[s.zone]?.efg ?? NaN;
+    const delta   = isNaN(zoneEfg) ? NaN : zoneEfg - leagueXEfg;
+    const colour  = deltaColour(delta);
+    const bx = sx(s.ny), by = sy(s.nx);
+
+    const dot = layer.append("circle")
+      .attr("cx", bx).attr("cy", by).attr("r", 5)
+      .style("cursor", "pointer");
+
+    if (s.made) {
+      dot.attr("fill", colour).attr("fill-opacity", 0.85)
+         .attr("stroke", "rgba(0,0,0,0.15)").attr("stroke-width", 0.5);
+    } else {
+      dot.attr("fill", "transparent")
+         .attr("stroke", colour).attr("stroke-width", 1.8);
+    }
+
+    const zone    = ZONES.find(z => z.id === s.zone);
+    const xEfgTxt = isNaN(zoneEfg) ? "—" : (zoneEfg * 100).toFixed(1) + "%";
+    dot.on("mouseover", () => {
+         tip.innerHTML = `<b>${s.player || "Unknown"}</b><br>${s.made ? "&#10003; Made" : "&#10007; Missed"} ${s.type} (Q${s.period})<br><em>${zone ? zone.label : ""}</em><br>Zone xEFG%: ${xEfgTxt}`;
+         tip.style.opacity = 1;
+       })
+       .on("mousemove", e => {
+         tip.style.left = (e.pageX + 14) + "px";
+         tip.style.top  = (e.pageY - 36) + "px";
+       })
+       .on("mouseout", () => { tip.style.opacity = 0; });
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Quality stats panel
+// ─────────────────────────────────────────────────────────────
+// Shot area buckets — broader than zones, used for frequency breakdown
+const SHOT_AREAS = [
+  { id: "ra",    label: "Restricted Area", zones: new Set(["ra"]),                                     colour: "#f97316", xefg: 0.62 },
+  { id: "paint", label: "Paint",           zones: new Set(["paint"]),                                  colour: "#fb923c", xefg: 0.46 },
+  { id: "mid",   label: "Mid-range",       zones: new Set(["lbase","rbase","lelbow","relbow","cmid"]), colour: "#a78bfa", xefg: 0.42 },
+  { id: "c3",    label: "Corner 3",        zones: new Set(["lc3","rc3"]),                              colour: "#34d399", xefg: 0.57 },
+  { id: "arc3",  label: "Above-break 3",   zones: new Set(["lw3","rw3","top3"]),                       colour: "#60a5fa", xefg: 0.53 },
+];
+
+function areaBreakdown(sh) {
+  const total = sh.length || 1;
+  return SHOT_AREAS.map(a => {
+    const n = sh.filter(s => a.zones.has(s.zone)).length;
+    return { ...a, pct: n / total * 100, n };
+  });
+}
+
+// renderQualityStats: comparison table (team vs opponent) + shot area frequency bars.
+// Uses the continuous per-shot xEFG model throughout.
+function renderQualityStats(shots, oppShots) {
+  document.getElementById("zoneTableSection").style.display = "none";
+  document.getElementById("qualitySection").style.display   = "block";
+
+  function fmtPct(v)   { return isNaN(v) ? "—" : (v * 100).toFixed(1) + "%"; }
+  function fmtDelta(v) { return isNaN(v) ? "—" : (v >= 0 ? "+" : "") + (v * 100).toFixed(1) + "%"; }
+  function dCol(v)     { return isNaN(v) ? "#555" : v > 0.005 ? "#2E30C4" : v < -0.005 ? "#b91c1c" : "#555"; }
+
+  // ── Team metrics ──────────────────────────────────────────
+  const made = shots.filter(s => s.made).length;
+  const made3 = shots.filter(s => s.made && s.type === "3pt").length;
+  const att   = shots.length;
+  const actualEfg = efgp(made, made3, att);
+  const pts   = shots.filter(s => s.made && s.type === "2pt").length * 2 + made3 * 3;
+  const xefg  = computeTeamXEFG(shots);
+  const lgXefg = computeContinuousLeagueXEFG();
+  const exec  = isNaN(actualEfg) || isNaN(xefg) ? NaN : actualEfg - xefg;
+  const selVsLg = isNaN(xefg) ? NaN : xefg - lgXefg;
+
+  // ── Opponent metrics ──────────────────────────────────────
+  const oAtt   = oppShots.length;
+  const oMade  = oppShots.filter(s => s.made).length;
+  const oMade3 = oppShots.filter(s => s.made && s.type === "3pt").length;
+  const oActEfg = efgp(oMade, oMade3, oAtt);
+  const oXefg  = computeTeamXEFG(oppShots);
+  const oExec  = isNaN(oActEfg) || isNaN(oXefg) ? NaN : oActEfg - oXefg;
+  const oSelVsLg = isNaN(oXefg) ? NaN : oXefg - lgXefg;
+
+  // ── Team / opponent display names ─────────────────────────
+  const t      = state.gameData.teams[state.team];
+  const tName  = t?.short || t?.name || "Team";
+  const oTeam  = state.gameData.teams[state.opponent];
+  const oName  = state.opponent !== "all"
+    ? (oTeam?.short || oTeam?.name || state.opponent)
+    : "Opponents";
+
+  // ── Summary grid (xEFG% team vs opponent) ────────────────
+  const xefgDiffCard = isNaN(xefg) || isNaN(oXefg) ? NaN : xefg - oXefg;
+
+  const sg = document.getElementById("summaryGrid");
+  sg.style.gridTemplateColumns = "repeat(3,1fr)";
+  sg.innerHTML = `
+    <div class="summary-card"><div class="num" style="color:${dCol(selVsLg)}">${fmtPct(xefg)}</div><div class="lbl">${tName} xEFG%</div></div>
+    <div class="summary-card"><div class="num" style="color:${dCol(oSelVsLg)}">${fmtPct(oXefg)}</div><div class="lbl">${oName} xEFG%</div></div>
+    <div class="summary-card"><div class="num" style="color:${dCol(xefgDiffCard)}">${fmtDelta(xefgDiffCard)}</div><div class="lbl">xEFG% Diff</div></div>`;
+
+  // ── Comparison table ──────────────────────────────────────
+
+  const xefgDiff = isNaN(xefg) || isNaN(oXefg) ? NaN : xefg - oXefg;
+  const execDiff = isNaN(exec) || isNaN(oExec)  ? NaN : exec - oExec;
+
+  document.getElementById("qualityGrid").innerHTML = `
+    <table style="margin-bottom:4px">
+      <thead>
+        <tr>
+          <th></th>
+          <th class="r">${tName}</th>
+          <th class="r" style="color:#888">${oName}</th>
+          <th class="r" style="color:#555">Diff</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>xEFG%</td>
+          <td class="r"><b>${fmtPct(xefg)}</b></td>
+          <td class="r" style="color:#888">${fmtPct(oXefg)}</td>
+          <td class="r" style="color:${dCol(xefgDiff)};font-weight:600">${fmtDelta(xefgDiff)}</td>
+        </tr>
+        <tr>
+          <td>eFG%</td>
+          <td class="r"><b>${fmtPct(actualEfg)}</b></td>
+          <td class="r" style="color:#888">${fmtPct(oActEfg)}</td>
+          <td class="r"></td>
+        </tr>
+        <tr>
+          <td>Execution</td>
+          <td class="r" style="color:${dCol(exec)};font-weight:600">${fmtDelta(exec)}</td>
+          <td class="r" style="color:${dCol(oExec)}">${fmtDelta(oExec)}</td>
+          <td class="r" style="color:${dCol(execDiff)}">${fmtDelta(execDiff)}</td>
+        </tr>
+      </tbody>
+    </table>`;
+
+  // ── Shot area frequency bars ──────────────────────────────
+  const tAreas = areaBreakdown(shots);
+  const oAreas = areaBreakdown(oppShots);
+
+  let html = `<h2 style="font-size:13px;font-weight:600;margin:14px 0 10px;color:#020202;">Shot Area Frequency</h2>`;
+
+  tAreas.forEach((a, i) => {
+    const tPct = a.pct;
+    const oPct = oAreas[i].pct;
+    html += `
+      <div style="margin-bottom:10px">
+        <div style="margin-bottom:3px">
+          <span style="font-size:11px;font-weight:600;color:#020202">
+            <span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${a.colour};vertical-align:middle;margin-right:5px"></span>${a.label}
+          </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+          <span style="font-size:10px;color:#555;min-width:52px">${tName}</span>
+          <div style="flex:1;height:8px;background:#f0f0f4;border-radius:3px;overflow:hidden">
+            <div style="width:${tPct.toFixed(1)}%;height:100%;background:${a.colour};border-radius:3px"></div>
+          </div>
+          <span style="font-size:11px;color:#333;min-width:32px;text-align:right">${tPct.toFixed(0)}%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;color:#aaa;min-width:52px">${oName}</span>
+          <div style="flex:1;height:8px;background:#f0f0f4;border-radius:3px;overflow:hidden">
+            <div style="width:${oPct.toFixed(1)}%;height:100%;background:${a.colour};opacity:0.40;border-radius:3px"></div>
+          </div>
+          <span style="font-size:11px;color:#aaa;min-width:32px;text-align:right">${oPct.toFixed(0)}%</span>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById("areaFreqSection").innerHTML = html;
+}
+
+function renderPlayerStats(shots) {
+  const sec = document.getElementById("playerStatsSection");
+  if (shots.length === 0) { sec.style.display = "none"; return; }
+
+  const players = {};
+  shots.forEach(s => {
+    const p = s.player || "Unknown";
+    if (!players[p]) players[p] = { name: p, att: 0, made: 0, att3: 0, made3: 0, games: new Set() };
+    players[p].att++;
+    if (s.game_id) players[p].games.add(s.game_id);
+    if (s.type === "3pt") players[p].att3++;
+    if (s.made) { players[p].made++; if (s.type === "3pt") players[p].made3++; }
+  });
+
+  document.getElementById("playerStatsBody").innerHTML =
+    Object.values(players)
+      .sort((a, b) => b.att - a.att)
+      .map(p => {
+        const att2  = p.att  - p.att3;
+        const made2 = p.made - p.made3;
+        const efg   = p.att  > 0 ? (efgp(p.made, p.made3, p.att) * 100).toFixed(1) + "%" : "—";
+        const fg2   = att2   > 0 ? (made2 / att2   * 100).toFixed(1) + "%" : "—";
+        const fg3   = p.att3 > 0 ? (p.made3 / p.att3 * 100).toFixed(1) + "%" : "—";
+        return `<tr>
+          <td>${p.name}</td>
+          <td class="r">${p.games.size}</td>
+          <td class="r">${p.att}</td>
+          <td class="r">${efg}</td>
+          <td class="r">${fg2}</td>
+          <td class="r">${fg3}</td>
+        </tr>`;
+      }).join("");
+  sec.style.display = "block";
 }
 </script>
 </body>
